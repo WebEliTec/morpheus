@@ -3,7 +3,9 @@ const config = {
   rootModuleId: 'Wrapper',
 
   moduleRegistry: {
-    Wrapper: {},
+    Wrapper: {
+      isRoot: true,
+    },
   }, 
 
   signals: {
@@ -18,8 +20,9 @@ const config = {
 export default config;
 
 
-export function Wrapper( { children } ) {
-  <main>
-    { children }
-  </main>
+export function Wrapper() {
+  return(  <main>
+    Main!
+  </main>)
+
 }

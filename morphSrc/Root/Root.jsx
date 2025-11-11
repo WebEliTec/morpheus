@@ -10,12 +10,15 @@ export default function Root( { Node, Module, Router } ) {
     <> 
       <Node id="SideMenu" /> 
       <Node id="SideBar" />
+      <Node id="Main" />
+
       <main>
         { route === 'home'           && <Module id="Home" /> }
         { route === 'content-system' && <Module id="ContentSystem" /> }
         { route === 'users'          && <Module id="Users" /> }
       </main>
-      <Node id="TestNode" />
+                  
+
     </>
   )
 }

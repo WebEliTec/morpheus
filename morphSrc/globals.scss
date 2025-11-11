@@ -1,3 +1,5 @@
+@import "tailwindcss";
+
 $side-bar-width: 300px;
 $primary: #008a90;
 $primary-darker: #0e6e9e;
@@ -7,6 +9,11 @@ $secondary-darkest: #031b27;
 
 body {
     padding-right: $side-bar-width;
+}
+
+#root {
+    width: 100vw;
+    height: 100vh;
 }
 
 #side-bar {

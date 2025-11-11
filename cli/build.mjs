@@ -102,7 +102,7 @@ for (const nodeId of nodeIds) {
 
     const output                    = `${importStatements}const nodeResources = ${serializedResources};\n\nexport default nodeResources;${componentExportStatements}`;
     
-    const outputPath                = `morphBuildSrc/${subConfigDirPath}/${nodeId}.resources.js`;
+    const outputPath                = `morphBuildSrc/${subConfigDirPath}/${nodeId}.resources.jsx`;
     
     fs.writeFileSync(outputPath, output, 'utf8');
     
