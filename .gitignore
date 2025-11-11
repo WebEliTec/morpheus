@@ -27,3 +27,4 @@ dist-ssr
 /morphBuildSrc
 package-lock.json
 /node_modules
+/public
