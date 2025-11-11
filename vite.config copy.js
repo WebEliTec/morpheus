@@ -31,4 +31,13 @@ export default defineConfig({
     port: 3000,
     open: true,
   }, 
+  build: {
+    rollupOptions: {
+      external: (id) => {
+        // Exclude the directories from being bundled
+        return id.includes('morpheus/core/resourceCompiler') || 
+               id.includes('morpheus/dev');
+      }
+    }
+  }
 });
