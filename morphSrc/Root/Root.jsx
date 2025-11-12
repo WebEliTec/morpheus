@@ -12,15 +12,18 @@ export default function Root( { _, Node, Module, Router } ) {
     <> 
       <Node id="SideMenu" /> 
       <Node id="SideBar" />
-      <Node id="Main" />
 
-      <Module id="SomeSharedModule"/>
+
+
+      <Module id="SomeSharedModule"/> 
+      <Module id="SomeSharedModule"/> 
 
       <main>
         { route === 'home'           && <Module id="Home" /> }
         { route === 'content-system' && <Module id="ContentSystem" /> }
         { route === 'users'          && <Module id="Users" /> }
       </main>
+            <Node id="Main" />
                   
 
     </>

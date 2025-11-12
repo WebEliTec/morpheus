@@ -22,6 +22,8 @@ const appConfig = {
 
 	},  
 
+	
+
 	sharedModuleRegistry: {
 
 		SomeSharedModule: {

@@ -8,9 +8,11 @@ const config = {
     Wrapper: {
       isRoot: true,
     },
+
+    /*
     SomeSharedModule: {
       isShared: true,
-    },
+    },*/
   }, 
 
   signals: {
@@ -30,7 +32,7 @@ export function Wrapper({Module}) {
   return(  
     <main>
       Main Module
-      <Module id="SomeSharedModule" />
+      {/* <Module id="SomeSharedModule" />  */}
       <hr />
     </main>
   )

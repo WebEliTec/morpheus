@@ -233,59 +233,52 @@ export default class SingleNodeCompiler {
     const isNodeSpecificDefaultModuleDirPathOnRootLevel = nodeSpecificDefaultModuleDirPath == '/';
     
 
-
     for (const [ moduleId, moduleRegistryItem ] of Object.entries( moduleRegistry ) ) {
 
-      initializedModuleRegistry[ moduleId ]   = moduleRegistryItem;
-      const isShared                          = moduleRegistryItem?.isShared;
+      initializedModuleRegistry[ moduleId ]         = moduleRegistryItem;
 
-      const individualModulePath              = this.removeTrailingSlash( moduleRegistryItem?.dir, false );
-      const hasIndividualModulePath           = individualModulePath && individualModulePath != '/';
-      const isIndividualModulePathOnRootLevel = individualModulePath == '/';
+      const sharedModuleRegistryItem                = this.contextConfig?.sharedModuleRegistry?.[moduleId];
+
+      const isShared                                = moduleRegistryItem?.isShared;
+      const sharedModuleDirectoryDefaultPath        = this.resourceRegistry.dynamicDirectories.sharedModules;
+      const sharedModuleDirectorySubPath            = this.removeTrailingSlash( sharedModuleRegistryItem?.dir );
+      const hasIndividualSharedModulePath           = sharedModuleDirectorySubPath && sharedModuleDirectorySubPath != '/';
+      const isIndividualSharedModulePathOnRootLevel = sharedModuleDirectorySubPath == '/';
+
+      const individualModulePath                    = this.removeTrailingSlash( moduleRegistryItem?.dir, false );
+      const hasIndividualModulePath                 = individualModulePath && individualModulePath != '/';
+      const isIndividualModulePathOnRootLevel       = individualModulePath == '/';
 
       let constructedPath;
       let internalPath;
 
-      if( !isShared ) {
 
-        if ( hasIndividualModulePath ) {
-          internalPath    = `${individualModulePath}/${moduleId}`; 
-        } else if ( isIndividualModulePathOnRootLevel ) {
-          internalPath    = `${moduleId}`;
-        } else if ( hasNodeSpecificDefaultModuleDirPath ) {
-          internalPath    = `${nodeSpecificDefaultModuleDirPath}/${moduleId}`;
-        } else if( isNodeSpecificDefaultModuleDirPathOnRootLevel ) {
-          internalPath    = `${moduleId}`;
-        } else if( hasDefaultModuleDirPath ) {
-          internalPath    = `${defaultModuleDirPath}/${moduleId}`;
-        } else {
-          internalPath    = `${moduleId}`;
-        }
-
-        constructedPath = `${this.nodeDirPath}/${internalPath}`;
-
-      } else {
-
-        const sharedModuleRegistryItem = this.contextConfig?.sharedModuleRegistry?.[moduleId];
-        
-        if( !sharedModuleRegistryItem ) {
-          console.warn( 'No Item found in sharedModuleRegistry' );
-          return;
-        }
-
-        const sharedModuleDirectoryPath     = this.resourceRegistry.dynamicDirectories.sharedModules;
-        const individualSharedModulePath    = this.removeTrailingSlash( sharedModuleRegistryItem?.dir );
-        const hasIndividualSharedModulePath = individualSharedModulePath && individualSharedModulePath !== '/';
-
-        if ( hasIndividualSharedModulePath ) {
-          internalPath = `${sharedModuleDirectoryPath}/${individualSharedModulePath}/${moduleId}`;
-        } else {
-          internalPath = `${sharedModuleDirectoryPath}/${moduleId}`;
-        } 
-
-        constructedPath = internalPath;
-
+      if( isShared && !sharedModuleRegistryItem ) {
+        console.warn( 'No Item found in sharedModuleRegistry' );
+        return;
       }
+
+      if ( isShared && isIndividualSharedModulePathOnRootLevel ) {
+        internalPath = `${sharedModuleDirectoryDefaultPath}/${moduleId}`; 
+      } else if( isShared && hasIndividualSharedModulePath ) {
+        internalPath = `${sharedModuleDirectoryDefaultPath}/${sharedModuleDirectorySubPath}/${moduleId}`; 
+      } else if( isShared && !hasIndividualSharedModulePath ) {
+        internalPath = `${sharedModuleDirectoryDefaultPath}/${moduleId}`;
+      } else if( hasIndividualModulePath ) {
+        internalPath = `${individualModulePath}/${moduleId}`; 
+      } else if ( isIndividualModulePathOnRootLevel ) {
+        internalPath = `${moduleId}`;
+      } else if( hasNodeSpecificDefaultModuleDirPath ) {
+        internalPath = `${nodeSpecificDefaultModuleDirPath}/${moduleId}`;
+      } else if( isNodeSpecificDefaultModuleDirPathOnRootLevel ) {
+        internalPath = `${moduleId}`;
+      } else if( hasDefaultModuleDirPath ) {
+        internalPath = `${defaultModuleDirPath}/${moduleId}`;
+      } else {
+        internalPath = `${moduleId}`;
+      }
+
+      constructedPath = isShared ? internalPath : `${this.nodeDirPath}/${internalPath}`;
 
 
       if (this.environment === 'server') {
@@ -303,17 +296,21 @@ export default class SingleNodeCompiler {
         initializedModuleRegistry[moduleId].path         = constructedPath;
         initializedModuleRegistry[moduleId].internalPath = internalPath;
 
-        } else {
+      } else {
 
-          const result = await this.loadResource( constructedPath );
+        const result = await this.loadResource( constructedPath );
 
-          if( result ) {
-            initializedModuleRegistry[moduleId].component = result;
-            initializedModuleRegistry[moduleId].path      = constructedPath;
-          }
+        if( !result ) {
+          return null;
+        }
 
-        // Runtime: actually import
+        initializedModuleRegistry[moduleId].component = result;
+        initializedModuleRegistry[moduleId].path      = constructedPath;
 
+      }
+
+      if( moduleId == 'SideBar' ) {
+        console.log(constructedPath);
       }
 
     }
@@ -321,6 +318,7 @@ export default class SingleNodeCompiler {
     return initializedModuleRegistry;
 
   }
+
 
   /* Single File Loading
   /* *** *** *** *** *** *** *** *** *** *** *** *** *** *** */
@@ -490,7 +488,7 @@ export default class SingleNodeCompiler {
 
     }
     
-    console.log( constructedPath );
+    //console.log( constructedPath );
 
     if (this.executionContext === 'app') {
       return () => import(/* @vite-ignore */ `../../../morphSrc/${constructedPath}`);

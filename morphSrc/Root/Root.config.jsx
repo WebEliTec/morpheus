@@ -83,6 +83,7 @@ const config = {
 
     ContentSystem: {},
 
+    
     SomeSharedModule: {
       isShared: true,
     }, 
