@@ -8,6 +8,9 @@ const config = {
     Wrapper: {
       isRoot: true,
     },
+    SomeSharedModule: {
+      isShared: true,
+    },
   }, 
 
   signals: {
@@ -22,11 +25,13 @@ const config = {
 export default config;
 
 
-export function Wrapper() {
+export function Wrapper({Module}) {
 
   return(  
     <main>
-      Main!!!!dsasdasdas
+      Main Module
+      <Module id="SomeSharedModule" />
+      <hr />
     </main>
   )
 

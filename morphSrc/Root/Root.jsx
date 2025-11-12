@@ -14,7 +14,7 @@ export default function Root( { _, Node, Module, Router } ) {
       <Node id="SideBar" />
       <Node id="Main" />
 
-      Lololl
+      <Module id="SomeSharedModule"/>
 
       <main>
         { route === 'home'           && <Module id="Home" /> }

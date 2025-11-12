@@ -223,66 +223,46 @@ export default class SingleNodeCompiler {
       return;
     }
 
-    const defaultModuleDirPath             = this.removeTrailingSlash( this.contextConfig.defaultPaths.modules );
-    const nodeSpecificDefaultModuleDirPath = this.removeTrailingSlash( config?.defaultPaths?.modules );
-    const initializedModuleRegistry        = {};
+    const initializedModuleRegistry                     = {};
+
+    const defaultModuleDirPath                          = this.removeTrailingSlash( this.contextConfig.defaultPaths.modules );
+    const hasDefaultModuleDirPath                       = defaultModuleDirPath && defaultModuleDirPath != '/';
+
+    const nodeSpecificDefaultModuleDirPath              = this.removeTrailingSlash( config?.defaultPaths?.modules );
+    const hasNodeSpecificDefaultModuleDirPath           = nodeSpecificDefaultModuleDirPath && nodeSpecificDefaultModuleDirPath != '/';
+    const isNodeSpecificDefaultModuleDirPathOnRootLevel = nodeSpecificDefaultModuleDirPath == '/';
+    
+
 
     for (const [ moduleId, moduleRegistryItem ] of Object.entries( moduleRegistry ) ) {
 
-      initializedModuleRegistry[ moduleId ] = moduleRegistryItem;
-      const isShared                     = moduleRegistryItem?.isShared;
-      const individualModulePath         = this.removeTrailingSlash( moduleRegistryItem?.dir, false );
+      initializedModuleRegistry[ moduleId ]   = moduleRegistryItem;
+      const isShared                          = moduleRegistryItem?.isShared;
+
+      const individualModulePath              = this.removeTrailingSlash( moduleRegistryItem?.dir, false );
+      const hasIndividualModulePath           = individualModulePath && individualModulePath != '/';
+      const isIndividualModulePathOnRootLevel = individualModulePath == '/';
 
       let constructedPath;
       let internalPath;
 
       if( !isShared ) {
 
-        if ( !this.hasCustomNodeDirPath ) {
-
-          if ( individualModulePath && individualModulePath != '/' ) {
-            constructedPath = `${this.nodeId}/${individualModulePath}/${moduleId}`;
-            internalPath    = `${individualModulePath}/${moduleId}`;  
-          } else if ( individualModulePath == '/' ) {
-            constructedPath = `${this.nodeId}/${moduleId}`;
-            internalPath    = `${moduleId}`;
-          } else if ( nodeSpecificDefaultModuleDirPath && nodeSpecificDefaultModuleDirPath != '/' ) {
-            constructedPath = `${this.nodeId}/${nodeSpecificDefaultModuleDirPath}/${moduleId}`;
-            internalPath    = `${nodeSpecificDefaultModuleDirPath}/${moduleId}`;
-          } else if( nodeSpecificDefaultModuleDirPath == '/' ) {
-            constructedPath = `${this.nodeId}/${moduleId}`;
-            internalPath    = `${moduleId}`;
-          } else if( defaultModuleDirPath && defaultModuleDirPath != '/' ) {
-            constructedPath = `${this.nodeId}/${defaultModuleDirPath}/${moduleId}`;
-            internalPath    = `${defaultModuleDirPath}/${moduleId}`;
-          } else {
-            constructedPath = `${this.nodeId}/${moduleId}`;
-            internalPath    = `${moduleId}`;
-          }
-
-        } else  {
-
-          if ( individualModulePath && individualModulePath != '/' ) {
-            constructedPath = `${this.customNodeDirPath}/${this.nodeId}/${individualModulePath}/${moduleId}`;
-            internalPath    = `${individualModulePath}/${moduleId}`;
-          } else if ( individualModulePath == '/' ) {
-            constructedPath = `${this.customNodeDirPath}/${this.nodeId}/${moduleId}`;
-            internalPath    = `${moduleId}`;
-          } else if ( nodeSpecificDefaultModuleDirPath && nodeSpecificDefaultModuleDirPath != '/' ) {
-            constructedPath = `${this.customNodeDirPath}/${this.nodeId}/${nodeSpecificDefaultModuleDirPath}/${moduleId}`;
-            internalPath    = `${nodeSpecificDefaultModuleDirPath}/${moduleId}`;
-          } else if( nodeSpecificDefaultModuleDirPath == '/' ) {
-            constructedPath = `${this.customNodeDirPath}/${this.nodeId}/${moduleId}`;
-            internalPath    = `${moduleId}`;
-          } else if( defaultModuleDirPath && defaultModuleDirPath != '/' ) {
-            constructedPath = `${this.customNodeDirPath}/${this.nodeId}/${defaultModuleDirPath}/${moduleId}`;
-            internalPath    = `${defaultModuleDirPath}/${moduleId}`;
-          } else {
-            constructedPath = `${this.customNodeDirPath}/${this.customNodeDirPath}/${this.nodeId}/${moduleId}`;
-            internalPath    = `${this.nodeId}/${moduleId}`;
-          }
-
+        if ( hasIndividualModulePath ) {
+          internalPath    = `${individualModulePath}/${moduleId}`; 
+        } else if ( isIndividualModulePathOnRootLevel ) {
+          internalPath    = `${moduleId}`;
+        } else if ( hasNodeSpecificDefaultModuleDirPath ) {
+          internalPath    = `${nodeSpecificDefaultModuleDirPath}/${moduleId}`;
+        } else if( isNodeSpecificDefaultModuleDirPathOnRootLevel ) {
+          internalPath    = `${moduleId}`;
+        } else if( hasDefaultModuleDirPath ) {
+          internalPath    = `${defaultModuleDirPath}/${moduleId}`;
+        } else {
+          internalPath    = `${moduleId}`;
         }
+
+        constructedPath = `${this.nodeDirPath}/${internalPath}`;
 
       } else {
 
@@ -293,20 +273,20 @@ export default class SingleNodeCompiler {
           return;
         }
 
-        const sharedModuleDirectoryPath  = this.resourceRegistry.dynamicDirectories.sharedModules;
-        const individualSharedModulePath = this.removeTrailingSlash( sharedModuleRegistryItem?.dir );
+        const sharedModuleDirectoryPath     = this.resourceRegistry.dynamicDirectories.sharedModules;
+        const individualSharedModulePath    = this.removeTrailingSlash( sharedModuleRegistryItem?.dir );
+        const hasIndividualSharedModulePath = individualSharedModulePath && individualSharedModulePath !== '/';
 
-        if ( individualSharedModulePath && individualSharedModulePath !== '/' ) {
-          constructedPath = `${sharedModuleDirectoryPath}/${individualSharedModulePath}/${moduleId}`;
-          internalPath    = `${sharedModuleDirectoryPath}/${individualSharedModulePath}/${moduleId}`;
+        if ( hasIndividualSharedModulePath ) {
+          internalPath = `${sharedModuleDirectoryPath}/${individualSharedModulePath}/${moduleId}`;
         } else {
-          constructedPath = `${sharedModuleDirectoryPath}/${moduleId}`;
-          internalPath    = `${sharedModuleDirectoryPath}/${moduleId}`;
+          internalPath = `${sharedModuleDirectoryPath}/${moduleId}`;
         } 
+
+        constructedPath = internalPath;
 
       }
 
-      //console.log( constructedPath );
 
       if (this.environment === 'server') {
 
@@ -402,34 +382,21 @@ export default class SingleNodeCompiler {
             return;
           }
 
-          const sharedModuleDirectoryPath  = this.resourceRegistry.dynamicDirectories.sharedModules;
-          const individualSharedModulePath = this.removeTrailingSlash( sharedModuleRegistryItem?.dir );
+          const sharedModuleDirectoryPath     = this.resourceRegistry.dynamicDirectories.sharedModules;
+          const individualSharedModulePath    = this.removeTrailingSlash( sharedModuleRegistryItem?.dir );
+          const hasIndividualSharedModulePath = individualSharedModulePath && individualSharedModulePath !== '/';
+          const constructedPath               = hasIndividualSharedModulePath ? `${sharedModuleDirectoryPath}/${individualSharedModulePath}/${moduleId}` : `${sharedModuleDirectoryPath}/${moduleId}`;
+          const result                        = await this.loadResource(constructedPath);
 
-          if ( individualSharedModulePath && individualSharedModulePath !== '/' ) {
-            constructedPath = `${sharedModuleDirectoryPath}/${individualSharedModulePath}/${moduleId}`;
-          } else {
-            constructedPath = `${sharedModuleDirectoryPath}/${moduleId}`;
-          } 
+          console.log('RESULT');
+          console.log(result);
 
-          const moduleImportMethod = this.generateImportMethod( constructedPath );
-      
-          try {
-            module = await moduleImportMethod();
-          } catch (error) {
-            console.log(error);
-            continue;
+          if( result ) {
+            initializedModuleRegistry[moduleId] = {
+              ...moduleRegistryItem,
+              component: result,
+            };
           }
-
-          const moduleValidation = this.validateModuleExports(module);
-
-          if ( moduleValidation.hasNamedExportsButNoDefaultExport || moduleValidation.hasNoMeaningfulDefaultExport ) {
-            continue;
-          } 
-
-          initializedModuleRegistry[moduleId] = {
-            ...moduleRegistryItem,
-            component: module.default
-          };
 
         }
 
@@ -487,13 +454,13 @@ export default class SingleNodeCompiler {
 
     const resourceFileImportMethod = this.generateImportMethod( constructedPath );
     
-    console.log( 'constructedPath ' + constructedPath );
+    //console.log( 'constructedPath ' + constructedPath );
     let module;
 
     try {
       module = await resourceFileImportMethod();
     } catch (error) {
-      console.log( error );
+      //console.log( error );
       return null;
     }
 

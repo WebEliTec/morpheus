@@ -6,7 +6,7 @@ const config = {
   /* *** *** *** *** *** *** *** *** *** *** *** *** *** *** */
 
 	defaultPaths: {
-		modules: '/',
+		modules: '/modules',
 		traits:  '/',
 	},
 
@@ -62,6 +62,7 @@ const config = {
     Root:          {
       routes:  [ '/home', '/content-system', '/users' ],
       signals: [],
+      dir: '/'
     },
 
     Home:          {
@@ -81,6 +82,10 @@ const config = {
     }, 
 
     ContentSystem: {},
+
+    SomeSharedModule: {
+      isShared: true,
+    }, 
 
   },
 

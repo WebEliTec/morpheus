@@ -22,6 +22,14 @@ const appConfig = {
 
 	},  
 
+	sharedModuleRegistry: {
+
+		SomeSharedModule: {
+			dir: '/test'
+		},
+
+	}, 
+
 	mediaRegistry: {
 		sounds: {
 			'ui-click-1': {}, 
