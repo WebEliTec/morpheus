@@ -5,7 +5,6 @@ import path from 'path';
 export default class SingleNodeCompiler {
 
   constructor( nodeId, nodeItem, executionContext, contextConfig, environment = 'client' ) {
-    console.log('SingleNodeCompiler!');
     this.nodeId           = nodeId;
     this.nodeItem         = nodeItem
     this.executionContext = executionContext;
@@ -76,7 +75,7 @@ export default class SingleNodeCompiler {
   /* Static Files
   /* *** *** *** *** *** *** *** *** *** *** *** *** *** *** */
 
-    async loadAvailableResources() {
+  async loadAvailableResources() {
 
     const availableResources = {};
     
@@ -309,10 +308,6 @@ export default class SingleNodeCompiler {
 
       }
 
-      if( moduleId == 'SideBar' ) {
-        console.log(constructedPath);
-      }
-
     }
 
     return initializedModuleRegistry;
@@ -355,39 +350,58 @@ export default class SingleNodeCompiler {
 
     const config = module.default;
 
-    // Hydrate module registry with components from named exports
+
     const initializedModuleRegistry = {};
+
     
-    if (config?.moduleRegistry) {
+    if ( config?.moduleRegistry ) {
 
       for (const [moduleId, moduleRegistryItem] of Object.entries(config.moduleRegistry)) {
 
-        const isShared = moduleRegistryItem?.isShared;
+        const sharedModuleRegistryItem                = this.contextConfig?.sharedModuleRegistry?.[moduleId];
 
-        if( !isShared ) {
-          initializedModuleRegistry[moduleId] = {
-            ...moduleRegistryItem,
-            component: module[moduleId]
-          };
-        } else {
+        const isShared                                = moduleRegistryItem?.isShared;
 
-          let module;
+        const sharedModuleDirectoryDefaultPath        = this.resourceRegistry.dynamicDirectories.sharedModules;
+        const sharedModuleDirectorySubPath            = this.removeTrailingSlash( sharedModuleRegistryItem?.dir );
+        const hasIndividualSharedModulePath           = sharedModuleDirectorySubPath && sharedModuleDirectorySubPath != '/';
+        const isIndividualSharedModulePathOnRootLevel = sharedModuleDirectorySubPath == '/';
 
-          const sharedModuleRegistryItem = this.contextConfig?.sharedModuleRegistry?.[moduleId];
-          
-          if( !sharedModuleRegistryItem ) {
-            console.warn( 'No Item found in sharedModuleRegistry' );
-            return;
+        let internalPath;
+
+        if ( isShared && isIndividualSharedModulePathOnRootLevel ) {
+          internalPath = `${sharedModuleDirectoryDefaultPath}/${moduleId}`; 
+        } else if ( isShared && hasIndividualSharedModulePath ) {
+          internalPath = `${sharedModuleDirectoryDefaultPath}/${sharedModuleDirectorySubPath}/${moduleId}`; 
+        } else if ( isShared && !hasIndividualSharedModulePath ) {
+          internalPath = `${sharedModuleDirectoryDefaultPath}/${moduleId}`;
+        }
+
+
+        if ( isShared  && this.environment == 'server' ) {
+          // Build time: just validate file exists
+          const fs       = await import( /* @vite-ignore */ 'fs');
+          const fullPath = path.resolve(process.cwd(), 'morphSrc', `${internalPath}.jsx`);
+
+          if (!fs.existsSync(fullPath)) {
+            throw new Error(`Module ${moduleId} not found at ${fullPath}`);
           }
 
-          const sharedModuleDirectoryPath     = this.resourceRegistry.dynamicDirectories.sharedModules;
-          const individualSharedModulePath    = this.removeTrailingSlash( sharedModuleRegistryItem?.dir );
-          const hasIndividualSharedModulePath = individualSharedModulePath && individualSharedModulePath !== '/';
-          const constructedPath               = hasIndividualSharedModulePath ? `${sharedModuleDirectoryPath}/${individualSharedModulePath}/${moduleId}` : `${sharedModuleDirectoryPath}/${moduleId}`;
-          const result                        = await this.loadResource(constructedPath);
+          // Don't import, just store metadata
+          initializedModuleRegistry[moduleId] = {};
 
-          console.log('RESULT');
-          console.log(result);
+          initializedModuleRegistry[moduleId] = {
+              ...moduleRegistryItem,
+              component: null,
+              path: internalPath,
+              internalPath,
+            };
+
+        } 
+
+        if( isShared  && this.environment != 'server' ) {
+
+          const result = await this.loadResource( internalPath );
 
           if( result ) {
             initializedModuleRegistry[moduleId] = {
@@ -396,6 +410,13 @@ export default class SingleNodeCompiler {
             };
           }
 
+        }
+
+        if( !isShared ) {
+          initializedModuleRegistry[moduleId] = {
+            ...moduleRegistryItem,
+            component: module[moduleId]
+          };
         }
 
       }
@@ -426,7 +447,6 @@ export default class SingleNodeCompiler {
 
     // Build the identity resource collection
     const nodeResources = {
-      //config:           config,
       hasParent:        config?.hasParent,
       rootModuleId:     this.getRootModuleId( config, initializedModuleRegistry ),
       constants:        config.constants,
@@ -557,10 +577,5 @@ export default class SingleNodeCompiler {
     return rootModuleId ?? 'Root';
 
   }
-
-  hasCustomNodeDirPath() {
-    return this.customNodeDirPath && this.customNodeDirPath != '/'
-  }
-
 
 }

@@ -4,8 +4,6 @@ import SingleNodeCompiler from '../morpheus/core/resourceCompiler/singleNodeComp
 import appConfig from '../morphSrc/app.config.js';
 
 
-//console.log('Starting Morpheus build...');
-
 // Step 1: Delete existing directories
 try {
 
@@ -21,8 +19,6 @@ try {
 }
 
 // Step 1: Copy morphSrc to morphBuildSrc
-//console.log('Copying morphSrc to morphBuildSrc...');
-
 try {
 
   fse.copySync('morphSrc', 'morphBuildSrc');
@@ -35,7 +31,6 @@ try {
 }
 
 // Step 3: Compile each node and write resources
-//console.log('Compiling node resources...');
 
 const nodeIds = Object.keys(appConfig.nodeRegistry);
 
@@ -54,32 +49,48 @@ for (const nodeId of nodeIds) {
     const configImports     = extractImportsFromFile( configDirPath, nodeId );
 
     const componentExports  = isSingleFile ? extractComponentExportsFromFile(configDirPath, nodeId) : [];
-
-    console.log( componentExports );
     
     const imports           = [...configImports]; // Start with config imports
     const moduleIdentifiers = {};
 
     if ( nodeResources.moduleRegistry ) {
 
+
+      /*
+      console.log(nodeId);
+      console.log(nodeResources.moduleRegistry);*/
+
       Object.entries( nodeResources.moduleRegistry ).forEach( ( [ moduleId, moduleRegistryItem ] ) => {
+
         
-          /*
+        if ( isSingleFile && !moduleRegistryItem.isShared ) {
+
+          moduleIdentifiers[moduleId]  = moduleId;
+          moduleRegistryItem.component = `__IDENTIFIER__${moduleId}`;
+
+        } else if ( isSingleFile && moduleRegistryItem.isShared ) {
+
+          const importPath             = `@morphBuildSrc/${moduleRegistryItem.internalPath}`;
+          imports.push(`import ${moduleId} from '${importPath}';`);
+          moduleIdentifiers[moduleId]  = moduleId;
+          moduleRegistryItem.component = `__IDENTIFIER__${moduleId}`;
+
+        } else if ( !isSingleFile && !moduleRegistryItem.isShared ) {
+
           const importPath             = `./${moduleRegistryItem.internalPath}`;
           imports.push(`import ${moduleId} from '${importPath}';`);
           moduleIdentifiers[moduleId]  = moduleId;
-          moduleRegistryItem.component = `__IDENTIFIER__${moduleId}`;*/
+          moduleRegistryItem.component = `__IDENTIFIER__${moduleId}`;
 
+        } else if ( !isSingleFile && moduleRegistryItem.isShared ) {
 
-        if (isSingleFile && !moduleRegistryItem.isShared) {
-
-          // Don't create import for internal components
+          const importPath             = `@morphBuildSrc/${moduleRegistryItem.internalPath}`;
+          imports.push(`import ${moduleId} from '${importPath}';`);
           moduleIdentifiers[moduleId]  = moduleId;
           moduleRegistryItem.component = `__IDENTIFIER__${moduleId}`;
 
         } else if (moduleRegistryItem.path) {
 
-          // External modules need imports
           const importPath             = `./${moduleRegistryItem.internalPath}`;
           imports.push(`import ${moduleId} from '${importPath}';`);
           moduleIdentifiers[moduleId]  = moduleId;
@@ -87,21 +98,17 @@ for (const nodeId of nodeIds) {
 
         }
 
-
       });
 
     }
     
-    const importStatements = imports.length > 0 ? imports.join('\n') + '\n\n' : '';
+    const importStatements          = imports.length > 0 ? imports.join('\n') + '\n\n' : '';
   
     delete nodeResources.subConfigDirPath;
     
     const serializedResources       = serializeValue(nodeResources, 0, moduleIdentifiers);
-
     const componentExportStatements = componentExports.length > 0 ? '\n\n' + componentExports.join('\n\n'): '';
-
     const output                    = `${importStatements}const nodeResources = ${serializedResources};\n\nexport default nodeResources;${componentExportStatements}`;
-    
     const outputPath                = `morphBuildSrc/${subConfigDirPath}/${nodeId}.resources.jsx`;
     
     fs.writeFileSync(outputPath, output, 'utf8');
@@ -210,7 +217,7 @@ function serializeValue(value, indent = 2, moduleIdentifiers = {}) {
 // Function to extract import statements from source file
 function extractImportsFromFile( configDirPath, nodeId ) {
   
-  console.log( 'configDirPath', configDirPath );
+  //console.log( 'configDirPath', configDirPath );
   
   // Try both .jsx and .js extensions
   const possiblePaths = [ `${configDirPath}/${nodeId}.config.jsx`, `${configDirPath}/${nodeId}.config.js`];
@@ -314,14 +321,14 @@ function cleanupMorphBuildSrc() {
         // Check for .config files (any extension)
         if (item.includes('.config.')) {
           fs.unlinkSync(fullPath);
-          console.log(`  Deleted: ${fullPath}`);
+          //console.log(`  Deleted: ${fullPath}`);
           continue;
         }
         
         // Check for specific filenames
         if (filesToDelete.includes(item)) {
           fs.unlinkSync(fullPath);
-          console.log(`  Deleted: ${fullPath}`);
+          //console.log(`  Deleted: ${fullPath}`);
         }
       }
     }
