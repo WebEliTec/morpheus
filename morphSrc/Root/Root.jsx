@@ -1,6 +1,8 @@
 import '../globals.scss';
 
-export default function Root( { Node, Module, Router } ) {
+export default function Root( { _, Node, Module, Router } ) {
+
+  _.helloWorld1();
 
   const route = Router.getSegment( 1 );
 

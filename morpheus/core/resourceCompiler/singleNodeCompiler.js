@@ -4,10 +4,9 @@ import path from 'path';
 
 export default class SingleNodeCompiler {
 
-  constructor( nodeRegistry, nodeId, executionContext, contextConfig, environment = 'client' ) {
-    this.nodeRegistry     = nodeRegistry;
+  constructor( nodeId, nodeItem, executionContext, contextConfig, environment = 'client' ) {
     this.nodeId           = nodeId;
-    this.nodeItem         = this.nodeRegistry[ nodeId ];
+    this.nodeItem         = nodeItem
     this.executionContext = executionContext;
     this.contextConfig    = contextConfig;
     this.resourceRegistry = resourceRegistry.singleNode;
@@ -25,27 +24,15 @@ export default class SingleNodeCompiler {
 
   }
 
-  /* Preload Config
-  /* *** *** *** *** *** *** *** *** *** *** *** *** *** *** */
-
-  async loadConfigFile() {
-
-  }
 
   /* Directory Compilation
   /* *** *** *** *** *** *** *** *** *** *** *** *** *** *** */
 
   async compileResourcesFromDirectory() {
 
-    //console.log( this.nodeId );
-
     const availableResources = await this.loadAvailableResources();
 
-    //console.log( availableResources );
-
     const selectedResources  = this.selectResources( availableResources );
-
-    //console.log( resolvedStaticFiles );
 
     const traits             = await this.loadTraits( availableResources );
 
@@ -53,12 +40,10 @@ export default class SingleNodeCompiler {
 
     const rootModuleId       = this.getRootModuleId( selectedResources.config, moduleRegistry );
 
-
     const nodeResources      = {
 
       nodeId:           this.nodeId,
-      parentId:         selectedResources.config?.parentId,        
-      //config:         selectedResources.config,
+      parentId:         selectedResources.config?.parentId,
       rootModuleId,
       constants:        selectedResources?.constants, 
       metaData:         selectedResources?.metaData, 
@@ -71,8 +56,6 @@ export default class SingleNodeCompiler {
 
     }
 
-    //console.log( nodeResources );
-
     return nodeResources;
 
   }
@@ -84,7 +67,7 @@ export default class SingleNodeCompiler {
 
     const availableResources = {};
     
-    for (const [resourceName, resourceFileLocation] of Object.entries(this.resourceRegistry.staticFiles)) {
+    for (const [resourceName, resourceFileLocation] of Object.entries(this.resourceRegistry.resourceTypes)) {
       
       const customNodeDirPath = this.removeTrailingSlash(this.nodeItem?.dir);
       let constructedPath;
@@ -109,26 +92,13 @@ export default class SingleNodeCompiler {
       
       //console.log(`Attempting to load ${resourceName} from:`, constructedPath);
       
-      const resourceFileImportMethod = this.generateImportMethod( constructedPath );
-      console.log( 'constructedPath ' + constructedPath );
-      let module;
-      try {
-        module = await resourceFileImportMethod();
-        //console.log(`✓ Successfully loaded ${resourceName}`);
-      } catch (error) {
-        console.log(`✗ Failed to load ${resourceName}:`, error.message);
-        availableResources[resourceName] = null;
-        continue;
+      const result = await this.loadResource( constructedPath );
+
+      if( result ) {
+        availableResources[resourceName] = result;
       }
 
-      const moduleValidation = this.validateModuleExports( module );
-
-      if ( moduleValidation.hasNamedExportsButNoDefaultExport || moduleValidation.hasNoMeaningfulDefaultExport ) {
-        availableResources[resourceName] = null;
-        continue;
-      } 
-
-      availableResources[resourceName] = module.default;
+      continue;
 
     }
 
@@ -140,7 +110,7 @@ export default class SingleNodeCompiler {
 
     const selectedResources = {};
 
-    for (const [ resourceName, resourceFileLocation ] of Object.entries( this.resourceRegistry.staticFiles ) ) {
+    for (const [ resourceName, resourceFileLocation ] of Object.entries( this.resourceRegistry.resourceTypes ) ) {
 
       if( resourceName == 'config' ) {
         selectedResources.config = availableResources.config;
@@ -249,26 +219,12 @@ export default class SingleNodeCompiler {
 
       }
 
-      const traitImportMethod = this.generateImportMethod( constructedPath );
+      const result = await this.loadResource( constructedPath );
 
-
-      try {
-
-        const module           = await traitImportMethod();
-        
-        const moduleValidation = this.validateModuleExports(module);
-
-        if (moduleValidation.hasNamedExportsButNoDefaultExport || moduleValidation.hasNoMeaningfulDefaultExport ) {
-          continue;
-        } 
-
-        trait = module.default;
-        
-      } catch (error) {
-        continue;
+      
+      if( result ) {
+        traitImplementations[traitId] = result;
       }
-
-      traitImplementations[traitId] = trait;
 
     }
 
@@ -387,24 +343,20 @@ export default class SingleNodeCompiler {
             throw new Error(`Module ${moduleId} not found at ${fullPath}`);
           }
           // Don't import, just store metadata
-          initializedModuleRegistry[moduleId].component = null;
+          initializedModuleRegistry[moduleId].component    = null;
           initializedModuleRegistry[moduleId].path         = constructedPath;
           initializedModuleRegistry[moduleId].internalPath = internalPath;
         } else {
-        // Runtime: actually import
-        const moduleImportMethod = this.generateImportMethod(constructedPath);
-        try {
-          const module = await moduleImportMethod();
-          const moduleValidation = this.validateModuleExports(module);
-          if (moduleValidation.hasNamedExportsButNoDefaultExport || moduleValidation.hasNoMeaningfulDefaultExport) {
-            continue;
+
+          const result = await this.loadResource( constructedPath );
+
+          if( result ) {
+            initializedModuleRegistry[moduleId].component = result;
+            initializedModuleRegistry[moduleId].path      = constructedPath;
           }
-          initializedModuleRegistry[moduleId].component = module.default;
-          initializedModuleRegistry[moduleId].path      = constructedPath;
-        } catch (error) {
-          console.log(error);
-          continue;
-        }
+
+        // Runtime: actually import
+
       }
 
     }
@@ -554,18 +506,29 @@ export default class SingleNodeCompiler {
   /* Helpers
   /* *** *** *** *** *** *** *** *** *** *** *** *** *** *** */
 
-  removeTrailingSlash( path, shouldRemoveIfSingleTrailingSlash = false ) {
 
-    if( path == null ) {
-      return;
-    }
+  async loadResource( constructedPath ) {
 
-    if( !shouldRemoveIfSingleTrailingSlash && path == '/' ) {
-      return path;
-    }
+    const resourceFileImportMethod = this.generateImportMethod( constructedPath );
     
-    return path.startsWith('/') ? path.slice(1) : path;
+    console.log( 'constructedPath ' + constructedPath );
+    let module;
 
+    try {
+      module = await resourceFileImportMethod();
+    } catch (error) {
+      console.log( error );
+      return null;
+    }
+
+    const moduleValidation = this.validateModuleExports( module );
+
+    if ( moduleValidation.hasNamedExportsButNoDefaultExport || moduleValidation.hasNoMeaningfulDefaultExport ) {
+      console.log( 'Resource has no valid export.' );
+      return null;
+    } 
+
+    return module.default;
   }
 
   generateImportMethod(constructedPath) {
@@ -613,6 +576,20 @@ export default class SingleNodeCompiler {
 
   }
 
+  removeTrailingSlash( path, shouldRemoveIfSingleTrailingSlash = false ) {
+
+    if( path == null ) {
+      return;
+    }
+
+    if( !shouldRemoveIfSingleTrailingSlash && path == '/' ) {
+      return path;
+    }
+    
+    return path.startsWith('/') ? path.slice(1) : path;
+
+  }
+
   getRootModuleId( config, moduleRegistry ) {
 
     let rootModuleId = config?.rootModuleId || config?.rootModule || config?.root;
@@ -640,30 +617,5 @@ export default class SingleNodeCompiler {
 
   }
 
-  /* Load Resource
-  /* *** *** *** *** *** *** *** *** *** *** *** *** *** *** */
-
-  async loadResource( constructedPath ) {
-
-    const resourceFileImportMethod = this.generateImportMethod( constructedPath );
-    
-    console.log( 'constructedPath ' + constructedPath );
-    let module;
-
-
-    try {
-      module = await resourceFileImportMethod();
-    } catch (error) {
-      return error;
-    }
-
-    const moduleValidation = this.validateModuleExports( module );
-
-    if ( moduleValidation.hasNamedExportsButNoDefaultExport || moduleValidation.hasNoMeaningfulDefaultExport ) {
-      return 'Resource has no valid export.';
-    } 
-
-    return module.default;
-  }
 
 }

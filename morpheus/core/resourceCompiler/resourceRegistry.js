@@ -2,7 +2,7 @@ const resourceRegistry = {
 
   singleNode: {
     
-    staticFiles: {
+    resourceTypes: {
 
       config:           'config.jsx',
           
@@ -48,7 +48,7 @@ const resourceRegistry = {
 
       rootPath: 'frameworks',
 
-      staticFiles: {
+      resourceTypes: {
         
         config:          'config.jsx',
         
@@ -85,7 +85,7 @@ const resourceRegistry = {
 
       rootPath: 'apps',
 
-      staticFiles: {
+      resourceTypes: {
         
         config:          'config.jsx',
         
@@ -123,7 +123,7 @@ const resourceRegistry = {
 
       rootPath: 'instances',
 
-      staticFiles: {
+      resourceTypes: {
         
         config:         'config.jsx',
 

@@ -31,7 +31,7 @@ const config = {
   /* Traits
   /* *** *** *** *** *** *** *** *** *** *** *** *** *** *** */
 
-  traits: [],
+  traits: ['someTrait'],
 
 
   /* Kernel
