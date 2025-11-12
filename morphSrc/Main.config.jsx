@@ -1,5 +1,7 @@
 const config = {
 
+  isFile: true,
+
   rootModuleId: 'Wrapper',
 
   moduleRegistry: {
@@ -21,8 +23,12 @@ export default config;
 
 
 export function Wrapper() {
-  return(  <main>
-    Main!
-  </main>)
+
+  return(  
+    <main>
+      Main!
+    </main>
+  )
+
 
 }

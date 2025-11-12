@@ -4,6 +4,7 @@ export default class NodeCompiler {
 
   constructor( nodeRegistry, nodeId, executionContext, contextConfig ) {
 
+    this.nodeRegistry     = nodeRegistry;
     this.nodeId           = nodeId;
     this.nodeItem         = nodeRegistry[ nodeId ];
     this.executionContext = executionContext;
@@ -18,8 +19,8 @@ export default class NodeCompiler {
   async compileNode() {
     
     const singleNodeCompiler = new SingleNodeCompiler(
+      this.nodeRegistry,
       this.nodeId, 
-      this.nodeItem, 
       this.executionContext, 
       this.contextConfig
     );

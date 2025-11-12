@@ -4,9 +4,10 @@ import path from 'path';
 
 export default class SingleNodeCompiler {
 
-  constructor( nodeId, nodeItem, executionContext, contextConfig, environment = 'client' ) {
+  constructor( nodeRegistry, nodeId, executionContext, contextConfig, environment = 'client' ) {
+    this.nodeRegistry     = nodeRegistry;
     this.nodeId           = nodeId;
-    this.nodeItem         = nodeItem;
+    this.nodeItem         = this.nodeRegistry[ nodeId ];
     this.executionContext = executionContext;
     this.contextConfig    = contextConfig;
     this.resourceRegistry = resourceRegistry.singleNode;
@@ -23,6 +24,9 @@ export default class SingleNodeCompiler {
     return nodeResources;
 
   }
+
+  /* Directory Compilation
+  /* *** *** *** *** *** *** *** *** *** *** *** *** *** *** */
 
   /* Directory Compilation
   /* *** *** *** *** *** *** *** *** *** *** *** *** *** *** */
