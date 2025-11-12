@@ -225,7 +225,7 @@ export default class SingleNodeCompiler {
 
     const defaultModuleDirPath             = this.removeTrailingSlash( this.contextConfig.defaultPaths.modules );
     const nodeSpecificDefaultModuleDirPath = this.removeTrailingSlash( config?.defaultPaths?.modules );
-    const initializedModuleRegistry           = {};
+    const initializedModuleRegistry        = {};
 
     for (const [ moduleId, moduleRegistryItem ] of Object.entries( moduleRegistry ) ) {
 
@@ -308,20 +308,21 @@ export default class SingleNodeCompiler {
 
       //console.log( constructedPath );
 
-        if (this.environment === 'server') {
+      if (this.environment === 'server') {
 
-          // Build time: just validate file exists
-          const fs       = await import( /* @vite-ignore */ 'fs');
-          const fullPath = path.resolve(process.cwd(), 'morphSrc', `${constructedPath}.jsx`);
+        // Build time: just validate file exists
+        const fs       = await import( /* @vite-ignore */ 'fs');
+        const fullPath = path.resolve(process.cwd(), 'morphSrc', `${constructedPath}.jsx`);
 
-          if (!fs.existsSync(fullPath)) {
-            throw new Error(`Module ${moduleId} not found at ${fullPath}`);
-          }
+        if (!fs.existsSync(fullPath)) {
+          throw new Error(`Module ${moduleId} not found at ${fullPath}`);
+        }
 
-          // Don't import, just store metadata
-          initializedModuleRegistry[moduleId].component    = null;
-          initializedModuleRegistry[moduleId].path         = constructedPath;
-          initializedModuleRegistry[moduleId].internalPath = internalPath;
+        // Don't import, just store metadata
+        initializedModuleRegistry[moduleId].component    = null;
+        initializedModuleRegistry[moduleId].path         = constructedPath;
+        initializedModuleRegistry[moduleId].internalPath = internalPath;
+
         } else {
 
           const result = await this.loadResource( constructedPath );
