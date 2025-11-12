@@ -14,7 +14,7 @@ export default function Root( { _, Node, Module, Router } ) {
       <Node id="SideBar" />
       <Node id="Main" />
 
-      huhuh
+      Lololl
 
       <main>
         { route === 'home'           && <Module id="Home" /> }

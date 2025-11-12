@@ -13,7 +13,9 @@ export default class SingleNodeCompiler {
     this.resourceRegistry = resourceRegistry.singleNode;
     this.environment      = environment;
 
-    this.customNodeDirPath = this.removeTrailingSlash(this.nodeItem?.dir);
+    this.customNodeDirPath    = this.removeTrailingSlash(this.nodeItem?.dir);
+    this.hasCustomNodeDirPath = this.customNodeDirPath && this.customNodeDirPath != '/';
+    this.nodeDirPath          = this.hasCustomNodeDirPath  ? `${this.customNodeDirPath}/${this.nodeId}` : this.nodeId
 
   }
 
@@ -74,33 +76,16 @@ export default class SingleNodeCompiler {
   /* Static Files
   /* *** *** *** *** *** *** *** *** *** *** *** *** *** *** */
 
-  async loadAvailableResources() {
+    async loadAvailableResources() {
 
     const availableResources = {};
     
     for (const [resourceName, resourceFileLocation] of Object.entries(this.resourceRegistry.resourceTypes)) {
       
-      let constructedPath;
-      
-      if ( !this.hasCustomNodeDirPath() ) {
+      const isConfig        = resourceName === 'config';
+      const constructedPath = isConfig ? `${this.nodeDirPath}/${this.nodeId}.config.jsx` : `${this.nodeDirPath}/${resourceFileLocation}`;
 
-        if (resourceName == 'config') {
-          constructedPath       = `${this.nodeId}/${this.nodeId}.config.jsx`;
-          this.subConfigDirPath = `${this.nodeId}`
-        } else {
-          constructedPath       = `${this.nodeId}/${resourceFileLocation}`;
-        }
-
-      } else {
-        if (resourceName == 'config') {
-          constructedPath       = `${this.customNodeDirPath}/${this.nodeId}/${this.nodeId}.config.jsx`;
-          this.subConfigDirPath = `${this.customNodeDirPath}/${this.nodeId}`;
-        } else {
-          constructedPath       = `${this.customNodeDirPath}/${this.nodeId}/${resourceFileLocation}`;
-        }
-      }
-      
-      //console.log(`Attempting to load ${resourceName} from:`, constructedPath);
+      if (isConfig) { this.subConfigDirPath = this.nodeDirPath }
       
       const result = await this.loadResource( constructedPath );
 
@@ -200,7 +185,7 @@ export default class SingleNodeCompiler {
 
       let   constructedPath;
 
-      if ( !this.hasCustomNodeDirPath() ) {
+      if ( !this.hasCustomNodeDirPath ) {
         
         if( nodeSpecificTraitDirPath && nodeSpecificTraitDirPath != '/' ) {
           constructedPath = `${this.nodeId}/${nodeSpecificTraitDirPath}/${traitId}`;
@@ -269,7 +254,7 @@ export default class SingleNodeCompiler {
 
       if( !isShared ) {
 
-        if ( !this.hasCustomNodeDirPath() ) {
+        if ( !this.hasCustomNodeDirPath ) {
 
           if ( individualModulePath && individualModulePath != '/' ) {
             constructedPath = `${this.nodeId}/${individualModulePath}/${moduleId}`;
