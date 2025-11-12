@@ -7,7 +7,7 @@ const config = {
 
 	defaultPaths: {
 		modules: '/',
-		traits:  '/traits',
+		traits:  '/',
 	},
 
 

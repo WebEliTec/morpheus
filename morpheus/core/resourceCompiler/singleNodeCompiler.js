@@ -170,6 +170,18 @@ export default class SingleNodeCompiler {
 
     const traitImplementations       = {};
 
+    let traitDirPath;
+
+    if( nodeSpecificTraitDirPath && nodeSpecificTraitDirPath != '/' ) {
+      traitDirPath = `${this.nodeDirPath}/${nodeSpecificTraitDirPath}`;
+    } else if( nodeSpecificTraitDirPath == '/' ) {
+      traitDirPath = `${this.nodeDirPath}`;
+    } else if( defaultTraitDirPath && defaultTraitDirPath != '/' ) {
+      traitDirPath = `${this.nodeDirPath}/${defaultTraitDirPath}`;
+    } else {
+      traitDirPath = `${this.customNodeDirPath}/${this.nodeId}`;
+    }
+
     for (const traitId of traitIds) {
 
       //If kernel is specified as traitId, ignore it.
@@ -183,37 +195,9 @@ export default class SingleNodeCompiler {
         continue;
       } 
 
-      let   constructedPath;
+      const constructedPath = `${traitDirPath}/${traitId}`;
+      const result          = await this.loadResource( constructedPath );
 
-      if ( !this.hasCustomNodeDirPath ) {
-        
-        if( nodeSpecificTraitDirPath && nodeSpecificTraitDirPath != '/' ) {
-          constructedPath = `${this.nodeId}/${nodeSpecificTraitDirPath}/${traitId}`;
-        } else if( nodeSpecificTraitDirPath == '/' ) {
-          constructedPath = `${this.nodeId}/${traitId}`;
-        } else if( defaultTraitDirPath && defaultTraitDirPath != '/' ) {
-          constructedPath = `${this.nodeId}/${defaultTraitDirPath}/${traitId}`;
-        } else {
-          constructedPath = `${this.nodeId}/${traitId}`;
-        }
-
-      } else {
-
-        if( nodeSpecificTraitDirPath && nodeSpecificTraitDirPath != '/' ) {
-          constructedPath = `${this.customNodeDirPath}/${this.nodeId}/${nodeSpecificTraitDirPath}/${traitId}`;
-        } else if( nodeSpecificTraitDirPath == '/' ) {
-          constructedPath = `${this.customNodeDirPath}/${this.nodeId}/${traitId}`;
-        } else if( defaultTraitDirPath && defaultTraitDirPath != '/' ) {
-          constructedPath = `${this.customNodeDirPath}/${this.nodeId}/${defaultTraitDirPath}/${traitId}`;
-        } else {
-          constructedPath = `${this.customNodeDirPath}/${this.nodeId}/${traitId}`;
-        }
-
-      }
-
-      const result = await this.loadResource( constructedPath );
-
-      
       if( result ) {
         traitImplementations[traitId] = result;
       }
