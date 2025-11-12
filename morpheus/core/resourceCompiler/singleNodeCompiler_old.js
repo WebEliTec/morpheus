@@ -5,16 +5,12 @@ import path from 'path';
 export default class SingleNodeCompiler {
 
   constructor( nodeId, nodeItem, executionContext, contextConfig, environment = 'client' ) {
-    console.log('SingleNodeCompiler!');
     this.nodeId           = nodeId;
     this.nodeItem         = nodeItem
     this.executionContext = executionContext;
     this.contextConfig    = contextConfig;
     this.resourceRegistry = resourceRegistry.singleNode;
     this.environment      = environment;
-
-    this.customNodeDirPath = this.removeTrailingSlash(this.nodeItem?.dir);
-
   }
 
   async loadNodeResources() {
@@ -32,7 +28,7 @@ export default class SingleNodeCompiler {
   /* *** *** *** *** *** *** *** *** *** *** *** *** *** *** */
 
   async loadConfigFile() {
-
+    
   }
 
 
@@ -80,9 +76,10 @@ export default class SingleNodeCompiler {
     
     for (const [resourceName, resourceFileLocation] of Object.entries(this.resourceRegistry.resourceTypes)) {
       
+      const customNodeDirPath = this.removeTrailingSlash(this.nodeItem?.dir);
       let constructedPath;
       
-      if ( !this.hasCustomNodeDirPath() ) {
+      if (!customNodeDirPath || customNodeDirPath == '/') {
 
         if (resourceName == 'config') {
           constructedPath       = `${this.nodeId}/${this.nodeId}.config.jsx`;
@@ -93,10 +90,10 @@ export default class SingleNodeCompiler {
 
       } else {
         if (resourceName == 'config') {
-          constructedPath       = `${this.customNodeDirPath}/${this.nodeId}/${this.nodeId}.config.jsx`;
-          this.subConfigDirPath = `${this.customNodeDirPath}/${this.nodeId}`;
+          constructedPath       = `${customNodeDirPath}/${this.nodeId}/${this.nodeId}.config.jsx`;
+          this.subConfigDirPath = `${customNodeDirPath}/${this.nodeId}`;
         } else {
-          constructedPath       = `${this.customNodeDirPath}/${this.nodeId}/${resourceFileLocation}`;
+          constructedPath       = `${customNodeDirPath}/${this.nodeId}/${resourceFileLocation}`;
         }
       }
       
@@ -198,9 +195,12 @@ export default class SingleNodeCompiler {
         continue;
       } 
 
+      //External Trait Loading begins
+      let   trait             = null;
+      const customNodeDirPath = this.removeTrailingSlash( this.nodeItem?.dir );
       let   constructedPath;
 
-      if ( !this.hasCustomNodeDirPath() ) {
+      if ( !customNodeDirPath || customNodeDirPath == '/' ) {
         
         if( nodeSpecificTraitDirPath && nodeSpecificTraitDirPath != '/' ) {
           constructedPath = `${this.nodeId}/${nodeSpecificTraitDirPath}/${traitId}`;
@@ -215,13 +215,13 @@ export default class SingleNodeCompiler {
       } else {
 
         if( nodeSpecificTraitDirPath && nodeSpecificTraitDirPath != '/' ) {
-          constructedPath = `${this.customNodeDirPath}/${this.nodeId}/${nodeSpecificTraitDirPath}/${traitId}`;
+          constructedPath = `${customNodeDirPath}/${this.nodeId}/${nodeSpecificTraitDirPath}/${traitId}`;
         } else if( nodeSpecificTraitDirPath == '/' ) {
-          constructedPath = `${this.customNodeDirPath}/${this.nodeId}/${traitId}`;
+          constructedPath = `${customNodeDirPath}/${this.nodeId}/${traitId}`;
         } else if( defaultTraitDirPath && defaultTraitDirPath != '/' ) {
-          constructedPath = `${this.customNodeDirPath}/${this.nodeId}/${defaultTraitDirPath}/${traitId}`;
+          constructedPath = `${customNodeDirPath}/${this.nodeId}/${defaultTraitDirPath}/${traitId}`;
         } else {
-          constructedPath = `${this.customNodeDirPath}/${this.nodeId}/${traitId}`;
+          constructedPath = `${customNodeDirPath}/${this.nodeId}/${traitId}`;
         }
 
       }
@@ -254,11 +254,14 @@ export default class SingleNodeCompiler {
       return;
     }
 
+    const customNodeDirPath                = this.removeTrailingSlash( this.nodeItem?.dir );
     const defaultModuleDirPath             = this.removeTrailingSlash( this.contextConfig.defaultPaths.modules );
     const nodeSpecificDefaultModuleDirPath = this.removeTrailingSlash( config?.defaultPaths?.modules );
     const initializedModuleRegistry           = {};
 
     for (const [ moduleId, moduleRegistryItem ] of Object.entries( moduleRegistry ) ) {
+      
+      let module;
 
       initializedModuleRegistry[ moduleId ] = moduleRegistryItem;
       const isShared                     = moduleRegistryItem?.isShared;
@@ -269,7 +272,7 @@ export default class SingleNodeCompiler {
 
       if( !isShared ) {
 
-        if ( !this.hasCustomNodeDirPath() ) {
+        if ( !customNodeDirPath || customNodeDirPath == '/' ) {
 
           if ( individualModulePath && individualModulePath != '/' ) {
             constructedPath = `${this.nodeId}/${individualModulePath}/${moduleId}`;
@@ -294,22 +297,22 @@ export default class SingleNodeCompiler {
         } else  {
 
           if ( individualModulePath && individualModulePath != '/' ) {
-            constructedPath = `${this.customNodeDirPath}/${this.nodeId}/${individualModulePath}/${moduleId}`;
+            constructedPath = `${customNodeDirPath}/${this.nodeId}/${individualModulePath}/${moduleId}`;
             internalPath    = `${individualModulePath}/${moduleId}`;
           } else if ( individualModulePath == '/' ) {
-            constructedPath = `${this.customNodeDirPath}/${this.nodeId}/${moduleId}`;
+            constructedPath = `${customNodeDirPath}/${this.nodeId}/${moduleId}`;
             internalPath    = `${moduleId}`;
           } else if ( nodeSpecificDefaultModuleDirPath && nodeSpecificDefaultModuleDirPath != '/' ) {
-            constructedPath = `${this.customNodeDirPath}/${this.nodeId}/${nodeSpecificDefaultModuleDirPath}/${moduleId}`;
+            constructedPath = `${customNodeDirPath}/${this.nodeId}/${nodeSpecificDefaultModuleDirPath}/${moduleId}`;
             internalPath    = `${nodeSpecificDefaultModuleDirPath}/${moduleId}`;
           } else if( nodeSpecificDefaultModuleDirPath == '/' ) {
-            constructedPath = `${this.customNodeDirPath}/${this.nodeId}/${moduleId}`;
+            constructedPath = `${customNodeDirPath}/${this.nodeId}/${moduleId}`;
             internalPath    = `${moduleId}`;
           } else if( defaultModuleDirPath && defaultModuleDirPath != '/' ) {
-            constructedPath = `${this.customNodeDirPath}/${this.nodeId}/${defaultModuleDirPath}/${moduleId}`;
+            constructedPath = `${customNodeDirPath}/${this.nodeId}/${defaultModuleDirPath}/${moduleId}`;
             internalPath    = `${defaultModuleDirPath}/${moduleId}`;
           } else {
-            constructedPath = `${this.customNodeDirPath}/${this.customNodeDirPath}/${this.nodeId}/${moduleId}`;
+            constructedPath = `${customNodeDirPath}/${customNodeDirPath}/${this.nodeId}/${moduleId}`;
             internalPath    = `${this.nodeId}/${moduleId}`;
           }
 
@@ -340,15 +343,12 @@ export default class SingleNodeCompiler {
       //console.log( constructedPath );
 
         if (this.environment === 'server') {
-
           // Build time: just validate file exists
-          const fs       = await import( /* @vite-ignore */ 'fs');
+          const fs = await import( /* @vite-ignore */ 'fs');
           const fullPath = path.resolve(process.cwd(), 'morphSrc', `${constructedPath}.jsx`);
-
           if (!fs.existsSync(fullPath)) {
             throw new Error(`Module ${moduleId} not found at ${fullPath}`);
           }
-
           // Don't import, just store metadata
           initializedModuleRegistry[moduleId].component    = null;
           initializedModuleRegistry[moduleId].path         = constructedPath;
@@ -377,23 +377,24 @@ export default class SingleNodeCompiler {
 
   async compileResourcesFromFile() {
       
+    const customNodeDirPath = this.removeTrailingSlash ( this.nodeItem?.dir );
     const configFileName    = this.nodeItem?.configFileName ?`${this.nodeItem.configFileName}.config.jsx` : `${this.nodeId}.config.jsx`;
     let constructedPath;
 
-    if ( !this.customNodeDirPath || this.customNodeDirPath == '/' ) {
+    if ( !customNodeDirPath || customNodeDirPath == '/' ) {
       constructedPath       = `${configFileName}`;
       this.subConfigDirPath = '';
     } else {
-      constructedPath       = `${this.customNodeDirPath}/${configFileName}`;
+      constructedPath       = `${customNodeDirPath}/${configFileName}`;
       this.subConfigDirPath = `${configFileName}`;
     } 
 
-    const importMethod = this.generateImportMethod( constructedPath );
+    const staticFileImportMethod = this.generateImportMethod( constructedPath );
 
     let module;
 
     try {
-      module = await importMethod();
+      module = await staticFileImportMethod();
     } catch (error) {
       //console.log( error );
       return;
@@ -621,10 +622,6 @@ export default class SingleNodeCompiler {
 
     return rootModuleId ?? 'Root';
 
-  }
-
-  hasCustomNodeDirPath() {
-    return this.customNodeDirPath && this.customNodeDirPath != '/'
   }
 
 
