@@ -25,8 +25,12 @@ export default class SingleNodeCompiler {
 
   }
 
-  /* Directory Compilation
+  /* Preload Config
   /* *** *** *** *** *** *** *** *** *** *** *** *** *** *** */
+
+  async loadConfigFile() {
+
+  }
 
   /* Directory Compilation
   /* *** *** *** *** *** *** *** *** *** *** *** *** *** *** */
@@ -634,6 +638,32 @@ export default class SingleNodeCompiler {
 
     return rootModuleId ?? 'Root';
 
+  }
+
+  /* Load Resource
+  /* *** *** *** *** *** *** *** *** *** *** *** *** *** *** */
+
+  async loadResource( constructedPath ) {
+
+    const resourceFileImportMethod = this.generateImportMethod( constructedPath );
+    
+    console.log( 'constructedPath ' + constructedPath );
+    let module;
+
+
+    try {
+      module = await resourceFileImportMethod();
+    } catch (error) {
+      return error;
+    }
+
+    const moduleValidation = this.validateModuleExports( module );
+
+    if ( moduleValidation.hasNamedExportsButNoDefaultExport || moduleValidation.hasNoMeaningfulDefaultExport ) {
+      return 'Resource has no valid export.';
+    } 
+
+    return module.default;
   }
 
 }
