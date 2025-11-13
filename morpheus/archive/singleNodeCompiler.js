@@ -4,8 +4,7 @@ import path from 'path';
 
 export default class SingleNodeCompiler {
 
-  constructor( inheritanceLevel, nodeId, nodeItem, executionContext, contextConfig, environment = 'client' ) {
-    this.inheritanceLevel = inheritanceLevel;
+  constructor( nodeId, nodeItem, executionContext, contextConfig, environment = 'client' ) {
     this.nodeId           = nodeId;
     this.nodeItem         = nodeItem
     this.executionContext = executionContext;
@@ -13,16 +12,9 @@ export default class SingleNodeCompiler {
     this.resourceRegistry = resourceRegistry.singleNode;
     this.environment      = environment;
 
-    this.setNodeDirPath();
-
-  }
-
-  setNodeDirPath() {
-    if( this.inheritanceLevel == 'echo' ) {
-      this.customNodeDirPath    = this.removeTrailingSlash(this.nodeItem?.dir);
-      this.hasCustomNodeDirPath = this.customNodeDirPath && this.customNodeDirPath != '/';
-      this.nodeDirPath          = this.hasCustomNodeDirPath  ? `${this.customNodeDirPath}/${this.nodeId}` : this.nodeId
-    }
+    this.customNodeDirPath    = this.removeTrailingSlash(this.nodeItem?.dir);
+    this.hasCustomNodeDirPath = this.customNodeDirPath && this.customNodeDirPath != '/';
+    this.nodeDirPath          = this.hasCustomNodeDirPath  ? `${this.customNodeDirPath}/${this.nodeId}` : this.nodeId
 
   }
 

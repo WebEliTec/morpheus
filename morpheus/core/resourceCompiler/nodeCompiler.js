@@ -25,18 +25,23 @@ export default class NodeCompiler {
    */
   
   async exec() {
-    return await this.compileNode(this.nodeId, );
+    return await this.compileNode();
   }
   
   async compileNode() {
     
+
     const singleNodeCompiler = new SingleNodeCompiler(
+      'echo',
       this.nodeId, 
       this.nodeItem, 
       this.executionContext, 
       this.contextConfig
     );
     const nodeResources = await singleNodeCompiler.loadNodeResources();
+
+
+
 
     // console.log( nodeResources );
     const parentId     = nodeResources.parentId;
