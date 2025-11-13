@@ -30,31 +30,43 @@ export default class NodeCompiler {
   
   async compileNode() {
     
+    const echoSingleNodeCompiler = new SingleNodeCompiler({
+      inheritanceLevel: 'echo', 
+      nodeId:           this.nodeId,
+      nodeItem:         this.nodeItem,
+      executionContext: this.executionContext, 
+      contextConfig:    this.contextConfig,
+      environment:      'client'
+    });
 
-    const singleNodeCompiler = new SingleNodeCompiler(
-      {
-        inheritanceLevel: 'echo', 
+    const echoNodeResources  = await echoSingleNodeCompiler.loadNodeResources();
+
+    const parentIdOfEcho     = echoNodeResources?.parentId;
+
+    if( parentIdOfEcho ) {
+
+      const deltaSingleNodeCompiler = new SingleNodeCompiler({
+        inheritanceLevel: 'delta', 
         nodeId:           this.nodeId,
         nodeItem:         this.nodeItem,
         executionContext: this.executionContext, 
         contextConfig:    this.contextConfig,
         environment:      'client'
-      }
-      /*
-      'echo',
-      this.nodeId, 
-      this.nodeItem, 
-      this.executionContext, 
-      this.contextConfig*/
-    );
+      });
 
-    const nodeResources = await singleNodeCompiler.loadNodeResources();
+      const deltaNodeResources  = await deltaSingleNodeCompiler.loadNodeResources();
+      console.log( deltaNodeResources );
 
-    const parentId      = nodeResources.parentId;
+    }
 
+
+
+    return echoNodeResources;
+
+    /*
     if( !parentId ) {
       return nodeResources;
-    }
+    }*/
     
   }
 }

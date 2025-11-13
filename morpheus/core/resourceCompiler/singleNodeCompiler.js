@@ -37,6 +37,8 @@ export default class SingleNodeCompiler {
 
     }
 
+    console.log( 'this.nodeDirPath', this.nodeDirPath );
+
   }
 
   async loadNodeResources() {
@@ -88,6 +90,7 @@ export default class SingleNodeCompiler {
       traits,
 
     }
+
 
     return nodeResources;
 
@@ -468,7 +471,7 @@ export default class SingleNodeCompiler {
 
     // Build the identity resource collection
     const nodeResources = {
-      hasParent:        config?.hasParent,
+      parentId:         config?.parentId,
       rootModuleId:     this.getRootModuleId( config, initializedModuleRegistry ),
       constants:        config.constants,
       metaData:         config.metaData,
