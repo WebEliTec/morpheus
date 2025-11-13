@@ -19,6 +19,7 @@ export default class SingleNodeCompiler {
   }
 
   setNodeDirPath() {
+
     if ( this.inheritanceLevel == 'echo' ) {
 
       this.customNodeDirPath    = this.removeTrailingSlash(this.nodeItem?.dir);

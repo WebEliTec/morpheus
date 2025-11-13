@@ -15,15 +15,16 @@ const ParentKernelContext = createContext(null);
 export default class NodeManager {
 
 
-  constructor( { executionContext, contextConfig, app, onNodeMount, onNodeUnmount, mayCreateNode } ) {
+  constructor( { executionContext, contextConfig, abstractNodeConfig, app, onNodeMount, onNodeUnmount, mayCreateNode } ) {
 
-    this.executionContext = executionContext;
-    this.contextConfig    = contextConfig;
-    this.app              = app;
-    this.nodeRegistry     = this.contextConfig.nodeRegistry;
-    this.onNodeMount      = onNodeMount;    
-    this.onNodeUnmount    = onNodeUnmount;
-    this.mayCreateNode    = mayCreateNode;
+    this.executionContext   = executionContext;
+    this.contextConfig      = contextConfig;
+    this.abstractNodeConfig = abstractNodeConfig;
+    this.app                = app;
+    this.nodeRegistry       = this.contextConfig.nodeRegistry;
+    this.onNodeMount        = onNodeMount;    
+    this.onNodeUnmount      = onNodeUnmount;
+    this.mayCreateNode      = mayCreateNode;
 
   }
 
@@ -85,7 +86,20 @@ export default class NodeManager {
 
       try {
 
-        const compiler = new NodeCompiler( this.nodeRegistry, nodeId, this.executionContext, this.contextConfig, this.nodeRegistry );
+        const compiler = new NodeCompiler({
+          nodeRegistry: this.nodeRegistry, 
+          nodeId, 
+          executionContext: this.executionContext, 
+          contextConfig: this.contextConfig,
+          abstractNodeConfig: this.abstractNodeConfig,
+        }
+          
+          
+          
+          //this.nodeRegistry, nodeId, this.executionContext, this.contextConfig, this.abstractNodeConfig 
+        
+        
+        );
         nodeResources  = await compiler.exec();
 
       } catch (error) {

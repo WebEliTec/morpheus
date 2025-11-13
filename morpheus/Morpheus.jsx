@@ -2,8 +2,10 @@
 
 import { useState, useEffect } from 'react';
 import GraphManager from './core/graphManager/graphManager';
+
 import appConfig from '../morphSrc/app.config';
 import devToolConfig from './dev/ui/devTool.config';
+import abstractNodeConfig from './abstractNode.config';
 
 import MediaManager from './apis/mediaManager';
 import Graph from './apis/graph';
@@ -69,7 +71,8 @@ export class Morpheus {
       executionContext: 'app',
       app:              this.app, 
       contextConfig:    appConfig,
-      graphChangeListener: this.graphChangeListener.bind( this )
+      abstractNodeConfig,
+      graphChangeListener: this.graphChangeListener.bind( this ),
     }
 
     this.graphManager = new GraphManager( config );
@@ -88,8 +91,9 @@ export class Morpheus {
 
     const config = {
       executionContext: 'dev',
-      app:              this.devToolApp, 
-      contextConfig:    devToolConfig, 
+      app:                this.devToolApp, 
+      contextConfig:      devToolConfig, 
+      abstractNodeConfig,
     }
 
     this.devToolGraphManager  = new GraphManager( config );

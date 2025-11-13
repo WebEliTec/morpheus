@@ -2,12 +2,13 @@ import SingleNodeCompiler from './singleNodeCompiler';
 
 export default class NodeCompiler {
 
-  constructor( nodeRegistry, nodeId, executionContext, contextConfig ) {
+  constructor( { nodeRegistry, nodeId, executionContext, contextConfig, abstractNodeConfig } ) {
 
-    this.nodeId           = nodeId;
-    this.nodeItem         = nodeRegistry[ nodeId ];
-    this.executionContext = executionContext;
-    this.contextConfig    = contextConfig;
+    this.nodeId             = nodeId;
+    this.nodeItem           = nodeRegistry[ nodeId ];
+    this.executionContext   = executionContext;
+    this.contextConfig      = contextConfig;
+    this.abstractNodeConfig = abstractNodeConfig;
     
   }
 
