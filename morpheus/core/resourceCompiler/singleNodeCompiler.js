@@ -18,10 +18,22 @@ export default class SingleNodeCompiler {
   }
 
   setNodeDirPath() {
-    if( this.inheritanceLevel == 'echo' ) {
+    if ( this.inheritanceLevel == 'echo' ) {
+
       this.customNodeDirPath    = this.removeTrailingSlash(this.nodeItem?.dir);
       this.hasCustomNodeDirPath = this.customNodeDirPath && this.customNodeDirPath != '/';
       this.nodeDirPath          = this.hasCustomNodeDirPath  ? `${this.customNodeDirPath}/${this.nodeId}` : this.nodeId
+      
+    } else {
+      
+      const inheritanceLevelIds = ['alpha', 'bravo', 'charile', 'delta' ];
+
+      if( inheritanceLevelIds.includes( this.inheritanceLevel ) ) {
+        this.nodeDirPath = 'lib/' + this.inheritanceLevel;
+      } else {
+        throw new Error('Unknow levelID: ' + this.inheritanceLevel );
+      }
+
     }
 
   }
