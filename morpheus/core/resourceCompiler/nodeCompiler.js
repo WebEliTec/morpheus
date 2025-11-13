@@ -32,19 +32,25 @@ export default class NodeCompiler {
     
 
     const singleNodeCompiler = new SingleNodeCompiler(
+      {
+        inheritanceLevel: 'echo', 
+        nodeId:           this.nodeId,
+        nodeItem:         this.nodeItem,
+        executionContext: this.executionContext, 
+        contextConfig:    this.contextConfig,
+        environment:      'client'
+      }
+      /*
       'echo',
       this.nodeId, 
       this.nodeItem, 
       this.executionContext, 
-      this.contextConfig
+      this.contextConfig*/
     );
+
     const nodeResources = await singleNodeCompiler.loadNodeResources();
 
-
-
-
-    // console.log( nodeResources );
-    const parentId     = nodeResources.parentId;
+    const parentId      = nodeResources.parentId;
 
     if( !parentId ) {
       return nodeResources;

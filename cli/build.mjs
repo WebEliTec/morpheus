@@ -41,7 +41,15 @@ for (const nodeId of nodeIds) {
     const nodeItem          = appConfig.nodeRegistry[nodeId];
     const isSingleFile      = nodeItem?.isFile;
 
-    const compiler          = new SingleNodeCompiler(nodeId, nodeItem, 'app', appConfig, 'server');
+    const compiler          = new SingleNodeCompiler({
+      inheritanceLevel: 'echo', 
+      nodeId, 
+      nodeItem, 
+      executionContext: 'app', 
+      contextConfig:    appConfig, 
+      environment:      'server'
+    });
+
     const nodeResources     = await compiler.loadNodeResources();
     const subConfigDirPath  = nodeResources.subConfigDirPath;
 

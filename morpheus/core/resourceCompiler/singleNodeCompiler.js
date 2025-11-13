@@ -4,7 +4,8 @@ import path from 'path';
 
 export default class SingleNodeCompiler {
 
-  constructor( inheritanceLevel, nodeId, nodeItem, executionContext, contextConfig, environment = 'client' ) {
+  constructor( { inheritanceLevel, nodeId, nodeItem, executionContext, contextConfig, environment } ) {
+    
     this.inheritanceLevel = inheritanceLevel;
     this.nodeId           = nodeId;
     this.nodeItem         = nodeItem
@@ -25,7 +26,7 @@ export default class SingleNodeCompiler {
       this.nodeDirPath          = this.hasCustomNodeDirPath  ? `${this.customNodeDirPath}/${this.nodeId}` : this.nodeId
       
     } else {
-      
+
       const inheritanceLevelIds = ['alpha', 'bravo', 'charile', 'delta' ];
 
       if( inheritanceLevelIds.includes( this.inheritanceLevel ) ) {
