@@ -3,31 +3,20 @@ import fse from 'fs-extra';
 import SingleNodeCompiler from '../morpheus/core/resourceCompiler/singleNodeCompiler.js';
 import appConfig from '../morphSrc/app.config.js';
 
-
-// Step 1: Delete existing directories
 try {
-
   if (fse.existsSync('morphBuildSrc')) {
     fse.removeSync('morphBuildSrc');
   }
-
 } catch (error) {
-
   console.error('✗ Failed to clean:', error.message);
   process.exit(1);
-
 }
 
-// Step 1: Copy morphSrc to morphBuildSrc
 try {
-
   fse.copySync('morphSrc', 'morphBuildSrc');
-
 } catch (error) {
-
   console.error('✗ Failed to copy:', error.message);
   process.exit(1);
-
 }
 
 // Step 3: Compile each node and write resources
@@ -41,14 +30,7 @@ for (const nodeId of nodeIds) {
     const nodeItem          = appConfig.nodeRegistry[nodeId];
     const isSingleFile      = nodeItem?.isFile;
 
-    const compiler          = new SingleNodeCompiler({
-      inheritanceLevel: 'echo', 
-      nodeId, 
-      nodeItem, 
-      executionContext: 'app', 
-      contextConfig:    appConfig, 
-      environment:      'server'
-    });
+    const compiler          = new SingleNodeCompiler({ inheritanceLevel: 'echo',  nodeId,  nodeItem,  executionContext: 'app', contextConfig: appConfig,  environment: 'server' });
 
     const nodeResources     = await compiler.loadNodeResources();
     const subConfigDirPath  = nodeResources.subConfigDirPath;
@@ -62,11 +44,6 @@ for (const nodeId of nodeIds) {
     const moduleIdentifiers = {};
 
     if ( nodeResources.moduleRegistry ) {
-
-
-      /*
-      console.log(nodeId);
-      console.log(nodeResources.moduleRegistry);*/
 
       Object.entries( nodeResources.moduleRegistry ).forEach( ( [ moduleId, moduleRegistryItem ] ) => {
 
@@ -112,6 +89,8 @@ for (const nodeId of nodeIds) {
     
     const importStatements          = imports.length > 0 ? imports.join('\n') + '\n\n' : '';
   
+    appConfig.nodeRegistry[nodeId].subConfigDirPath = nodeResources.subConfigDirPath;
+
     delete nodeResources.subConfigDirPath;
     
     const serializedResources       = serializeValue(nodeResources, 0, moduleIdentifiers);
@@ -130,7 +109,7 @@ for (const nodeId of nodeIds) {
   }
 }
 
-createResourceProvider(nodeIds);
+createResourceProvider( nodeIds );
 cleanupMorphBuildSrc();
 
 console.log('✓ Build complete!');
@@ -347,26 +326,30 @@ function cleanupMorphBuildSrc() {
   console.log('✓ Cleanup complete');
 }
 
-function createResourceProvider(nodeIds) {
-  // Generate imports for all resource files
-  const imports = nodeIds.map(nodeId => {
-    const nodeItem = appConfig.nodeRegistry[nodeId];
-    const isSingleFile = nodeItem?.isFile;
-    
-    // Determine the import path based on node structure
-    let importPath;
-    if (isSingleFile) {
-      // Single file: might be at root or in subdirectory
-      const customDir = nodeItem?.dir?.replace(/^\//, '');
-      importPath = customDir ? `./${customDir}/${nodeId}.resources` : `./${nodeId}.resources`;
-    } else {
-      // Directory-based
-      const customDir = nodeItem?.dir?.replace(/^\//, '');
-      const basePath = customDir ? `${customDir}/${nodeId}` : nodeId;
-      importPath = `./${basePath}/${nodeId}.resources`;
-    }
-    
-    return `import ${nodeId}Resources from '${importPath}';`;
+function createResourceProvider( nodeIds ) {
+
+    const imports = nodeIds.map(nodeId => {
+
+      const nodeItem     = appConfig.nodeRegistry[nodeId];
+      const isSingleFile = nodeItem?.isFile;
+      
+      let importPath;
+
+      if (isSingleFile) {
+        const customDir = nodeItem?.dir?.replace(/^\//, '');
+        importPath      = customDir ? `./${customDir}/${nodeId}.resources` : `./${nodeId}.resources`;
+
+      } else {
+
+        //const customDir = nodeItem?.dir?.replace(/^\//, '');
+        //const basePath = customDir ? `${customDir}/${nodeId}` : nodeId;
+        const basePath = appConfig.nodeRegistry[nodeId].subConfigDirPath;
+        importPath     = `./${basePath}/${nodeId}.resources`;
+
+      }
+      
+      return `import ${nodeId}Resources from '${importPath}';`;
+
   }).join('\n');
   
   // Generate the registry object
