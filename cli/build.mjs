@@ -110,6 +110,8 @@ for (const nodeId of nodeIds) {
       outputPath = `morphBuildSrc/${nodeId}.resources.jsx`
     }
 
+    console.log( 'outputPath', outputPath )
+
     //const outputPath                = `morphBuildSrc/${configDirSubPath}/${nodeId}.resources.jsx`;
     
     fs.writeFileSync(outputPath, output, 'utf8');
@@ -252,8 +254,6 @@ function extractImportsFromFile( configDirPath, nodeId ) {
 function extractComponentExportsFromFile(configDirPath, nodeId) {
   
   const filePath = `${configDirPath}/${nodeId}.config.jsx`
-
-  console.log( 'filePath', filePath )
   
   if (fs.existsSync(filePath)) {
 

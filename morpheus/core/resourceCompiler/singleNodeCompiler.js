@@ -32,29 +32,21 @@ export default class SingleNodeCompiler {
       const isFile              = this.nodeItem?.isFile;
 
       if( isFile && this.customNodeDirPath && this.customNodeDirPath == '/'  ) {
-        console.log('A');
         this.nodeDirPath = '';
       } else if( isFile && this.customNodeDirPath && this.customNodeDirPath != '/' ) {
-        console.log('B');
-        this.nodeDirPath = this.customNodeDirPath;
+        this.nodeDirPath = this.removeTrailingSlash ( this.customNodeDirPath );
       } else if( isFile && this.defaultNodeDirPath && this.defaultNodeDirPath == '/' ) {
-        console.log('C');
         this.nodeDirPath = '';
       } else if( isFile && this.defaultNodeDirPath && this.defaultNodeDirPath != '/' ) {
-        console.log('D');
-        this.nodeDirPath = this.defaultNodeDirPath;
+        this.nodeDirPath = this.removeTrailingSlash ( this.defaultNodeDirPath );
       } else if( !isFile && this.customNodeDirPath && this.customNodeDirPath == '/' ) {
-        console.log('E');
         this.nodeDirPath = this.nodeId;
       } else if( !isFile && this.customNodeDirPath && this.customNodeDirPath != '/' ) {
-        console.log('F');
-        this.nodeDirPath = `${this.customNodeDirPath}/${this.nodeId}`;
+        this.nodeDirPath = this.removeTrailingSlash ( `${this.customNodeDirPath}/${this.nodeId}` );
       } else if( !isFile && this.defaultNodeDirPath && this.defaultNodeDirPath == '/' ) {
-        console.log('G');
         this.nodeDirPath = this.nodeId;
       } else if( !isFile && this.defaultNodeDirPath && this.defaultNodeDirPath != '/' ) {
-        console.log('H');
-        this.nodeDirPath = `${this.defaultNodeDirPath}/${this.nodeId}`;
+        this.nodeDirPath = this.removeTrailingSlash ( `${this.defaultNodeDirPath}/${this.nodeId}` );
       } else {
         this.nodeDirPath = '';
       }
@@ -71,7 +63,7 @@ export default class SingleNodeCompiler {
 
     }
 
-    this.configDirSubPath = this.nodeDirPath;
+    this.configDirSubPath = this.removeTrailingSlash ( this.nodeDirPath );
 
   }
 
@@ -171,7 +163,14 @@ export default class SingleNodeCompiler {
     for (const [resourceName, resourceFileLocation] of Object.entries(this.resourceRegistry.resourceTypes)) {
       
       const isConfig        = resourceName === 'config';
+
+
       const constructedPath = isConfig ? `${this.nodeDirPath}/${this.nodeId}.config.jsx` : `${this.nodeDirPath}/${resourceFileLocation}`;
+      
+      //if( isConfig )
+
+
+      
       const result          = await this.loadResource( constructedPath );
 
       if( result ) {

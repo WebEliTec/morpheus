@@ -12,22 +12,24 @@ const appConfig = {
 			dir: '/',
 		},
 
+		/*
 		SideMenu: {
 			dir: '/',
-		},
+		},*/
 
 		SideBar:  {
-			//dir: '/',
+			dir: '/lol',
 		},
 
+		/*
 		Main:     {
 			isFile: true,
-			dir: '/',
+			//dir: '/',
 		},
 
 		TestNode: {
 			dir: '/',
-		},
+		},*/
 
 	},  
 

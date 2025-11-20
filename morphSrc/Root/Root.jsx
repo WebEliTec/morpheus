@@ -15,7 +15,7 @@ export default function Root( { Kernel, Node, Module, Router } ) {
 
 
       <Node id="SideBar" />
-
+{/* 
       <Module id="SomeSharedModule"/> 
 
       <main>
@@ -24,7 +24,7 @@ export default function Root( { Kernel, Node, Module, Router } ) {
         { route === 'users'          && <Module id="Users" /> }
       </main>
       
-      <Node id="Main" /> 
+      <Node id="Main" />  */}
                   
     </>
   )
