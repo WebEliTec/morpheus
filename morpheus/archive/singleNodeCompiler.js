@@ -23,7 +23,7 @@ export default class SingleNodeCompiler {
     const isFile        = this.nodeItem?.isFile;
     const nodeResources = isFile ? await this.compileResourcesFromFile() : await this.compileResourcesFromDirectory();
 
-    nodeResources.subConfigDirPath = this.subConfigDirPath
+    nodeResources.configDirSubPath = this.configDirSubPath
 
     return nodeResources;
 
@@ -84,7 +84,7 @@ export default class SingleNodeCompiler {
       const isConfig        = resourceName === 'config';
       const constructedPath = isConfig ? `${this.nodeDirPath}/${this.nodeId}.config.jsx` : `${this.nodeDirPath}/${resourceFileLocation}`;
 
-      if (isConfig) { this.subConfigDirPath = this.nodeDirPath }
+      if (isConfig) { this.configDirSubPath = this.nodeDirPath }
       
       const result = await this.loadResource( constructedPath );
 
@@ -325,10 +325,10 @@ export default class SingleNodeCompiler {
 
     if ( !this.customNodeDirPath || this.customNodeDirPath == '/' ) {
       constructedPath       = `${configFileName}`;
-      this.subConfigDirPath = '';
+      this.configDirSubPath = '';
     } else {
       constructedPath       = `${this.customNodeDirPath}/${configFileName}`;
-      this.subConfigDirPath = `${configFileName}`;
+      this.configDirSubPath = `${configFileName}`;
     } 
 
     const importMethod = this.generateImportMethod( constructedPath );

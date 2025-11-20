@@ -53,10 +53,7 @@ export default class SingleNodeCompiler {
 
     }
 
-    this.subConfigDirPath = this.nodeDirPath;
-
-    //console.log( this.nodeId );
-    //console.log( this.nodeDirPath );
+    this.configDirSubPath = this.nodeDirPath;
 
   }
 
@@ -83,11 +80,11 @@ export default class SingleNodeCompiler {
 
     if( this.executionContext == 'app' ) {
       console.log( this.nodeId );
-      console.log( 'this.subConfigDirPath' );
-      console.log( this.subConfigDirPath );
+      console.log( 'this.configDirSubPath' );
+      console.log( this.configDirSubPath );
     }
 
-    nodeResources.subConfigDirPath = this.subConfigDirPath;
+    nodeResources.configDirSubPath = this.configDirSubPath;
 
     return nodeResources;
 
@@ -382,10 +379,10 @@ export default class SingleNodeCompiler {
 
     if ( !this.customNodeDirPath || this.customNodeDirPath == '/' ) {
       constructedPath       = `${configFileName}`;
-      this.subConfigDirPath = '';
+      this.configDirSubPath = '';
     } else {
       constructedPath       = `${this.customNodeDirPath}/${configFileName}`;
-      this.subConfigDirPath = `${configFileName}`;
+      this.configDirSubPath = `${configFileName}`;
     } 
 
     const importMethod = this.generateImportMethod( constructedPath );

@@ -19,8 +19,6 @@ try {
   process.exit(1);
 }
 
-// Step 3: Compile each node and write resources
-
 const nodeIds = Object.keys(appConfig.nodeRegistry);
 
 for (const nodeId of nodeIds) {
@@ -33,9 +31,9 @@ for (const nodeId of nodeIds) {
     const compiler          = new SingleNodeCompiler({ inheritanceLevel: 'echo',  nodeId,  nodeItem,  executionContext: 'app', contextConfig: appConfig,  environment: 'server' });
 
     const nodeResources     = await compiler.loadNodeResources();
-    const subConfigDirPath  = nodeResources.subConfigDirPath;
+    const configDirSubPath  = nodeResources.configDirSubPath;
 
-    const configDirPath     = `morphSrc/${subConfigDirPath}`;
+    const configDirPath     = `morphSrc/${configDirSubPath}`;
     const configImports     = extractImportsFromFile( configDirPath, nodeId );
 
     const componentExports  = isSingleFile ? extractComponentExportsFromFile(configDirPath, nodeId) : [];
@@ -89,14 +87,14 @@ for (const nodeId of nodeIds) {
     
     const importStatements          = imports.length > 0 ? imports.join('\n') + '\n\n' : '';
   
-    appConfig.nodeRegistry[nodeId].subConfigDirPath = nodeResources.subConfigDirPath;
+    appConfig.nodeRegistry[nodeId].configDirSubPath = nodeResources.configDirSubPath;
 
-    delete nodeResources.subConfigDirPath;
+    delete nodeResources.configDirSubPath;
     
     const serializedResources       = serializeValue(nodeResources, 0, moduleIdentifiers);
     const componentExportStatements = componentExports.length > 0 ? '\n\n' + componentExports.join('\n\n'): '';
     const output                    = `${importStatements}const nodeResources = ${serializedResources};\n\nexport default nodeResources;${componentExportStatements}`;
-    const outputPath                = `morphBuildSrc/${subConfigDirPath}/${nodeId}.resources.jsx`;
+    const outputPath                = `morphBuildSrc/${configDirSubPath}/${nodeId}.resources.jsx`;
     
     fs.writeFileSync(outputPath, output, 'utf8');
     
@@ -336,14 +334,13 @@ function createResourceProvider( nodeIds ) {
       let importPath;
 
       if (isSingleFile) {
+
         const customDir = nodeItem?.dir?.replace(/^\//, '');
         importPath      = customDir ? `./${customDir}/${nodeId}.resources` : `./${nodeId}.resources`;
 
       } else {
 
-        //const customDir = nodeItem?.dir?.replace(/^\//, '');
-        //const basePath = customDir ? `${customDir}/${nodeId}` : nodeId;
-        const basePath = appConfig.nodeRegistry[nodeId].subConfigDirPath;
+        const basePath = appConfig.nodeRegistry[nodeId].configDirSubPath;
         importPath     = `./${basePath}/${nodeId}.resources`;
 
       }
