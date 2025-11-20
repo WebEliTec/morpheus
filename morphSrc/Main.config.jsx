@@ -30,7 +30,7 @@ export function Wrapper({Module}) {
 
   return(  
     <main>
-      Main Module
+      Main Module FRom Single
       <Module id="SomeSharedModule" />  
       <hr />
     </main>

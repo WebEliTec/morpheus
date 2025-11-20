@@ -29,13 +29,31 @@ export default class SingleNodeCompiler {
       this.customNodeDirPath    = this.nodeItem?.dir;
       this.hasCustomNodeDirPath = this.customNodeDirPath != null && this.customNodeDirPath != '/';
 
-      if( this.customNodeDirPath && this.customNodeDirPath == '/' ) {
+      const isFile              = this.nodeItem?.isFile;
+
+      if( isFile && this.customNodeDirPath && this.customNodeDirPath == '/'  ) {
+        console.log('A');
+        this.nodeDirPath = '';
+      } else if( isFile && this.customNodeDirPath && this.customNodeDirPath != '/' ) {
+        console.log('B');
+        this.nodeDirPath = this.customNodeDirPath;
+      } else if( isFile && this.defaultNodeDirPath && this.defaultNodeDirPath == '/' ) {
+        console.log('C');
+        this.nodeDirPath = '';
+      } else if( isFile && this.defaultNodeDirPath && this.defaultNodeDirPath != '/' ) {
+        console.log('D');
+        this.nodeDirPath = this.defaultNodeDirPath;
+      } else if( !isFile && this.customNodeDirPath && this.customNodeDirPath == '/' ) {
+        console.log('E');
         this.nodeDirPath = this.nodeId;
-      } else if( this.customNodeDirPath && this.customNodeDirPath != '/' ) {
+      } else if( !isFile && this.customNodeDirPath && this.customNodeDirPath != '/' ) {
+        console.log('F');
         this.nodeDirPath = `${this.customNodeDirPath}/${this.nodeId}`;
-      } else if( this.defaultNodeDirPath && this.defaultNodeDirPath == '/' ) {
+      } else if( !isFile && this.defaultNodeDirPath && this.defaultNodeDirPath == '/' ) {
+        console.log('G');
         this.nodeDirPath = this.nodeId;
-      } else if( this.defaultNodeDirPath && this.defaultNodeDirPath != '/' ) {
+      } else if( !isFile && this.defaultNodeDirPath && this.defaultNodeDirPath != '/' ) {
+        console.log('H');
         this.nodeDirPath = `${this.defaultNodeDirPath}/${this.nodeId}`;
       } else {
         this.nodeDirPath = '';
@@ -60,34 +78,43 @@ export default class SingleNodeCompiler {
   /* Load Config File
   /* *** *** *** *** *** *** *** *** *** *** *** *** *** *** */
 
-  async preLoadConfigFile() {
-    const constructedPath = `${this.nodeDirPath}/${this.nodeId}.config.jsx`;
-    const configPayload   = await this.loadResource( constructedPath );
-    return configPayload;
-  }
-
   async loadNodeResources() {
 
     const configPayload = await this.preLoadConfigFile();
+    const isFile        = this.inheritanceLevel == 'echo' ? this.nodeItem?.isFile : configPayload.default?.isFile;
 
-    const isFile        = this.inheritanceLevel == 'echo' ? this.nodeItem?.isFile : configPayload?.isFile;
+    if( isFile ) {
+      //console.log( configPayload.default );
+    }
 
-    //console.log( 'isFile', isFile );
-    //console.log(configPayload);
-
-    const nodeResources = isFile ? await this.compileResourcesFromFile() : await this.compileResourcesFromDirectory();
+    const nodeResources = isFile ? await this.compileResourcesFromFile( configPayload ) : await this.compileResourcesFromDirectory();
 
 
     if( this.executionContext == 'app' ) {
-      console.log( this.nodeId );
-      console.log( 'this.configDirSubPath' );
-      console.log( this.configDirSubPath );
+      //console.log( this.nodeId );
+      //console.log( 'this.configDirSubPath' );
+      //console.log( this.configDirSubPath );
     }
 
     nodeResources.configDirSubPath = this.configDirSubPath;
 
     return nodeResources;
 
+  }
+
+  async preLoadConfigFile() {
+
+    let constructedPath;
+
+    if( this.nodeDirPath == '/' ) {
+      constructedPath = `${this.nodeId}.config.jsx`;
+    } else {
+      constructedPath = `${this.nodeDirPath}/${this.nodeId}.config.jsx`;
+    }
+
+    
+    const configPayload   = await this.loadResource( constructedPath, false );
+    return configPayload;
   }
 
 
@@ -372,19 +399,24 @@ export default class SingleNodeCompiler {
   /* Single File Loading
   /* *** *** *** *** *** *** *** *** *** *** *** *** *** *** */
 
-  async compileResourcesFromFile() {
+  async compileResourcesFromFile( configPayLoad ) {
       
+    /*
     const configFileName    = this.nodeItem?.configFileName ? `${this.nodeItem.configFileName}.config.jsx` : `${this.nodeId}.config.jsx`;
     let constructedPath;
 
-    if ( !this.customNodeDirPath || this.customNodeDirPath == '/' ) {
-      constructedPath       = `${configFileName}`;
-      this.configDirSubPath = '';
+    
+    if ( this.configDirSubPath ) {
+      constructedPath       = `${this.configDirSubPath}/${configFileName}`;
+      this.configDirSubPath = `${this.configDirSubPath}/${configFileName}`;;
     } else {
-      constructedPath       = `${this.customNodeDirPath}/${configFileName}`;
+      constructedPath       = `${configFileName}`;
       this.configDirSubPath = `${configFileName}`;
-    } 
+    } */
 
+    
+    
+    /*
     const importMethod = this.generateImportMethod( constructedPath );
 
     let module;
@@ -400,9 +432,15 @@ export default class SingleNodeCompiler {
 
     if ( moduleValidation.hasNamedExportsButNoDefaultExport || moduleValidation.hasNoMeaningfulDefaultExport ) {
       return;
-    } 
+    } */
 
-    const config = module.default;
+    //const config = module.default;
+
+    //const config = this.loadResource( constructedPath, false );
+
+    //console.log( config );
+
+    const config = configPayLoad.default;
 
 
     const initializedModuleRegistry = {};
@@ -469,7 +507,7 @@ export default class SingleNodeCompiler {
         if( !isShared ) {
           initializedModuleRegistry[moduleId] = {
             ...moduleRegistryItem,
-            component: module[moduleId]
+            component: configPayLoad[moduleId]
           };
         }
 
@@ -522,7 +560,7 @@ export default class SingleNodeCompiler {
   /* *** *** *** *** *** *** *** *** *** *** *** *** *** *** */
 
 
-  async loadResource( constructedPath ) {
+  async loadResource( constructedPath, loadDefault = true ) {
 
     const resourceFileImportMethod = this.generateImportMethod( constructedPath );
     
@@ -543,7 +581,7 @@ export default class SingleNodeCompiler {
       return null;
     } 
 
-    return module.default;
+    return loadDefault ? module.default : module;
   }
 
   generateImportMethod(constructedPath) {
@@ -565,6 +603,7 @@ export default class SingleNodeCompiler {
     //console.log( constructedPath );
 
     if (this.executionContext === 'app') {
+      console.log( `../../../morphSrc/${constructedPath} ` );
       return () => import(/* @vite-ignore */ `../../../morphSrc/${constructedPath}`);
     } else {
       return () => import(/* @vite-ignore */`../../dev/ui/${constructedPath}`);

@@ -94,7 +94,23 @@ for (const nodeId of nodeIds) {
     const serializedResources       = serializeValue(nodeResources, 0, moduleIdentifiers);
     const componentExportStatements = componentExports.length > 0 ? '\n\n' + componentExports.join('\n\n'): '';
     const output                    = `${importStatements}const nodeResources = ${serializedResources};\n\nexport default nodeResources;${componentExportStatements}`;
-    const outputPath                = `morphBuildSrc/${configDirSubPath}/${nodeId}.resources.jsx`;
+    
+    let outputPath; 
+
+    let subPath =  appConfig.nodeRegistry[nodeId].configDirSubPath;
+
+    
+
+    if( subPath ) {
+      console.log('A');
+      console.log( 'subpath', subPath  );
+      outputPath = `morphBuildSrc/${subPath}/${nodeId}.resources.jsx`
+    } else {
+      console.log('B');
+      outputPath = `morphBuildSrc/${nodeId}.resources.jsx`
+    }
+
+    //const outputPath                = `morphBuildSrc/${configDirSubPath}/${nodeId}.resources.jsx`;
     
     fs.writeFileSync(outputPath, output, 'utf8');
     
@@ -335,8 +351,11 @@ function createResourceProvider( nodeIds ) {
 
       if (isSingleFile) {
 
-        const customDir = nodeItem?.dir?.replace(/^\//, '');
-        importPath      = customDir ? `./${customDir}/${nodeId}.resources` : `./${nodeId}.resources`;
+        //const customDir = nodeItem?.dir?.replace(/^\//, '');
+        const basePath  = appConfig.nodeRegistry[nodeId].configDirSubPath;
+        console.log( 'YYYYYYY' );
+        console.log( basePath );
+        importPath      = basePath ? `./${basePath}/${nodeId}.resources` : `./${nodeId}.resources`;
 
       } else {
 
