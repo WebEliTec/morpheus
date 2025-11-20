@@ -72,22 +72,9 @@ export default class SingleNodeCompiler {
 
   async loadNodeResources() {
 
-    const configPayload = await this.preLoadConfigFile();
-    const isFile        = this.inheritanceLevel == 'echo' ? this.nodeItem?.isFile : configPayload.default?.isFile;
-
-    if( isFile ) {
-      //console.log( configPayload.default );
-    }
-
-    const nodeResources = isFile ? await this.compileResourcesFromFile( configPayload ) : await this.compileResourcesFromDirectory();
-
-
-    if( this.executionContext == 'app' ) {
-      //console.log( this.nodeId );
-      //console.log( 'this.configDirSubPath' );
-      //console.log( this.configDirSubPath );
-    }
-
+    const configPayload            = await this.preLoadConfigFile();
+    const isFile                   = this.inheritanceLevel == 'echo' ? this.nodeItem?.isFile : configPayload.default?.isFile;
+    const nodeResources            = isFile ? await this.compileResourcesFromFile( configPayload ) : await this.compileResourcesFromDirectory();
     nodeResources.configDirSubPath = this.configDirSubPath;
 
     return nodeResources;
@@ -99,16 +86,10 @@ export default class SingleNodeCompiler {
     let constructedPath;
 
     if( this.nodeDirPath == '/' || this.nodeDirPath == '' ) {
-      console.log('A');
       constructedPath = `${this.nodeId}.config.jsx`;
     } else {
-      console.log('B');
-      console.log( this.nodeDirPath );
       constructedPath = `${this.nodeDirPath}/${this.nodeId}.config.jsx`;
     }
-
-    console.log('Preload!');
-
     
     const configPayload   = await this.loadResource( constructedPath, false );
     return configPayload;
