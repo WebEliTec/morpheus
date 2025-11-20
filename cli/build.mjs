@@ -350,18 +350,13 @@ function createResourceProvider( nodeIds ) {
       let importPath;
 
       if (isSingleFile) {
-
-        //const customDir = nodeItem?.dir?.replace(/^\//, '');
         const basePath  = appConfig.nodeRegistry[nodeId].configDirSubPath;
         console.log( 'YYYYYYY' );
-        console.log( basePath );
-        importPath      = basePath ? `./${basePath}/${nodeId}.resources` : `./${nodeId}.resources`;
-
+        console.log( 'basePath', basePath );
+        importPath      = !!basePath ? `./${basePath}/${nodeId}.resources` : `./${nodeId}.resources`;
       } else {
-
         const basePath = appConfig.nodeRegistry[nodeId].configDirSubPath;
         importPath     = `./${basePath}/${nodeId}.resources`;
-
       }
       
       return `import ${nodeId}Resources from '${importPath}';`;

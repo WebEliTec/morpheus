@@ -106,11 +106,16 @@ export default class SingleNodeCompiler {
 
     let constructedPath;
 
-    if( this.nodeDirPath == '/' ) {
+    if( this.nodeDirPath == '/' || this.nodeDirPath == '' ) {
+      console.log('A');
       constructedPath = `${this.nodeId}.config.jsx`;
     } else {
+      console.log('B');
+      console.log( this.nodeDirPath );
       constructedPath = `${this.nodeDirPath}/${this.nodeId}.config.jsx`;
     }
+
+    console.log('Preload!');
 
     
     const configPayload   = await this.loadResource( constructedPath, false );
