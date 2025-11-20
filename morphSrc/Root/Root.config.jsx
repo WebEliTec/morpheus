@@ -1,3 +1,5 @@
+//import SingularityEngine from "../services/singularityEngine";
+
 const config = {
 
   //parentId: 'SomeApp',
@@ -23,8 +25,10 @@ const config = {
   /* *** *** *** *** *** *** *** *** *** *** *** *** *** *** */
 
   hooks: {
-    kernelDidInitialize: ( kernel ) => {
+    kernelDidInitialize: async ( kernel ) => {
       kernel.coreData.someValue = 'Test';
+      //kernel.singularityEngine  = new SingularityEngine();
+      //await kernel.singularityEngine.init();
     }
   },
 

@@ -1,6 +1,6 @@
 const config = {
 
-  parentId: 'Menu',
+  //parentId: 'MenuDelta',
   
 
   /* Core Data

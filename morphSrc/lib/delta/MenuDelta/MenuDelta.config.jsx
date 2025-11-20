@@ -1,14 +1,16 @@
 const config = {
 
-  base: {
-    traitRoot: '/',
-    moduleRoot: '/',
+  //parentId: 'MenuCharlie',
+
+  defaultPaths: {
+    traits: '/',
+    modules: '/',
   },
 
   signals: {
     someSignalB: {
       type: 'primitive', 
-      default: 'b',
+      default: 'bax',
     } 
   },
 

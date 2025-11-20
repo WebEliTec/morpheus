@@ -1,24 +1,33 @@
 const appConfig = {
 
 	defaultPaths: {
-		nodes:   '/',
+		nodes:   '/nodes',
 		modules: '/',
 		traits:  '/traits',
 	},
 
 	nodeRegistry: {
 
-		Root:     {},
+		Root:     {
+			dir: '/',
+		},
 
-		SideBar:  {},
+		SideMenu: {
+			dir: '/',
+		},
 
-		SideMenu: {},
+		SideBar:  {
+			//dir: '/',
+		},
 
 		Main:     {
 			isFile: true,
+			dir: '/',
 		},
 
-		TestNode: {},
+		TestNode: {
+			dir: '/',
+		},
 
 	},  
 

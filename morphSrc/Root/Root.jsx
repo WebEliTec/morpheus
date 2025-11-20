@@ -1,19 +1,22 @@
 import '../globals.scss';
 
-export default function Root( { _, Node, Module, Router } ) {
+export default function Root( { Kernel, Node, Module, Router } ) {
 
-  _.helloWorld1();
+  Kernel.helloWorld1();
+
+  //console.log( Kernel.singularityEngine.getContentClasses() );
 
   const route = Router.getSegment( 1 );
 
-  //console.log('Rendering Root');
-
   return (
     <> 
+    Root
       <Node id="SideMenu" /> 
+
+
       <Node id="SideBar" />
 
-      {/* <Module id="SomeSharedModule"/>  */}
+      <Module id="SomeSharedModule"/> 
 
       <main>
         { route === 'home'           && <Module id="Home" /> }
@@ -21,7 +24,7 @@ export default function Root( { _, Node, Module, Router } ) {
         { route === 'users'          && <Module id="Users" /> }
       </main>
       
-      <Node id="Main" />
+      <Node id="Main" /> 
                   
     </>
   )

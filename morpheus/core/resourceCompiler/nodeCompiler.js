@@ -41,22 +41,42 @@ export default class NodeCompiler {
     });
 
     const echoNodeResources  = await echoSingleNodeCompiler.loadNodeResources();
-
     const parentIdOfEcho     = echoNodeResources?.parentId;
+
+
+    let parentIdOfDelta;
 
     if( parentIdOfEcho ) {
 
       const deltaSingleNodeCompiler = new SingleNodeCompiler({
         inheritanceLevel: 'delta', 
-        nodeId:           this.nodeId,
-        nodeItem:         this.nodeItem,
+        nodeId:           parentIdOfEcho,
+        //nodeItem:         this.nodeItem,
         executionContext: this.executionContext, 
-        contextConfig:    this.contextConfig,
+        contextConfig:    this.abstractNodeConfig,
         environment:      'client'
       });
 
       const deltaNodeResources  = await deltaSingleNodeCompiler.loadNodeResources();
       console.log( deltaNodeResources );
+      parentIdOfDelta     = deltaNodeResources?.parentId;
+
+    }
+
+    if( parentIdOfDelta ) {
+
+      const charlieSingleNodeCompiler = new SingleNodeCompiler({
+        inheritanceLevel: 'charlie', 
+        nodeId:           parentIdOfDelta,
+        //nodeItem:         this.nodeItem,
+        executionContext: this.executionContext, 
+        contextConfig:    this.abstractNodeConfig,
+        environment:      'client'
+      });
+
+      const charlieNodeResources  = await charlieSingleNodeCompiler.loadNodeResources();
+      console.log(charlieNodeResources);
+      //const parentIdOfCharlie     = charlieNodeResources?.parentId;
 
     }
 

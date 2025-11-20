@@ -18,33 +18,61 @@ export default class SingleNodeCompiler {
 
   }
 
+  /* Set Node Dir Path
+  /* *** *** *** *** *** *** *** *** *** *** *** *** *** *** */
+
   setNodeDirPath() {
 
     if ( this.inheritanceLevel == 'echo' ) {
 
-      this.customNodeDirPath    = this.removeTrailingSlash(this.nodeItem?.dir);
-      this.hasCustomNodeDirPath = this.customNodeDirPath && this.customNodeDirPath != '/';
-      this.nodeDirPath          = this.hasCustomNodeDirPath  ? `${this.customNodeDirPath}/${this.nodeId}` : this.nodeId
-      
+      this.defaultNodeDirPath   = this.removeTrailingSlash( this.contextConfig.defaultPaths.nodes );
+      this.customNodeDirPath    = this.nodeItem?.dir;
+      this.hasCustomNodeDirPath = this.customNodeDirPath != null && this.customNodeDirPath != '/';
+
+      if( this.customNodeDirPath && this.customNodeDirPath == '/' ) {
+        this.nodeDirPath = this.nodeId;
+      } else if( this.customNodeDirPath && this.customNodeDirPath != '/' ) {
+        this.nodeDirPath = `${this.customNodeDirPath}/${this.nodeId}`;
+      } else if( this.defaultNodeDirPath && this.defaultNodeDirPath == '/' ) {
+        this.nodeDirPath = this.nodeId;
+      } else if( this.defaultNodeDirPath && this.defaultNodeDirPath != '/' ) {
+        this.nodeDirPath = `${this.defaultNodeDirPath}/${this.nodeId}`;
+      } else {
+        this.nodeDirPath = '';
+      }
+
     } else {
 
-      const inheritanceLevelIds = ['alpha', 'bravo', 'charile', 'delta' ];
+      const inheritanceLevelIds = [ 'alpha', 'bravo', 'charlie', 'delta' ];
 
       if( inheritanceLevelIds.includes( this.inheritanceLevel ) ) {
-        this.nodeDirPath = 'lib/' + this.inheritanceLevel;
+        this.nodeDirPath = `lib/${this.inheritanceLevel}/${this.nodeId}`
       } else {
         throw new Error('Unknow levelID: ' + this.inheritanceLevel );
       }
 
     }
 
-    console.log( 'this.nodeDirPath', this.nodeDirPath );
+  }
 
+  /* Load Config File
+  /* *** *** *** *** *** *** *** *** *** *** *** *** *** *** */
+
+  async preLoadConfigFile() {
+    const constructedPath = `${this.nodeDirPath}/${this.nodeId}.config.jsx`;
+    const configPayload   = await this.loadResource( constructedPath );
+    return configPayload;
   }
 
   async loadNodeResources() {
 
-    const isFile        = this.nodeItem?.isFile;
+    const configPayload = await this.preLoadConfigFile();
+
+    const isFile        = this.inheritanceLevel == 'echo' ? this.nodeItem?.isFile : configPayload?.isFile;
+
+    //console.log( 'isFile', isFile );
+    console.log(configPayload);
+
     const nodeResources = isFile ? await this.compileResourcesFromFile() : await this.compileResourcesFromDirectory();
 
     nodeResources.subConfigDirPath = this.subConfigDirPath
@@ -53,18 +81,13 @@ export default class SingleNodeCompiler {
 
   }
 
-  /* Load Config File
-  /* *** *** *** *** *** *** *** *** *** *** *** *** *** *** */
-
-  async loadConfigFile() {
-
-  }
-
 
   /* Directory Compilation
   /* *** *** *** *** *** *** *** *** *** *** *** *** *** *** */
 
   async compileResourcesFromDirectory() {
+
+    console.log('compileResourcesFromDirectory');
 
     const availableResources = await this.loadAvailableResources();
 
@@ -290,7 +313,7 @@ export default class SingleNodeCompiler {
         internalPath = `${sharedModuleDirectoryDefaultPath}/${moduleId}`;
       } else if( hasIndividualModulePath ) {
         internalPath = `${individualModulePath}/${moduleId}`; 
-      } else if ( isIndividualModulePathOnRootLevel ) {
+      } else if( isIndividualModulePathOnRootLevel ) {
         internalPath = `${moduleId}`;
       } else if( hasNodeSpecificDefaultModuleDirPath ) {
         internalPath = `${nodeSpecificDefaultModuleDirPath}/${moduleId}`;
@@ -345,7 +368,7 @@ export default class SingleNodeCompiler {
 
   async compileResourcesFromFile() {
       
-    const configFileName    = this.nodeItem?.configFileName ?`${this.nodeItem.configFileName}.config.jsx` : `${this.nodeId}.config.jsx`;
+    const configFileName    = this.nodeItem?.configFileName ? `${this.nodeItem.configFileName}.config.jsx` : `${this.nodeId}.config.jsx`;
     let constructedPath;
 
     if ( !this.customNodeDirPath || this.customNodeDirPath == '/' ) {

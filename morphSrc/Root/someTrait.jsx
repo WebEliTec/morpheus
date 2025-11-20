@@ -1,6 +1,6 @@
 const someTrait = {
   helloWorld1() {
-    console.log('Hello World! xxxxx');
+    //console.log('Hello World!');
   }
 }
 
