@@ -1,0 +1,1 @@
+# Enable case if no defaultPath for Node is defined;

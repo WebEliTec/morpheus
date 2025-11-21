@@ -1,7 +1,7 @@
 const appConfig = {
 
 	defaultPaths: {
-		nodes:   '/nodes',
+		//nodes:   '/nodes',
 		modules: '/',
 		traits:  '/traits',
 	},
@@ -14,7 +14,7 @@ const appConfig = {
 
 
 		SideMenu: {
-			//dir: '/',
+			dir: '/',
 		},
 
 		SideBar:  {
@@ -24,7 +24,7 @@ const appConfig = {
 
 		Main:     {
 			isFile: true,
-			//dir: '/',
+			dir: '/nodes',
 		},
 
 		TestNode: {
