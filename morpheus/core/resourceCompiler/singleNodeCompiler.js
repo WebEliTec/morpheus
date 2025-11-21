@@ -231,14 +231,16 @@ export default class SingleNodeCompiler {
 
     let traitDirPath;
 
-    if( nodeSpecificTraitDirPath && nodeSpecificTraitDirPath != '/' ) {
+    if( nodeSpecificTraitDirPath == '/' ) {
+      traitDirPath = this.nodeDirPath;
+    } else if( nodeSpecificTraitDirPath != '/' && nodeSpecificTraitDirPath ) {
       traitDirPath = `${this.nodeDirPath}/${nodeSpecificTraitDirPath}`;
-    } else if( nodeSpecificTraitDirPath == '/' ) {
-      traitDirPath = `${this.nodeDirPath}`;
-    } else if( defaultTraitDirPath && defaultTraitDirPath != '/' ) {
+    } else if( defaultTraitDirPath == '/' ) {
+      traitDirPath = this.nodeDirPath;
+    } else if( defaultTraitDirPath != '/' && defaultTraitDirPath ) {
       traitDirPath = `${this.nodeDirPath}/${defaultTraitDirPath}`;
     } else {
-      traitDirPath = `${this.customNodeDirPath}/${this.nodeId}`;
+      traitDirPath = this.nodeId;
     }
 
     for (const traitId of traitIds) {

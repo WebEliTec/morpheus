@@ -2,8 +2,8 @@ const appConfig = {
 
 	defaultPaths: {
 		//nodes:   '/nodes',
-		modules: '/',
-		traits:  '/traits',
+		modules: '/modules',
+		//traits:  '/traits',
 	},
 
 	nodeRegistry: {

@@ -9,7 +9,7 @@ const config = {
 
 	defaultPaths: {
 		modules: '/modules',
-		traits:  '/',
+		//traits:  '/',
 	},
 
 
