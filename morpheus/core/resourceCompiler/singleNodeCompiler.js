@@ -101,15 +101,13 @@ export default class SingleNodeCompiler {
 
   async compileResourcesFromDirectory( configPayload ) {
 
-    //console.log('compileResourcesFromDirectory');
-
     const availableResources = await this.loadAvailableResources();
 
-    const selectedResources  = this.selectResources( availableResources );
+    const selectedResources  = this.selectResources( availableResources, configPayload.default );
 
-    const traits             = await this.loadTraits( availableResources );
+    const traits             = await this.loadTraits( availableResources, configPayload.default );
 
-    const moduleRegistry     = await this.loadModules( selectedResources?.moduleRegistry, availableResources.config );
+    const moduleRegistry     = await this.loadModules( selectedResources?.moduleRegistry, configPayload.default );
 
     const rootModuleId       = this.getRootModuleId( selectedResources.config, moduleRegistry );
 
@@ -147,9 +145,6 @@ export default class SingleNodeCompiler {
 
       const constructedPath = isConfig ? `${this.nodeDirPath}/${this.nodeId}.config.jsx` : `${this.nodeDirPath}/${resourceFileLocation}`;
 
-
-
-      
       const result          = await this.loadResource( constructedPath );
 
       if( result ) {
@@ -164,22 +159,25 @@ export default class SingleNodeCompiler {
 
   }
 
-  selectResources( availableResources ) {
+  selectResources( availableResources, configPayLoad ) {
+
+    
 
     const selectedResources = {};
+
+    selectedResources.config = configPayLoad;
 
     for (const [ resourceName, resourceFileLocation ] of Object.entries( this.resourceRegistry.resourceTypes ) ) {
 
       if( resourceName == 'config' ) {
-        selectedResources.config = availableResources.config;
         continue;
       }
 
       selectedResources[ resourceName ] = {};
 
-      const configPayload = availableResources.config?.[resourceName];
-      const filePayload   = availableResources?.[resourceName];
-      const payload       = configPayload ?? filePayload;
+      const configResourcePayload       = availableResources.config?.[resourceName];
+      const filePayload                 = availableResources?.[resourceName];
+      const payload                     = configResourcePayload ?? filePayload;
 
       if ( resourceName === 'signalClusters' && payload?.signals ) {
         delete payload.signals;
@@ -202,9 +200,12 @@ export default class SingleNodeCompiler {
   /* Traits
   /* *** *** *** *** *** *** *** *** *** *** *** *** *** *** */
 
-  async loadTraits( availableResources ) {
+  async loadTraits( availableResources, configPayLoad ) {
 
     const config = availableResources.config;
+
+    console.log( config );
+    console.log( configPayLoad );
     
     //console.log(config);
 
@@ -280,7 +281,7 @@ export default class SingleNodeCompiler {
   /* Module Loading
   /* *** *** *** *** *** *** *** *** *** *** *** *** *** *** */
 
-  async loadModules( moduleRegistry, config ) {
+  async loadModules( moduleRegistry, configPayload ) {
 
     if( !moduleRegistry ) {
       return;
@@ -291,7 +292,7 @@ export default class SingleNodeCompiler {
     const defaultModuleDirPath                          = this.removeTrailingSlash( this.contextConfig.defaultPaths.modules );
     const hasDefaultModuleDirPath                       = defaultModuleDirPath && defaultModuleDirPath != '/';
 
-    const nodeSpecificDefaultModuleDirPath              = this.removeTrailingSlash( config?.defaultPaths?.modules );
+    const nodeSpecificDefaultModuleDirPath              = this.removeTrailingSlash( configPayload?.defaultPaths?.modules );
     const hasNodeSpecificDefaultModuleDirPath           = nodeSpecificDefaultModuleDirPath && nodeSpecificDefaultModuleDirPath != '/';
     const isNodeSpecificDefaultModuleDirPathOnRootLevel = nodeSpecificDefaultModuleDirPath == '/';
     
