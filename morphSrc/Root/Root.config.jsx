@@ -17,9 +17,10 @@ const config = {
   /* *** *** *** *** *** *** *** *** *** *** *** *** *** *** */
 
 
+  /*
   coreData: {
     someData: true,
-  },
+  },*/
 
   /* Hooks
   /* *** *** *** *** *** *** *** *** *** *** *** *** *** *** */
@@ -27,8 +28,6 @@ const config = {
   hooks: {
     kernelDidInitialize: async ( kernel ) => {
       kernel.coreData.someValue = 'Test';
-      //kernel.singularityEngine  = new SingularityEngine();
-      //await kernel.singularityEngine.init();
     }
   },
 

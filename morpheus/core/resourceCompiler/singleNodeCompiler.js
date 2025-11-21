@@ -48,8 +48,10 @@ export default class SingleNodeCompiler {
       } else if( !isFile && this.defaultNodeDirPath && this.defaultNodeDirPath != '/' ) {
         this.nodeDirPath = this.removeTrailingSlash ( `${this.defaultNodeDirPath}/${this.nodeId}` );
       } else {
-        this.nodeDirPath = '';
+        this.nodeDirPath = this.nodeId;
       }
+
+      console.log( 'this.nodeDirPath', this.nodeDirPath );
 
     } else {
 
@@ -101,7 +103,7 @@ export default class SingleNodeCompiler {
 
   async compileResourcesFromDirectory( configPayload ) {
 
-    const availableResources = await this.loadAvailableResources();
+    const availableResources = await this.loadAvailableResources( configPayload.default );
 
     const selectedResources  = this.selectResources( availableResources, configPayload.default );
 
@@ -109,7 +111,7 @@ export default class SingleNodeCompiler {
 
     const moduleRegistry     = await this.loadModules( selectedResources?.moduleRegistry, configPayload.default );
 
-    const rootModuleId       = this.getRootModuleId( selectedResources.config, moduleRegistry );
+    const rootModuleId       = this.getRootModuleId( configPayload.default, moduleRegistry );
 
     const nodeResources      = {
 
@@ -127,6 +129,8 @@ export default class SingleNodeCompiler {
 
     }
 
+    console.log( nodeResources );
+
 
     return nodeResources;
 
@@ -135,23 +139,24 @@ export default class SingleNodeCompiler {
   /* Static Files
   /* *** *** *** *** *** *** *** *** *** *** *** *** *** *** */
 
-  async loadAvailableResources() {
+  async loadAvailableResources( configPayload ) {
 
-    const availableResources = {};
+    const availableResources  = {};
+    availableResources.config = configPayload;
     
     for (const [resourceName, resourceFileLocation] of Object.entries(this.resourceRegistry.resourceTypes)) {
-      
-      const isConfig        = resourceName === 'config';
 
-      const constructedPath = isConfig ? `${this.nodeDirPath}/${this.nodeId}.config.jsx` : `${this.nodeDirPath}/${resourceFileLocation}`;
+      if( resourceName === 'config' ) {
+        continue;
+      }
 
-      const result          = await this.loadResource( constructedPath );
+      const constructedPath = `${this.nodeDirPath}/${resourceFileLocation}`;
+
+      const result          = await this.loadResource( constructedPath ); 
 
       if( result ) {
         availableResources[resourceName] = result;
       }
-
-      continue;
 
     }
 
@@ -160,8 +165,6 @@ export default class SingleNodeCompiler {
   }
 
   selectResources( availableResources, configPayLoad ) {
-
-    
 
     const selectedResources = {};
 
@@ -202,16 +205,8 @@ export default class SingleNodeCompiler {
 
   async loadTraits( availableResources, configPayLoad ) {
 
-    const config = availableResources.config;
+    const config = configPayLoad;
 
-    console.log( config );
-    console.log( configPayLoad );
-    
-    //console.log(config);
-
-    //If config has no kernelIds specified in 'traits', check if a kernel is present. 
-    //If so, add it as trait.
-    
     if (!config?.traits || config.traits.length === 0) {
 
       const traitImplementations = {};
@@ -384,45 +379,6 @@ export default class SingleNodeCompiler {
   /* *** *** *** *** *** *** *** *** *** *** *** *** *** *** */
 
   async compileResourcesFromFile( configPayLoad ) {
-      
-    /*
-    const configFileName    = this.nodeItem?.configFileName ? `${this.nodeItem.configFileName}.config.jsx` : `${this.nodeId}.config.jsx`;
-    let constructedPath;
-
-    
-    if ( this.configDirSubPath ) {
-      constructedPath       = `${this.configDirSubPath}/${configFileName}`;
-      this.configDirSubPath = `${this.configDirSubPath}/${configFileName}`;;
-    } else {
-      constructedPath       = `${configFileName}`;
-      this.configDirSubPath = `${configFileName}`;
-    } */
-
-    
-    
-    /*
-    const importMethod = this.generateImportMethod( constructedPath );
-
-    let module;
-
-    try {
-      module = await importMethod();
-    } catch (error) {
-      //console.log( error );
-      return;
-    }
-
-    const moduleValidation = this.validateModuleExports( module );
-
-    if ( moduleValidation.hasNamedExportsButNoDefaultExport || moduleValidation.hasNoMeaningfulDefaultExport ) {
-      return;
-    } */
-
-    //const config = module.default;
-
-    //const config = this.loadResource( constructedPath, false );
-
-    //console.log( config );
 
     const config = configPayLoad.default;
 
