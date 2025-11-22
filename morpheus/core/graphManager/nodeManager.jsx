@@ -15,14 +15,14 @@ const ParentKernelContext = createContext(null);
 export default class NodeManager {
 
 
-  constructor( { executionContext, contextConfig, abstractNodeConfig, app, onNodeMount, onNodeUnmount, mayCreateNode } ) {
+  constructor( { executionContext, contextConfig, abstractNodeConfig, app, notifyGraphOnNodeMount, onNodeUnmount, mayCreateNode } ) {
 
     this.executionContext   = executionContext;
     this.contextConfig      = contextConfig;
     this.abstractNodeConfig = abstractNodeConfig;
     this.app                = app;
     this.nodeRegistry       = this.contextConfig.nodeRegistry;
-    this.onNodeMount        = onNodeMount;    
+    this.notifyGraphOnNodeMount        = notifyGraphOnNodeMount;    
     this.onNodeUnmount      = onNodeUnmount;
     this.mayCreateNode      = mayCreateNode;
 
@@ -65,7 +65,7 @@ export default class NodeManager {
 
   async createNode( nodeId, instanceId, ...props ) {
 
-    const nodeProps     = props[0] || {};
+    const nodeProps = props[0] || {};
 
     let nodeResources;
 
@@ -92,14 +92,8 @@ export default class NodeManager {
           executionContext: this.executionContext, 
           contextConfig: this.contextConfig,
           abstractNodeConfig: this.abstractNodeConfig,
-        }
-          
-          
-          
-          //this.nodeRegistry, nodeId, this.executionContext, this.contextConfig, this.abstractNodeConfig 
-        
-        
-        );
+        });
+
         nodeResources  = await compiler.exec();
 
       } catch (error) {
@@ -112,15 +106,14 @@ export default class NodeManager {
     }
 
     const { traits }          = nodeResources;
+
     nodeResources.KernelClass = this.createKernelClass(traits);
+
     const app                 = this.app;
     const kernel              = this.initializeKernel( nodeId, instanceId, nodeProps, nodeResources, app  );
 
-
-    //Sync Mode: Don't run this hook.
     await this.callHook( 'kernelDidInitialize', nodeResources, kernel );
 
-    /// Stays the same in sync and async mode
     const NodeProvider        = this.createNodeProvider( kernel, nodeResources );
     const Module              = this.createModule( kernel, nodeResources.moduleRegistry );
     const NodeComponent       = this.createNodeComponent( nodeResources, NodeProvider, Module, kernel );
@@ -178,9 +171,6 @@ export default class NodeManager {
       return;
     }
     
-    //console.log(`[NodeManager] Cleaning up kernel for ${kernel.nodeId} (${kernel.instanceId})`);
-    
-    // Call onDestroy hook if defined in traits (before clearing references)
     if (typeof kernel.onDestroy === 'function') {
       try {
         kernel.onDestroy();
@@ -189,7 +179,6 @@ export default class NodeManager {
       }
     }
     
-    // Clear all kernel references to allow garbage collection
     kernel.signals           = null;
     kernel.optimisticSignals = null;
     kernel.constants         = null;
@@ -199,8 +188,7 @@ export default class NodeManager {
     kernel.nodeId            = null;
     kernel.instanceId        = null;
     kernel.fullyQualifiedId  = null;
-    
-    //console.log(`[NodeManager] Kernel cleanup complete`);
+  
   }
 
   /* Component Factories
@@ -218,11 +206,14 @@ export default class NodeManager {
     }
 
     const signalDefinitions = [];
+
+    if( signalClusters ) {
       Object.keys(signalClusters).forEach((signalClusterId) => {
         Object.entries(signalClusters[signalClusterId].signals).forEach(([signalId, signalDef]) => {
           signalDefinitions.push({ signalId, ...signalDef });
         });
-    });
+      });
+    }
 
     const callHook = this.callHook.bind(this); 
     
@@ -298,8 +289,6 @@ export default class NodeManager {
     const App             = this.app;
 
     return function Module( { id, proxyId, children = null, ...props } ) {
-
-      //console.log( 'Calculate Module ' + id)
 
       /* General
       /* *** *** *** *** *** *** *** *** *** *** *** *** *** *** */
@@ -379,7 +368,6 @@ export default class NodeManager {
 
       const memoizedComponent = useMemo(() => {
 
-        //console.log( '✅ Rerendering ' +  moduleId);
         return Component ? 
         <Component 
 
@@ -421,7 +409,7 @@ export default class NodeManager {
     const { nodeId, nodeProps } = kernel
 
     const rootModuleId  = nodeResources.rootModuleId;
-    const onNodeMount   = this.onNodeMount; 
+    const notifyGraphOnNodeMount   = this.notifyGraphOnNodeMount; 
     const onNodeUnmount = this.onNodeUnmount;
     const destroyKernel = this.destroyKernel.bind(this);
     const callHook      = this.callHook.bind(this);  
@@ -430,15 +418,13 @@ export default class NodeManager {
 
     useEffect(() => {
       // Notify GraphManager
-      onNodeMount(kernel);
+      notifyGraphOnNodeMount(kernel);
       
-      // ✅ Call nodeDidMount hook
       (async () => {
         await callHook('nodeDidMount', nodeResources, kernel);
       })();
       
       return () => {
-        // ✅ Call unmount hooks
         (async () => {
           await callHook('nodeWillUnmount', nodeResources, kernel);
           

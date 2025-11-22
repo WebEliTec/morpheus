@@ -32,7 +32,7 @@ export default class SingleNodeCompiler {
       this.hasCustomNodeDirPath = this.customNodeDirPath != null && this.customNodeDirPath != '/';
       const isFile              = this.nodeItem?.isFile;
 
-      if( isFile && this.customNodeDirPath && this.customNodeDirPath == '/'  ) {
+      if( isFile && this.customNodeDirPath && this.customNodeDirPath == '/' ) {
         this.nodeDirPath = '';
       } else if( isFile && this.customNodeDirPath && this.customNodeDirPath != '/' ) {
         this.nodeDirPath = this.removeTrailingSlash ( this.customNodeDirPath );
@@ -578,7 +578,7 @@ export default class SingleNodeCompiler {
   }
 
   getRootModuleId( config, moduleRegistry ) {
-    
+
     let rootModuleId = config?.rootModuleId || config?.rootModule || config?.root;
 
     if( rootModuleId ) {

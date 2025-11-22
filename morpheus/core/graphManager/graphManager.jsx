@@ -11,7 +11,7 @@ export default class GraphManager {
     
     this.nodeManager  = new NodeManager({
       app:                this.app,
-      onNodeMount:        this.onNodeMount.bind(this),  
+      notifyGraphOnNodeMount: this.notifyGraphOnNodeMount.bind(this),  
       onNodeUnmount:      this.onNodeUnmount.bind(this), 
       mayCreateNode:      this.mayCreateNode.bind(this), 
       contextConfig:      this.contextConfig,
@@ -38,7 +38,7 @@ export default class GraphManager {
     }
   }
   
-  onNodeMount(kernel) {
+  notifyGraphOnNodeMount(kernel) {
 
     const { id: fullyQualifiedId } = kernel;
     const parentId                 = kernel.props?.parentId;

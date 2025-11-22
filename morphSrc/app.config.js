@@ -1,9 +1,7 @@
 const appConfig = {
 
 	nodeRegistry: {
-		Root: {
-			dir: '/'
-		},
+		Root: {},
 	},  
 
 }

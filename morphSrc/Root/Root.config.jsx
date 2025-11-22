@@ -20,7 +20,7 @@ const config = {
 
   },
 
-  signals: {
+  signalss: {
     someSignal: {
       type: 'primitive', 
       default: 'a'
