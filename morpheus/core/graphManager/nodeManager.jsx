@@ -199,7 +199,7 @@ export default class NodeManager {
 
     //If No Signal is defined, create one, so the rest of the code keeps running
     if( !signalClusters ) {
-      console.warn(`You need to define at least one signal or signal cluster within node "${kernel.nodeId}"`);
+      console.warn(`No signal or signalCluster provided for node '${kernel.nodeId}'`);
     }
 
     const signalDefinitions = [];

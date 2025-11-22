@@ -4,14 +4,6 @@ const config = {
 
   traits: ['someTrait'],
 
-  kernel: {
-    
-    logSingularityEngine() {
-      console.log( 'this.singularityEngine' );
-    },
-
-  },
-
   moduleRegistry: {
 
     Root: {

@@ -361,7 +361,7 @@ export default class SingleNodeCompiler {
         const result = await this.loadResource( constructedPath );
 
         if( !result ) {
-          console.warn(`Module '${moduleId}' of node '${this.nodeId}' not found in '${ this.getAbsPath( constructedPath ) }'.`);
+          console.warn(`Module '${moduleId}' of node '${this.nodeId}' not found in '${ this.getAbsPath( constructedPath ) }'. This will cause an error at morpheus buildtime.`);
           continue;
         }
 
