@@ -6,15 +6,16 @@ export default class SingleNodeCompiler {
 
   constructor( { inheritanceLevel, nodeId, nodeItem, executionContext, contextConfig, environment } ) {
     
-    this.appSrcFolderName       = 'morphSrc';
-    this.devSrcFolderName       = 'dev/ui';
-    this.inheritanceLevel       = inheritanceLevel;
-    this.nodeId                 = nodeId;
-    this.nodeItem               = nodeItem
-    this.executionContext       = executionContext;
-    this.executionContextConfig = contextConfig;
-    this.resourceRegistry       = resourceRegistry.singleNode;
-    this.environment            = environment;
+    this.appSrcFolderName           = 'morphSrc';
+    this.devSrcFolderName           = 'dev/ui';
+    this.inheritanceLevel           = inheritanceLevel;
+    this.nodeId                     = nodeId;
+    this.nodeItem                   = nodeItem
+    this.executionContext           = executionContext;
+    this.executionContextConfig     = contextConfig;
+    this.resourceRegistry           = resourceRegistry.singleNode;
+    this.environment                = environment;
+    this.executionContextFolderName = this.executionContext == 'app' ? this.appSrcFolderName : this.devSrcFolderName;
 
     this.setNodeDirPath();
 
@@ -106,6 +107,11 @@ export default class SingleNodeCompiler {
     const selectedResources  = this.selectResources( availableResources, configPayload.default );
     const traits             = await this.loadTraits( availableResources, configPayload.default );
     const moduleRegistry     = await this.loadModules( selectedResources?.moduleRegistry, configPayload.default );
+    
+    if( !moduleRegistry ) {
+      console.warn( `moduleRegistry is empty for node '${this.nodeId}'` );
+    }
+
     const rootModuleId       = this.getRootModuleId( configPayload.default, moduleRegistry );
 
     const nodeResources      = {
@@ -273,9 +279,9 @@ export default class SingleNodeCompiler {
   async loadModules( moduleRegistry, configPayload ) {
 
     if( !moduleRegistry ) {
+      console.warn( `No moduleRegistry passed to singleNodeCompiler.loadModules() while compiling node '${this.nodeId}'` )
       return;
     }
-
 
     const initializedModuleRegistry                     = {};
 
@@ -355,11 +361,13 @@ export default class SingleNodeCompiler {
         const result = await this.loadResource( constructedPath );
 
         if( !result ) {
-          return null;
+          console.warn(`Module '${moduleId}' of node '${this.nodeId}' not found in '${ this.getAbsPath( constructedPath ) }'.`);
+          continue;
         }
 
-        initializedModuleRegistry[moduleId].component = result;
-        initializedModuleRegistry[moduleId].path      = constructedPath;
+        initializedModuleRegistry[moduleId].component    = result;
+        initializedModuleRegistry[moduleId].path         = constructedPath;
+        initializedModuleRegistry[moduleId].internalPath = internalPath;
 
       }
 
@@ -375,11 +383,9 @@ export default class SingleNodeCompiler {
 
   async compileResourcesFromFile( configPayLoad ) {
 
-    const config = configPayLoad.default;
-
+    const config                    = configPayLoad.default;
 
     const initializedModuleRegistry = {};
-
     
     if ( config?.moduleRegistry ) {
 
@@ -498,20 +504,18 @@ export default class SingleNodeCompiler {
 
     const resourceFileImportMethod = this.generateImportMethod( constructedPath );
     
-    //console.log( 'constructedPath ' + constructedPath );
     let module;
 
     try {
       module = await resourceFileImportMethod();
     } catch (error) {
-      //console.log( error );
       return null;
     }
 
     const moduleValidation = this.validateModuleExports( module );
 
     if ( moduleValidation.hasNamedExportsButNoDefaultExport || moduleValidation.hasNoMeaningfulDefaultExport ) {
-      console.log( 'Resource has no valid export.' );
+      console.warn( `Resource has no valid export in '${constructedPath}'` );
       return null;
     } 
 
@@ -533,10 +537,7 @@ export default class SingleNodeCompiler {
       }
     }
     
-    //console.log( constructedPath );
-
     if (this.executionContext === 'app') {
-      //console.log( `../../../morphSrc/${constructedPath} ` );
       return () => import(/* @vite-ignore */ `../../../${this.appSrcFolderName}/${constructedPath}`);
     } else {
       return () => import(/* @vite-ignore */`../../${this.devSrcFolderName}/${constructedPath}`);
@@ -602,6 +603,10 @@ export default class SingleNodeCompiler {
 
     return rootModuleId ?? 'Root';
 
+  }
+
+  getAbsPath( constructedPath ) {
+    return `${this.executionContextFolderName}/${constructedPath}`;
   }
 
 }

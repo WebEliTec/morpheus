@@ -18,13 +18,8 @@ const config = {
       signals: [],
     },
 
-  },
+    ElementEcho: {}
 
-  signals: {
-    someSignal: {
-      type: 'primitive', 
-      default: 'a'
-    }
   },
   
 }

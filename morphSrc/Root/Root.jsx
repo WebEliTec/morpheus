@@ -4,7 +4,8 @@ export default function Root( { Kernel, Node, Module, Router } ) {
 
   return (
     <> 
-      Root             
+      <h1>Root Element</h1>
+      <Node id="NodeEcho" />          
     </>
   )
 }

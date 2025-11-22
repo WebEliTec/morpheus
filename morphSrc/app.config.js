@@ -2,6 +2,7 @@ const appConfig = {
 
 	nodeRegistry: {
 		Root: {},
+		NodeEcho: {},
 	},  
 
 }
