@@ -1,0 +1,200 @@
+@use "tailwindcss";
+
+$side-bar-width: 300px;
+$primary: #008a90;
+$primary-darker: #0e6e9e;
+$secondary: #a5f9fc;
+$secondary-darker: #005c5f;
+$secondary-darkest: #031b27;
+
+body {
+    padding-right: $side-bar-width;
+}
+
+#root {
+    width: 100vw;
+    height: 100vh;
+}
+
+#side-bar {
+
+    padding: 1rem;
+    position: fixed;
+    right: 0;
+    top: 0;
+    width: $side-bar-width;
+    height: 100vh;
+    background: linear-gradient(135deg, #000803e6 60%, #001a00e5 120%);
+    border-left: 1px solid $secondary-darkest;
+
+    h1 {
+        text-align: left;
+        color: #a5f9fc;
+        text-transform: uppercase;
+        position: relative;
+        font-size: 1rem;
+        margin-left: .5rem;
+        mask-image: linear-gradient(90deg, #04040489, #000 40%, #690606c8);
+        max-width: 162px;
+    }
+
+}
+
+.morph-button {
+
+    position: relative;
+    cursor: pointer;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    border-right: 1px solid #031b27;
+    background-color: #000c15;
+    color: $primary;
+    font-size: .6125rem;
+    font-weight: 500;
+    text-transform: uppercase;
+    border: 1px solid $primary-darker;
+    padding: .5rem .25rem;
+    width: 100%;
+    max-width: 600px;
+
+}
+
+.test-node {
+    padding: 1rem; 
+    backdrop-filter: blur(3px);
+}
+
+
+.logo-wrapper {
+    padding: 0.5rem 1rem;
+    display: inline-flex;
+    align-items: center;
+    font-size: 16px;
+    font-weight: 300;
+}
+
+.logo-wrapper img {
+    width: 36px;
+    height: auto;
+    margin-right: 1rem;
+    animation: spin-logo 40s linear infinite;
+    filter: drop-shadow(0px 0px 10px rgba(173, 216, 230, 0.8)) drop-shadow(0px 0px 20px rgba(138, 43, 226, 0.6)) drop-shadow(0px 0px 30px rgba(75, 0, 130, 0.5));
+}
+
+@keyframes spin-logo {
+    0% {
+        transform: rotate(0deg);
+    }
+    100% {
+        transform: rotate(360deg);
+    }
+}
+
+
+.counter-wrapper  {
+    display: flex;
+    justify-content: space-between;
+    padding: 0 !important;
+}
+
+
+#morph-footer {
+    background-color: #560000;
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    width: 100vw;
+    height: 4rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.counter-wrapper {
+
+    align-items: center;
+    
+    button {
+        background-color: black;
+        cursor: pointer;
+        padding: 1rem;
+    }
+
+    button:first-child {
+        border-right: 1px solid $secondary-darkest;
+    }
+
+    button:last-child {
+        border-left: 1px solid $secondary-darkest;
+    }
+}
+
+.toggler button {
+    padding: 1rem;
+    font-size: .875rem;
+}
+
+/* Components
+/* *** *** *** *** *** *** *** *** *** *** *** *** *** *** */
+
+.morph-menu {
+
+    /*
+    .morph-menu-overlay {
+        z-index: 10;
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100vw;
+        height: 100vh;
+        background: rgba(0, 8, 3, 0.7803921569) !important;
+        -webkit-backdrop-filter: blur(3px);
+        backdrop-filter: blur(3px);
+    }*/
+
+    .morph-menu-inner {
+        /*
+        z-index: 1000;
+        position: fixed;
+        top: 0; 
+        left: 0;*/
+        width: 100%;
+        //height: 100vh;
+        border: 1px solid #031b27;
+        background-color: rgba(0, 12, 21, 0.3803921569);
+        border-bottom: 1px solid $secondary-darkest;
+        display: flex;
+        justify-content: start;
+        align-items: center;
+
+        .morph-menu-item {
+            color: $secondary-darker;
+            font-size: .875rem;
+            padding: .75rem;
+            cursor: pointer;
+
+            &:hover {
+                color: $secondary;
+            }
+
+            &.active {
+                color: $secondary;
+            }
+        }
+    }
+}
+
+
+/* Utilities
+/* *** *** *** *** *** *** *** *** *** *** *** *** *** *** */
+
+.heading-gamma {
+    font-size: .875rem;
+    color: #a5f9fc;
+}
+
+.morph-box {
+    border: 1px solid #031b27;
+    border-radius: .25rem;
+}

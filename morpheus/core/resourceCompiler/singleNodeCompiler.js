@@ -27,7 +27,7 @@ export default class SingleNodeCompiler {
 
     if ( this.inheritanceLevel == 'echo' ) {
 
-      this.defaultNodeDirPath   = this.removeTrailingSlash( this.executionContextConfig.defaultPaths.nodes );
+      this.defaultNodeDirPath   = this.removeTrailingSlash( this.executionContextConfig?.defaultPaths?.nodes );
       this.customNodeDirPath    = this.nodeItem?.dir;
       this.hasCustomNodeDirPath = this.customNodeDirPath != null && this.customNodeDirPath != '/';
       const isFile              = this.nodeItem?.isFile;
@@ -105,7 +105,6 @@ export default class SingleNodeCompiler {
     const availableResources = await this.loadAvailableResources( configPayload.default );
     const selectedResources  = this.selectResources( availableResources, configPayload.default );
     const traits             = await this.loadTraits( availableResources, configPayload.default );
-    console.log( availableResources );
     const moduleRegistry     = await this.loadModules( selectedResources?.moduleRegistry, configPayload.default );
     const rootModuleId       = this.getRootModuleId( configPayload.default, moduleRegistry );
 
@@ -215,7 +214,7 @@ export default class SingleNodeCompiler {
     }
 
     const configTraitImplementations = config?.traitImplementations;
-    const defaultTraitDirPath        = this.removeTrailingSlash( this.executionContextConfig.defaultPaths.traits );
+    const defaultTraitDirPath        = this.removeTrailingSlash( this.executionContextConfig?.defaultPaths?.traits );
     const nodeSpecificTraitDirPath   = this.removeTrailingSlash( config?.defaultPaths?.traits );
 
     const traitIds                   = config.traits;
@@ -273,16 +272,14 @@ export default class SingleNodeCompiler {
 
   async loadModules( moduleRegistry, configPayload ) {
 
-
-    
-
     if( !moduleRegistry ) {
       return;
     }
 
+
     const initializedModuleRegistry                     = {};
 
-    const defaultModuleDirPath                          = this.removeTrailingSlash( this.executionContextConfig.defaultPaths.modules );
+    const defaultModuleDirPath                          = this.removeTrailingSlash( this.executionContextConfig?.defaultPaths?.modules );
     const hasDefaultModuleDirPath                       = defaultModuleDirPath && defaultModuleDirPath != '/';
 
     const nodeSpecificDefaultModuleDirPath              = this.removeTrailingSlash( configPayload?.defaultPaths?.modules );
@@ -581,10 +578,7 @@ export default class SingleNodeCompiler {
   }
 
   getRootModuleId( config, moduleRegistry ) {
-
-    console.log( this.nodeId );
-    console.log( moduleRegistry );
-
+    
     let rootModuleId = config?.rootModuleId || config?.rootModule || config?.root;
 
     if( rootModuleId ) {
