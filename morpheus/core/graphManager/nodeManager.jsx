@@ -84,10 +84,10 @@ export default class NodeManager {
       try {
 
         const compiler = new NodeCompiler({
-          nodeRegistry: this.nodeRegistry, 
+          nodeRegistry:       this.nodeRegistry, 
           nodeId, 
-          executionContext: this.executionContext, 
-          contextConfig: this.contextConfig,
+          executionContext:   this.executionContext, 
+          contextConfig:      this.contextConfig,
           abstractNodeConfig: this.abstractNodeConfig,
         });
 
