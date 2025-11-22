@@ -1,17 +1,15 @@
 const config = {
 
-  base: {
-    traitRoot: '/',
-    moduleRoot: '/',
+  defaultPaths: {
+    traits: '/',
+    modules: '/',
   },
 
   signals: {
     
     counter: {
-
-    type: 'primitive', 
+      type: 'primitive', 
       default: 1,
-
     },
 
     showInnerElement: {
@@ -62,14 +60,12 @@ const config = {
       signals: ['showInnerElement']
     },
 
-    Counter: {
-      signals: ['counter']
-    },
-
     AnotherModule: {
       routes:  true,
       signals: []
     },
+
+    //TestNode: {},
 
     InnerElement: {},
 

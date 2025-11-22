@@ -9,7 +9,7 @@ const appConfig = {
 	nodeRegistry: {
 
 		Root:     {
-			//dir: '/',
+			dir: '/',
 		},
 
 
@@ -28,7 +28,7 @@ const appConfig = {
 		},
 
 		TestNode: {
-			dir: '/',
+		 	dir: '/',
 		},
 
 	},  

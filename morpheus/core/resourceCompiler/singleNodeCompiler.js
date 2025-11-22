@@ -6,13 +6,13 @@ export default class SingleNodeCompiler {
 
   constructor( { inheritanceLevel, nodeId, nodeItem, executionContext, contextConfig, environment } ) {
     
-    this.inheritanceLevel = inheritanceLevel;
-    this.nodeId           = nodeId;
-    this.nodeItem         = nodeItem
-    this.executionContext = executionContext;
-    this.contextConfig    = contextConfig;
-    this.resourceRegistry = resourceRegistry.singleNode;
-    this.environment      = environment;
+    this.inheritanceLevel       = inheritanceLevel;
+    this.nodeId                 = nodeId;
+    this.nodeItem               = nodeItem
+    this.executionContext       = executionContext;
+    this.executionContextConfig = contextConfig;
+    this.resourceRegistry       = resourceRegistry.singleNode;
+    this.environment            = environment;
 
     this.setNodeDirPath();
 
@@ -25,10 +25,9 @@ export default class SingleNodeCompiler {
 
     if ( this.inheritanceLevel == 'echo' ) {
 
-      this.defaultNodeDirPath   = this.removeTrailingSlash( this.contextConfig.defaultPaths.nodes );
+      this.defaultNodeDirPath   = this.removeTrailingSlash( this.executionContextConfig.defaultPaths.nodes );
       this.customNodeDirPath    = this.nodeItem?.dir;
       this.hasCustomNodeDirPath = this.customNodeDirPath != null && this.customNodeDirPath != '/';
-
       const isFile              = this.nodeItem?.isFile;
 
       if( isFile && this.customNodeDirPath && this.customNodeDirPath == '/'  ) {
@@ -50,8 +49,6 @@ export default class SingleNodeCompiler {
       } else {
         this.nodeDirPath = this.nodeId;
       }
-
-      console.log( 'this.nodeDirPath', this.nodeDirPath );
 
     } else {
 
@@ -104,13 +101,10 @@ export default class SingleNodeCompiler {
   async compileResourcesFromDirectory( configPayload ) {
 
     const availableResources = await this.loadAvailableResources( configPayload.default );
-
     const selectedResources  = this.selectResources( availableResources, configPayload.default );
-
     const traits             = await this.loadTraits( availableResources, configPayload.default );
-
+    console.log( availableResources );
     const moduleRegistry     = await this.loadModules( selectedResources?.moduleRegistry, configPayload.default );
-
     const rootModuleId       = this.getRootModuleId( configPayload.default, moduleRegistry );
 
     const nodeResources      = {
@@ -128,9 +122,6 @@ export default class SingleNodeCompiler {
       traits,
 
     }
-
-    console.log( nodeResources );
-
 
     return nodeResources;
 
@@ -222,7 +213,7 @@ export default class SingleNodeCompiler {
     }
 
     const configTraitImplementations = config?.traitImplementations;
-    const defaultTraitDirPath        = this.removeTrailingSlash( this.contextConfig.defaultPaths.traits );
+    const defaultTraitDirPath        = this.removeTrailingSlash( this.executionContextConfig.defaultPaths.traits );
     const nodeSpecificTraitDirPath   = this.removeTrailingSlash( config?.defaultPaths?.traits );
 
     const traitIds                   = config.traits;
@@ -280,13 +271,16 @@ export default class SingleNodeCompiler {
 
   async loadModules( moduleRegistry, configPayload ) {
 
+
+    
+
     if( !moduleRegistry ) {
       return;
     }
 
     const initializedModuleRegistry                     = {};
 
-    const defaultModuleDirPath                          = this.removeTrailingSlash( this.contextConfig.defaultPaths.modules );
+    const defaultModuleDirPath                          = this.removeTrailingSlash( this.executionContextConfig.defaultPaths.modules );
     const hasDefaultModuleDirPath                       = defaultModuleDirPath && defaultModuleDirPath != '/';
 
     const nodeSpecificDefaultModuleDirPath              = this.removeTrailingSlash( configPayload?.defaultPaths?.modules );
@@ -298,7 +292,7 @@ export default class SingleNodeCompiler {
 
       initializedModuleRegistry[ moduleId ]         = moduleRegistryItem;
 
-      const sharedModuleRegistryItem                = this.contextConfig?.sharedModuleRegistry?.[moduleId];
+      const sharedModuleRegistryItem                = this.executionContextConfig?.sharedModuleRegistry?.[moduleId];
 
       const isShared                                = moduleRegistryItem?.isShared;
       const sharedModuleDirectoryDefaultPath        = this.resourceRegistry.dynamicDirectories.sharedModules;
@@ -392,7 +386,7 @@ export default class SingleNodeCompiler {
 
       for (const [moduleId, moduleRegistryItem] of Object.entries(config.moduleRegistry)) {
 
-        const sharedModuleRegistryItem                = this.contextConfig?.sharedModuleRegistry?.[moduleId];
+        const sharedModuleRegistryItem                = this.executionContextConfig?.sharedModuleRegistry?.[moduleId];
 
         const isShared                                = moduleRegistryItem?.isShared;
 
@@ -545,7 +539,7 @@ export default class SingleNodeCompiler {
     //console.log( constructedPath );
 
     if (this.executionContext === 'app') {
-      console.log( `../../../morphSrc/${constructedPath} ` );
+      //console.log( `../../../morphSrc/${constructedPath} ` );
       return () => import(/* @vite-ignore */ `../../../morphSrc/${constructedPath}`);
     } else {
       return () => import(/* @vite-ignore */`../../dev/ui/${constructedPath}`);
@@ -587,6 +581,9 @@ export default class SingleNodeCompiler {
   }
 
   getRootModuleId( config, moduleRegistry ) {
+
+    console.log( this.nodeId );
+    console.log( moduleRegistry );
 
     let rootModuleId = config?.rootModuleId || config?.rootModule || config?.root;
 

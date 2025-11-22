@@ -16,6 +16,7 @@ export default function Root( { Kernel, Node, Module, Router } ) {
 
       <Node id="SideBar" />
       <Node id="Main" /> 
+      <Node id="TestNode" />
 {/* 
       <Module id="SomeSharedModule"/> 
 
