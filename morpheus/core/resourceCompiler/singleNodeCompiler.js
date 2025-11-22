@@ -74,7 +74,7 @@ export default class SingleNodeCompiler {
 
   async loadNodeResources() {
 
-    const configFileContent            = await this.preLoadConfigFile();
+    const configFileContent        = await this.preLoadConfigFile();
     const isFile                   = this.inheritanceLevel == 'echo' ? this.nodeItem?.isFile : configFileContent.default?.isFile;
     const nodeResources            = isFile ? await this.compileResourcesFromFile( configFileContent ) : await this.compileResourcesFromDirectory( configFileContent );
     nodeResources.configDirSubPath = this.configDirSubPath;
@@ -260,9 +260,12 @@ export default class SingleNodeCompiler {
       const constructedPath = `${traitDirPath}/${traitId}`;
       const result          = await this.loadResource( constructedPath );
 
-      if( result ) {
-        traitImplementations[traitId] = result;
+      if( !result ) {
+        console.warn(`Trait '${traitId}' of node '${this.nodeId}' not found in '${this.getAbsPath(constructedPath)}'`);
+        continue;
       }
+
+      traitImplementations[traitId] = result;
 
     }
 
@@ -302,7 +305,7 @@ export default class SingleNodeCompiler {
 
       const sharedModuleRegistryItem                = this.executionContextConfig?.sharedModuleRegistry?.[moduleId];
 
-      const isShared                                = moduleRegistryItem?.isShared;
+      const isShared                                = moduleRegistryItem?.isShared && ( this.inheritanceLevel == 'echo' );
       const sharedModuleDirectoryDefaultPath        = this.resourceRegistry.dynamicDirectories.sharedModules;
       const sharedModuleDirectorySubPath            = this.removeTrailingSlash( sharedModuleRegistryItem?.dir );
       const hasIndividualSharedModulePath           = sharedModuleDirectorySubPath && sharedModuleDirectorySubPath != '/';

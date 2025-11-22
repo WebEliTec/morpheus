@@ -1,10 +1,20 @@
 const config = {
 
-  moduleRegistry: {
+  defaultPaths: {
+    traits: '/',
+  },
 
-    coreData: {
-      deltaCoreDataPiece: 'deltaCoreDataPiece',
-    },
+  traits: ['deltaTrait'],
+
+  coreData: {
+    deltaCoreDataPiece: 'deltaCoreDataPiece',
+  },
+
+  constants: {
+    anotherContant: 'xxxx',
+  },
+
+  moduleRegistry: {
     
     Wrapper: {
       isRoot: true,
