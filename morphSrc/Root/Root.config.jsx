@@ -10,8 +10,6 @@ const config = {
       signals: [],
     },
 
-    ElementEcho: {}
-
   },
   
 }

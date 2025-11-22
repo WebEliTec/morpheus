@@ -117,7 +117,7 @@ export default class SingleNodeCompiler {
     const nodeResources      = {
 
       nodeId:           this.nodeId,
-      parentId:         configPayload?.parentId,
+      parentId:         configPayload.default?.parentId,
       rootModuleId,
       constants:        selectedResources?.constants, 
       metaData:         selectedResources?.metaData, 

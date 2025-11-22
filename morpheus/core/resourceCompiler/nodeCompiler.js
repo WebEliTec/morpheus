@@ -41,42 +41,40 @@ export default class NodeCompiler {
     });
 
     const echoNodeResources  = await echoSingleNodeCompiler.loadNodeResources();
-    const parentIdOfEcho     = echoNodeResources?.parentId;
+    console.log( echoNodeResources );
+    const deltaNodeId        = echoNodeResources?.parentId;
 
+    console.log( deltaNodeId );
 
-    let parentIdOfDelta;
+    let charlieNodeId;
 
-    if( parentIdOfEcho ) {
+    if( deltaNodeId ) {
 
       const deltaSingleNodeCompiler = new SingleNodeCompiler({
         inheritanceLevel: 'delta', 
-        nodeId:           parentIdOfEcho,
-        //nodeItem:         this.nodeItem,
+        nodeId:           deltaNodeId,
         executionContext: this.executionContext, 
         contextConfig:    this.abstractNodeConfig,
         environment:      'client'
       });
 
-      const deltaNodeResources  = await deltaSingleNodeCompiler.loadNodeResources();
-      console.log( deltaNodeResources );
-      parentIdOfDelta     = deltaNodeResources?.parentId;
+      const deltaNodeResources = await deltaSingleNodeCompiler.loadNodeResources();
+      console.log( deltaNodeResources )
+      charlieNodeId            = deltaNodeResources?.parentId;
 
     }
 
-    if( parentIdOfDelta ) {
+    if( charlieNodeId  ) {
 
       const charlieSingleNodeCompiler = new SingleNodeCompiler({
         inheritanceLevel: 'charlie', 
-        nodeId:           parentIdOfDelta,
-        //nodeItem:         this.nodeItem,
+        nodeId:           charlieNodeId,
         executionContext: this.executionContext, 
         contextConfig:    this.abstractNodeConfig,
         environment:      'client'
       });
 
       const charlieNodeResources  = await charlieSingleNodeCompiler.loadNodeResources();
-      console.log(charlieNodeResources);
-      //const parentIdOfCharlie     = charlieNodeResources?.parentId;
 
     }
 

@@ -1,5 +1,5 @@
 export default function Wrapper() {
   return (
-    <div>Wrapper</div>
+    <div>NodeDelta</div>
   )
 }
