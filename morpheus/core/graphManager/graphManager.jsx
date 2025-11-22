@@ -44,7 +44,7 @@ export default class GraphManager {
     const parentId                 = kernel.props?.parentId;
     
     const nodeData = {
-      id: fullyQualifiedId,
+      id:       fullyQualifiedId,
       parentId,
       children: [],
       kernel,
@@ -116,19 +116,27 @@ export default class GraphManager {
   }
   
   findNodeById(id) {
+
     if (!this.graphData.nodeHierarchy) return null;
     
     const search = (node) => {
-      if (node.id === id) return node;
+
+      if (node.id === id) {
+        return node;
+      } 
       
       for (const child of node.children) {
         const found = search(child);
-        if (found) return found;
+        if (found) {
+          return found;
+        }
       }
       
       return null;
+
     };
     
     return search(this.graphData.nodeHierarchy);
+
   }
 }
