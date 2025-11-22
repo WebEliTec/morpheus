@@ -2,7 +2,7 @@ const appConfig = {
 
 	defaultPaths: {
 		//nodes:   '/nodes',
-		modules: '/modules',
+		//modules: '/modules',
 		//traits:  '/traits',
 	},
 
@@ -14,7 +14,7 @@ const appConfig = {
 
 
 		SideMenu: {
-			dir: '/',
+			//dir: '/',
 		},
 
 		SideBar:  {

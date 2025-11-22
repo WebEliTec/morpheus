@@ -41,7 +41,8 @@ const config = {
     SideMenu: {
       isRoot:  true,
       routes:  true,  
-      signals: ['selectedMenuItem']
+      signals: ['selectedMenuItem'], 
+      //dir: '/modules',
     }
 
   },

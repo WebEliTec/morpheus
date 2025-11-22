@@ -495,7 +495,6 @@ export default class SingleNodeCompiler {
   /* Helpers
   /* *** *** *** *** *** *** *** *** *** *** *** *** *** *** */
 
-
   async loadResource( constructedPath, loadDefault = true ) {
 
     const resourceFileImportMethod = this.generateImportMethod( constructedPath );
