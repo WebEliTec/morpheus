@@ -7,7 +7,7 @@ export default class SingleNodeCompiler {
   constructor( { inheritanceLevel, nodeId, nodeItem, executionContext, contextConfig, environment } ) {
     
     this.appSrcFolderName       = 'morphSrc';
-    this.devSrcFolderName       = 'dev/ui/';
+    this.devSrcFolderName       = 'dev/ui';
     this.inheritanceLevel       = inheritanceLevel;
     this.nodeId                 = nodeId;
     this.nodeItem               = nodeItem
@@ -531,7 +531,7 @@ export default class SingleNodeCompiler {
         const fullPath = path.resolve(process.cwd(), this.appSrcFolderName, serverPath);
         return () => import( /* @vite-ignore */ fullPath);
       } else {
-        const fullPath = path.resolve(process.cwd(), 'morpheus/dev/ui', serverPath);
+        const fullPath = path.resolve(process.cwd(), `morpheus/${this.devSrcFolderName}`, serverPath);
         return () => import( /* @vite-ignore */ fullPath);
       }
     }
@@ -542,7 +542,7 @@ export default class SingleNodeCompiler {
       //console.log( `../../../morphSrc/${constructedPath} ` );
       return () => import(/* @vite-ignore */ `../../../${this.appSrcFolderName}/${constructedPath}`);
     } else {
-      return () => import(/* @vite-ignore */`../../dev/ui/${constructedPath}`);
+      return () => import(/* @vite-ignore */`../../${this.devSrcFolderName}/${constructedPath}`);
     }
 
   }
