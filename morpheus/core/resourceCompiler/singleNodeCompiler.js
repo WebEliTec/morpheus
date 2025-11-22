@@ -74,9 +74,9 @@ export default class SingleNodeCompiler {
 
   async loadNodeResources() {
 
-    const configPayload            = await this.preLoadConfigFile();
-    const isFile                   = this.inheritanceLevel == 'echo' ? this.nodeItem?.isFile : configPayload.default?.isFile;
-    const nodeResources            = isFile ? await this.compileResourcesFromFile( configPayload ) : await this.compileResourcesFromDirectory( configPayload );
+    const configFileContent            = await this.preLoadConfigFile();
+    const isFile                   = this.inheritanceLevel == 'echo' ? this.nodeItem?.isFile : configFileContent.default?.isFile;
+    const nodeResources            = isFile ? await this.compileResourcesFromFile( configFileContent ) : await this.compileResourcesFromDirectory( configFileContent );
     nodeResources.configDirSubPath = this.configDirSubPath;
 
     return nodeResources;
@@ -93,31 +93,34 @@ export default class SingleNodeCompiler {
       constructedPath = `${this.nodeDirPath}/${this.nodeId}.config.jsx`;
     }
     
-    const configPayload   = await this.loadResource( constructedPath, false );
-    return configPayload;
+    const configFileContent   = await this.loadResource( constructedPath, false );
+
+    return configFileContent;
   }
 
 
   /* Directory Compilation
   /* *** *** *** *** *** *** *** *** *** *** *** *** *** *** */
 
-  async compileResourcesFromDirectory( configPayload ) {
+  async compileResourcesFromDirectory( configFileContent ) {
 
-    const availableResources = await this.loadAvailableResources( configPayload.default );
-    const selectedResources  = this.selectResources( availableResources, configPayload.default );
-    const traits             = await this.loadTraits( availableResources, configPayload.default );
-    const moduleRegistry     = await this.loadModules( selectedResources?.moduleRegistry, configPayload.default );
+    const configObject       = configFileContent.default;
+
+    const availableResources = await this.loadAvailableResources( configObject );
+    const selectedResources  = this.selectResources( availableResources, configObject );
+    const traits             = await this.loadTraits( availableResources, configObject );
+    const moduleRegistry     = await this.loadModules( selectedResources?.moduleRegistry, configObject );
     
     if( !moduleRegistry ) {
       console.warn( `moduleRegistry is empty for node '${this.nodeId}'` );
     }
 
-    const rootModuleId       = this.getRootModuleId( configPayload.default, moduleRegistry );
+    const rootModuleId       = this.getRootModuleId( configFileContent.default, moduleRegistry );
 
     const nodeResources      = {
 
       nodeId:           this.nodeId,
-      parentId:         configPayload.default?.parentId,
+      parentId:         configFileContent.default?.parentId,
       rootModuleId,
       constants:        selectedResources?.constants, 
       metaData:         selectedResources?.metaData, 
@@ -137,10 +140,10 @@ export default class SingleNodeCompiler {
   /* Static Files
   /* *** *** *** *** *** *** *** *** *** *** *** *** *** *** */
 
-  async loadAvailableResources( configPayload ) {
+  async loadAvailableResources( configObject ) {
 
     const availableResources  = {};
-    availableResources.config = configPayload;
+    availableResources.config = configObject;
     
     for (const [resourceName, resourceFileLocation] of Object.entries(this.resourceRegistry.resourceTypes)) {
 
@@ -162,11 +165,11 @@ export default class SingleNodeCompiler {
 
   }
 
-  selectResources( availableResources, configPayLoad ) {
+  selectResources( availableResources, configObject ) {
 
     const selectedResources = {};
 
-    selectedResources.config = configPayLoad;
+    selectedResources.config = configObject;
 
     for (const [ resourceName, resourceFileLocation ] of Object.entries( this.resourceRegistry.resourceTypes ) ) {
 
@@ -201,9 +204,9 @@ export default class SingleNodeCompiler {
   /* Traits
   /* *** *** *** *** *** *** *** *** *** *** *** *** *** *** */
 
-  async loadTraits( availableResources, configPayLoad ) {
+  async loadTraits( availableResources, configObject ) {
 
-    const config = configPayLoad;
+    const config = configObject;
 
     if (!config?.traits || config.traits.length === 0) {
 
@@ -276,7 +279,7 @@ export default class SingleNodeCompiler {
   /* Module Loading
   /* *** *** *** *** *** *** *** *** *** *** *** *** *** *** */
 
-  async loadModules( moduleRegistry, configPayload ) {
+  async loadModules( moduleRegistry, configObject ) {
 
     if( !moduleRegistry ) {
       console.warn( `No moduleRegistry passed to singleNodeCompiler.loadModules() while compiling node '${this.nodeId}'` )
@@ -288,7 +291,7 @@ export default class SingleNodeCompiler {
     const defaultModuleDirPath                          = this.removeTrailingSlash( this.executionContextConfig?.defaultPaths?.modules );
     const hasDefaultModuleDirPath                       = defaultModuleDirPath && defaultModuleDirPath != '/';
 
-    const nodeSpecificDefaultModuleDirPath              = this.removeTrailingSlash( configPayload?.defaultPaths?.modules );
+    const nodeSpecificDefaultModuleDirPath              = this.removeTrailingSlash( configObject?.defaultPaths?.modules );
     const hasNodeSpecificDefaultModuleDirPath           = nodeSpecificDefaultModuleDirPath && nodeSpecificDefaultModuleDirPath != '/';
     const isNodeSpecificDefaultModuleDirPathOnRootLevel = nodeSpecificDefaultModuleDirPath == '/';
     
@@ -381,9 +384,9 @@ export default class SingleNodeCompiler {
   /* Single File Loading
   /* *** *** *** *** *** *** *** *** *** *** *** *** *** *** */
 
-  async compileResourcesFromFile( configPayLoad ) {
+  async compileResourcesFromFile( configFileContent ) {
 
-    const config                    = configPayLoad.default;
+    const config                    = configFileContent.default;
 
     const initializedModuleRegistry = {};
     
@@ -448,7 +451,7 @@ export default class SingleNodeCompiler {
         if( !isShared ) {
           initializedModuleRegistry[moduleId] = {
             ...moduleRegistryItem,
-            component: configPayLoad[moduleId]
+            component: configFileContent[moduleId]
           };
         }
 

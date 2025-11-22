@@ -113,9 +113,9 @@ export default class SingleNodeCompiler {
 
       selectedResources[ resourceName ] = {};
 
-      const configPayload = availableResources.config?.[resourceName];
+      const configFileContent = availableResources.config?.[resourceName];
       const filePayload   = availableResources?.[resourceName];
-      const payload       = configPayload ?? filePayload;
+      const payload       = configFileContent ?? filePayload;
 
       if ( resourceName === 'signalClusters' && payload?.signals ) {
         delete payload.signals;
