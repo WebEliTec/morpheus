@@ -40,6 +40,8 @@ export default class GraphManager {
   
   notifyGraphOnNodeMount(kernel) {
 
+    console.log( 'notifyGraphOnNodeMount' );
+
     const { id: fullyQualifiedId } = kernel;
     const parentId                 = kernel.props?.parentId;
     

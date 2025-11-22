@@ -400,7 +400,7 @@ export default class NodeManager {
     const { nodeId, nodeProps } = kernel
 
     const rootModuleId             = nodeResources.rootModuleId;
-    const notifyGraphOnNodeMount   = this.notifyGraphOnNodeUnmount;
+    const notifyGraphOnNodeMount   = this.notifyGraphOnNodeMount;
     const notifyGraphOnNodeUnmount = this.notifyGraphOnNodeUnmount;
     const destroyKernel            = this.destroyKernel.bind(this);
     const callHook                 = this.callHook.bind(this);  
