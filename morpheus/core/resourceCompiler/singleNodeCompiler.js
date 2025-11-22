@@ -6,6 +6,8 @@ export default class SingleNodeCompiler {
 
   constructor( { inheritanceLevel, nodeId, nodeItem, executionContext, contextConfig, environment } ) {
     
+    this.appSrcFolderName       = 'morphSrc';
+    this.devSrcFolderName       = 'dev/ui/';
     this.inheritanceLevel       = inheritanceLevel;
     this.nodeId                 = nodeId;
     this.nodeItem               = nodeItem
@@ -340,7 +342,7 @@ export default class SingleNodeCompiler {
 
         // Build time: just validate file exists
         const fs       = await import( /* @vite-ignore */ 'fs');
-        const fullPath = path.resolve(process.cwd(), 'morphSrc', `${constructedPath}.jsx`);
+        const fullPath = path.resolve(process.cwd(), this.appSrcFolderName, `${constructedPath}.jsx`);
 
         if (!fs.existsSync(fullPath)) {
           throw new Error(`Module ${moduleId} not found at ${fullPath}`);
@@ -409,7 +411,7 @@ export default class SingleNodeCompiler {
         if ( isShared  && this.environment == 'server' ) {
           // Build time: just validate file exists
           const fs       = await import( /* @vite-ignore */ 'fs');
-          const fullPath = path.resolve(process.cwd(), 'morphSrc', `${internalPath}.jsx`);
+          const fullPath = path.resolve(process.cwd(), this.appSrcFolderName, `${internalPath}.jsx`);
 
           if (!fs.existsSync(fullPath)) {
             throw new Error(`Module ${moduleId} not found at ${fullPath}`);
@@ -526,20 +528,19 @@ export default class SingleNodeCompiler {
     if (this.environment === 'server') {
 
       if (this.executionContext === 'app') {
-        const fullPath = path.resolve(process.cwd(), 'morphSrc', serverPath);
+        const fullPath = path.resolve(process.cwd(), this.appSrcFolderName, serverPath);
         return () => import( /* @vite-ignore */ fullPath);
       } else {
         const fullPath = path.resolve(process.cwd(), 'morpheus/dev/ui', serverPath);
         return () => import( /* @vite-ignore */ fullPath);
       }
-
     }
     
     //console.log( constructedPath );
 
     if (this.executionContext === 'app') {
       //console.log( `../../../morphSrc/${constructedPath} ` );
-      return () => import(/* @vite-ignore */ `../../../morphSrc/${constructedPath}`);
+      return () => import(/* @vite-ignore */ `../../../${this.appSrcFolderName}/${constructedPath}`);
     } else {
       return () => import(/* @vite-ignore */`../../dev/ui/${constructedPath}`);
     }
