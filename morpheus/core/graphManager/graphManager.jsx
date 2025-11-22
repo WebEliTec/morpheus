@@ -10,13 +10,13 @@ export default class GraphManager {
     this.abstractNodeConfig  = config.abstractNodeConfig;
     
     this.nodeManager  = new NodeManager({
-      app:                this.app,
-      notifyGraphOnNodeMount: this.notifyGraphOnNodeMount.bind(this),  
-      onNodeUnmount:      this.onNodeUnmount.bind(this), 
-      mayCreateNode:      this.mayCreateNode.bind(this), 
-      contextConfig:      this.contextConfig,
-      abstractNodeConfig: this.abstractNodeConfig,
-      executionContext:   this.executionContext
+      app:                      this.app,
+      notifyGraphOnNodeMount:   this.notifyGraphOnNodeMount.bind(this),  
+      notifyGraphOnNodeUnmount: this.notifyGraphOnNodeUnmount.bind(this), 
+      mayCreateNode:            this.mayCreateNode.bind(this), 
+      contextConfig:            this.contextConfig,
+      abstractNodeConfig:       this.abstractNodeConfig,
+      executionContext:         this.executionContext
     });
 
     this.graphChangeListener = config?.graphChangeListener;
@@ -81,7 +81,7 @@ export default class GraphManager {
 
   }
   
-  onNodeUnmount(fullyQualifiedId) {
+  notifyGraphOnNodeUnmount(fullyQualifiedId) {
     
     const node = this.findNodeById(fullyQualifiedId);
     

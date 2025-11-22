@@ -15,16 +15,16 @@ const ParentKernelContext = createContext(null);
 export default class NodeManager {
 
 
-  constructor( { executionContext, contextConfig, abstractNodeConfig, app, notifyGraphOnNodeMount, onNodeUnmount, mayCreateNode } ) {
+  constructor( { executionContext, contextConfig, abstractNodeConfig, app, notifyGraphOnNodeMount, notifyGraphOnNodeUnmount, mayCreateNode } ) {
 
-    this.executionContext   = executionContext;
-    this.contextConfig      = contextConfig;
-    this.abstractNodeConfig = abstractNodeConfig;
-    this.app                = app;
-    this.nodeRegistry       = this.contextConfig.nodeRegistry;
-    this.notifyGraphOnNodeMount        = notifyGraphOnNodeMount;    
-    this.onNodeUnmount      = onNodeUnmount;
-    this.mayCreateNode      = mayCreateNode;
+    this.executionContext         = executionContext;
+    this.contextConfig            = contextConfig;
+    this.abstractNodeConfig       = abstractNodeConfig;
+    this.app                      = app;
+    this.nodeRegistry             = this.contextConfig.nodeRegistry;
+    this.notifyGraphOnNodeMount   = notifyGraphOnNodeMount;    
+    this.notifyGraphOnNodeUnmount = notifyGraphOnNodeUnmount;
+    this.mayCreateNode            = mayCreateNode;
 
   }
 
@@ -54,10 +54,7 @@ export default class NodeManager {
         loadNode();
       }, []);
 
-
-
       return Node ? <Node {...props} /> : <></>;
-
 
     };
 
@@ -218,16 +215,12 @@ export default class NodeManager {
     const callHook = this.callHook.bind(this); 
     
     return function NodeProvider( { children = null } ) {
-
-      //console.log('NodeProvider Executed');
       
       const [ signalChangeCounter, setSignalChangeCounter ] = useState(0);
       const [ changedSignals, setChangedSignals ]           = useState([]);
       const [signalsInitialized, setSignalsInitialized]     = useState(false);
       
       const signalInstances                                 = {};
-
-      // => Hook in different functionality, like saving signals in indexedDB, remotely, etc.
 
       const [signalValues, setSignalValues] = useState(() => {
         const initial = {};
@@ -252,7 +245,6 @@ export default class NodeManager {
 
       kernel.signals = signalInstances;
 
-      // ✅ Call signalsDidInitialize once
       useEffect(() => {
         if (!signalsInitialized) {
           callHook('signalsDidInitialize', nodeResources, kernel);
@@ -260,7 +252,6 @@ export default class NodeManager {
         }
       }, [signalsInitialized]);
 
-      // ✅ Call signalsDidChange when signals change
       useEffect(() => {
         if (changedSignals.length > 0 && signalsInitialized) {
           callHook('signalsDidChange', nodeResources, kernel, changedSignals);
@@ -365,11 +356,9 @@ export default class NodeManager {
         };
       }, []);
 
-
       const memoizedComponent = useMemo(() => {
-
-        return Component ? 
-        <Component 
+        
+        return Component ? <Component 
 
           React   = { React }
           R       = { React }
@@ -394,9 +383,11 @@ export default class NodeManager {
           Lucide  = { Lucide }
 
           {...props}>
+
           {children}
 
           </Component> : <h1>{`${`Module "${moduleId}" of node "${kernel.nodeId}" listed in module registry but not found in specified location.`}`}</h1>;
+
       }, [ shouldRerenderDueToSignalChange, shouldRerenderDueToURLChange ] );
   
       return memoizedComponent;
@@ -408,16 +399,16 @@ export default class NodeManager {
 
     const { nodeId, nodeProps } = kernel
 
-    const rootModuleId  = nodeResources.rootModuleId;
-    const notifyGraphOnNodeMount   = this.notifyGraphOnNodeMount; 
-    const onNodeUnmount = this.onNodeUnmount;
-    const destroyKernel = this.destroyKernel.bind(this);
-    const callHook      = this.callHook.bind(this);  
+    const rootModuleId             = nodeResources.rootModuleId;
+    const notifyGraphOnNodeMount   = this.notifyGraphOnNodeUnmount;
+    const notifyGraphOnNodeUnmount = this.notifyGraphOnNodeUnmount;
+    const destroyKernel            = this.destroyKernel.bind(this);
+    const callHook                 = this.callHook.bind(this);  
 
     return function NodeComponent( { ...props } ) {
 
     useEffect(() => {
-      // Notify GraphManager
+
       notifyGraphOnNodeMount(kernel);
       
       (async () => {
@@ -428,7 +419,7 @@ export default class NodeManager {
         (async () => {
           await callHook('nodeWillUnmount', nodeResources, kernel);
           
-          onNodeUnmount(kernel.id);
+          notifyGraphOnNodeUnmount(kernel.id);
           destroyKernel(kernel);
           
           await callHook('nodeDidUnmount', nodeResources, kernel);
@@ -446,8 +437,6 @@ export default class NodeManager {
   }
 
   async callHook(hookName, nodeResources, ...args) {
-
-    //console.log('Calling Hook ' + hookName + ' ' + nodeResources.nodeId );
     
     const hooks = nodeResources?.hooks;
 
