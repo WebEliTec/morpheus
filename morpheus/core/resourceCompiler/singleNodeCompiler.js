@@ -115,22 +115,22 @@ export default class SingleNodeCompiler {
       console.warn( `moduleRegistry is empty for node '${this.nodeId}'` );
     }
 
-    const rootModuleId       = this.getRootModuleId( configFileContent.default, moduleRegistry );
+    const rootModuleId       = this.getRootModuleId( configObject, moduleRegistry );
 
     const nodeResources      = {
 
       nodeId:           this.nodeId,
       executionContext: this.executionContext,
       inheritanceLevel: this.inheritanceLevel,
-      parentId:         configFileContent.default?.parentId,
-      rootModuleId,
-      constants:        selectedResources?.constants, 
-      metaData:         selectedResources?.metaData, 
-      coreData:         selectedResources?.coreData, 
-      signalClusters:   selectedResources?.signalClusters,
-      moduleRegistry,
-      instanceRegistry: selectedResources?.instanceRegistry, 
-      hooks:            selectedResources?.hooks,
+      parentId:         configObject?.parentId ?? null,
+      rootModuleId:     rootModuleId ?? null,
+      constants:        selectedResources?.constants ?? null, 
+      metaData:         selectedResources?.metaData ?? null, 
+      coreData:         selectedResources?.coreData ?? null, 
+      signalClusters:   selectedResources?.signalClusters ?? null,
+      moduleRegistry:   moduleRegistry ?? null,
+      instanceRegistry: selectedResources?.instanceRegistry ?? null, 
+      hooks:            selectedResources?.hooks ?? null,
       traits,
 
     }
@@ -489,17 +489,17 @@ export default class SingleNodeCompiler {
       nodeId:           this.nodeId,
       executionContext: this.executionContext,
       inheritanceLevel: this.inheritanceLevel,
-      parentId:         config?.parentId,
-      rootModuleId:     this.getRootModuleId( config, initializedModuleRegistry ),
-      constants:        config.constants,
-      metaData:         config.metaData,
-      coreData:         config.coreData,
-      signalClusters:   resolvedSignalClusters,
-      moduleRegistry:   initializedModuleRegistry,
-      instanceRegistry: config?.instanceRegistry, 
-      hooks:            config?.hooks,
-      traits,
-      
+      parentId:         config.parentId ?? null,
+      rootModuleId:     this.getRootModuleId( config, initializedModuleRegistry ) ?? null,
+      constants:        config.constants ?? null,
+      metaData:         config.metaData ?? null,
+      coreData:         config.coreData ?? null,
+      signalClusters:   resolvedSignalClusters ?? null,
+      moduleRegistry:   initializedModuleRegistry ?? null,
+      instanceRegistry: config.instanceRegistry ?? null, 
+      hooks:            config.hook ?? null,
+      traits:           traits ?? null,
+
     };
 
     return nodeResources;

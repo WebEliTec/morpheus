@@ -41,7 +41,8 @@ export default class NodeCompiler {
     });
 
     const echoNodeResources  = await echoSingleNodeCompiler.loadNodeResources();
-    console.log( echoNodeResources );
+
+    this.log( echoNodeResources );
     
     
     const deltaNodeId        = echoNodeResources?.parentId;
@@ -60,9 +61,9 @@ export default class NodeCompiler {
       });
 
       const deltaNodeResources = await deltaSingleNodeCompiler.loadNodeResources();
-      // console.log( '------------------' )
-      // console.log( deltaNodeResources )
-      // console.log( '------------------' )
+
+      this.log( deltaNodeResources );
+      
       charlieNodeId            = deltaNodeResources?.parentId;
 
     }
@@ -91,4 +92,12 @@ export default class NodeCompiler {
     }*/
     
   }
+
+
+  log( payload, message ) {
+    if ( this.executionContext == 'app' ) {
+      console.log( payload );
+    }
+  }
+
 }
