@@ -120,6 +120,8 @@ export default class SingleNodeCompiler {
     const nodeResources      = {
 
       nodeId:           this.nodeId,
+      executionContext: this.executionContext,
+      inheritanceLevel: this.inheritanceLevel,
       parentId:         configFileContent.default?.parentId,
       rootModuleId,
       constants:        selectedResources?.constants, 
@@ -462,7 +464,6 @@ export default class SingleNodeCompiler {
 
     }
 
-    // Handle signals - similar to resolveStaticFiles logic
     let resolvedSignalClusters = config.signalClusters;
     
     if (config.signals) {
@@ -474,7 +475,6 @@ export default class SingleNodeCompiler {
       };
     }
 
-    // Build traits - include kernel if present
     const traits = {};
     if ( config.kernel ) {
       traits.kernel = config.kernel;
@@ -484,8 +484,11 @@ export default class SingleNodeCompiler {
       Object.assign(traits, config.traitImplementations);
     }
 
-    // Build the identity resource collection
     const nodeResources = {
+
+      nodeId:           this.nodeId,
+      executionContext: this.executionContext,
+      inheritanceLevel: this.inheritanceLevel,
       parentId:         config?.parentId,
       rootModuleId:     this.getRootModuleId( config, initializedModuleRegistry ),
       constants:        config.constants,
@@ -496,6 +499,7 @@ export default class SingleNodeCompiler {
       instanceRegistry: config?.instanceRegistry, 
       hooks:            config?.hooks,
       traits,
+      
     };
 
     return nodeResources;

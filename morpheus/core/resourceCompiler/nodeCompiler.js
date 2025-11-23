@@ -41,10 +41,11 @@ export default class NodeCompiler {
     });
 
     const echoNodeResources  = await echoSingleNodeCompiler.loadNodeResources();
-    //console.log( echoNodeResources );
+    console.log( echoNodeResources );
+    
+    
     const deltaNodeId        = echoNodeResources?.parentId;
 
-    //console.log( deltaNodeId );
 
     let charlieNodeId;
 

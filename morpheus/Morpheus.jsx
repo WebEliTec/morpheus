@@ -12,12 +12,6 @@ import Graph from './apis/graph';
 import Router from './apis/router';
 import Utility from './apis/utility';
 
-/* 
-SSR -> NO Devtools, no matter if dev or prod
-Add GraphAPI to SSR Manager only later
-Creat MorpheusRoot Node for SSR
-*/
-
 
 export class Morpheus {
   
