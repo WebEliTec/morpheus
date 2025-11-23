@@ -1,14 +1,16 @@
+import { forEach } from 'lodash';
 import SingleNodeCompiler from './singleNodeCompiler';
 
 export default class NodeCompiler {
 
   constructor( { nodeRegistry, nodeId, executionContext, contextConfig, abstractNodeConfig } ) {
 
-    this.nodeId             = nodeId;
-    this.nodeItem           = nodeRegistry[ nodeId ];
-    this.executionContext   = executionContext;
-    this.contextConfig      = contextConfig;
-    this.abstractNodeConfig = abstractNodeConfig;
+    this.nodeId               = nodeId;
+    this.nodeItem             = nodeRegistry[ nodeId ];
+    this.executionContext     = executionContext;
+    this.contextConfig        = contextConfig;
+    this.abstractNodeConfig   = abstractNodeConfig;
+    this.inheritanceLevelIds  = [ 'alpha', 'bravo', 'charlie', 'delta', 'echo' ];
     
   }
 
@@ -30,6 +32,9 @@ export default class NodeCompiler {
   }
   
   async compileNode() {
+
+    /* Echo
+    /* *** *** *** *** *** *** *** *** *** *** *** *** *** *** */
     
     const echoSingleNodeCompiler = new SingleNodeCompiler({ inheritanceLevel: 'echo', nodeId: this.nodeId, nodeItem: this.nodeItem, executionContext: this.executionContext, contextConfig: this.contextConfig, environment: 'client' });
     const echoNodeResources      = await echoSingleNodeCompiler.loadNodeResources();    
@@ -43,10 +48,16 @@ export default class NodeCompiler {
 
     nodeInheritanceLineStack.echo  = echoNodeResources;
 
+    /* Delta
+    /* *** *** *** *** *** *** *** *** *** *** *** *** *** *** */
+
     const deltaSingleNodeCompiler  = new SingleNodeCompiler({ inheritanceLevel: 'delta', nodeId: deltaNodeId, executionContext: this.executionContext, contextConfig: this.abstractNodeConfig, environment: 'client' } );
     const deltaNodeResources       = await deltaSingleNodeCompiler.loadNodeResources();
 
     nodeInheritanceLineStack.delta = deltaNodeResources;
+
+    /* Charlie
+    /* *** *** *** *** *** *** *** *** *** *** *** *** *** *** */
     
     const charlieNodeId            = deltaNodeResources?.parentId;
 
@@ -59,20 +70,54 @@ export default class NodeCompiler {
 
     nodeInheritanceLineStack.charlie = charlieNodeResources;
 
-
-
     this.compileNodeInheritanceLineStack( nodeInheritanceLineStack );
 
+    /* Return
+    /* *** *** *** *** *** *** *** *** *** *** *** *** *** *** */
 
     return echoNodeResources;
-
-
 
   }
 
   compileNodeInheritanceLineStack( nodeInheritanceLineStack ) {
-    console.log( nodeInheritanceLineStack );
+    console.log(  nodeInheritanceLineStack );
+    const constants = this.resolveConstants( nodeInheritanceLineStack );
+
+    this.log( constants );
   }
+
+  resolveConstants(nodeInheritanceLineStack) {
+    
+    const constantsByInheritanceLevelId = {};
+    
+    this.inheritanceLevelIds.forEach((inheritanceLevelId) => {
+      const constants = nodeInheritanceLineStack[inheritanceLevelId]?.constants;
+      if (constants) {
+        constantsByInheritanceLevelId[inheritanceLevelId] = constants;
+      }
+    });
+
+    const constants       = {};
+    const constantOrigins = {};
+    
+    this.inheritanceLevelIds.forEach((levelId) => {
+      const levelConstants = constantsByInheritanceLevelId[levelId];
+      if (levelConstants) {
+        Object.keys(levelConstants).forEach((key) => {
+          constants[key] = levelConstants[key];
+          constantOrigins[key] = levelId;
+        });
+      }
+    });
+    
+    return constants;
+
+  }
+
+
+
+  /* Helpers
+  /* *** *** *** *** *** *** *** *** *** *** *** *** *** *** */
 
 
   log( payload, message ) {

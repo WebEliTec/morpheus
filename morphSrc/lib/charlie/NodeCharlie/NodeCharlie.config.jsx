@@ -10,6 +10,7 @@ const config = {
 
   constants: {
     charlieConstant: 'some Constant within charlie',
+    someConstant: 'Hallooo Charlie!',
   },
 
   moduleRegistry: {

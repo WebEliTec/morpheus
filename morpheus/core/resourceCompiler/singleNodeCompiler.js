@@ -16,6 +16,7 @@ export default class SingleNodeCompiler {
     this.resourceRegistry           = resourceRegistry.singleNode;
     this.environment                = environment;
     this.executionContextFolderName = this.executionContext == 'app' ? this.appSrcFolderName : this.devSrcFolderName;
+    this.inheritanceLevelIds        = [ 'alpha', 'bravo', 'charlie', 'delta' ];
 
     this.setNodeDirPath();
 
@@ -55,9 +56,7 @@ export default class SingleNodeCompiler {
 
     } else {
 
-      const inheritanceLevelIds = [ 'alpha', 'bravo', 'charlie', 'delta' ];
-
-      if( inheritanceLevelIds.includes( this.inheritanceLevel ) ) {
+      if( this.inheritanceLevelIds.includes( this.inheritanceLevel ) ) {
         this.nodeDirPath = `lib/${this.inheritanceLevel}/${this.nodeId}`
       } else {
         throw new Error('Unknow levelID: ' + this.inheritanceLevel );
