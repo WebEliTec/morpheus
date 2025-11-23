@@ -31,66 +31,47 @@ export default class NodeCompiler {
   
   async compileNode() {
     
-    const echoSingleNodeCompiler = new SingleNodeCompiler({
-      inheritanceLevel: 'echo', 
-      nodeId:           this.nodeId,
-      nodeItem:         this.nodeItem,
-      executionContext: this.executionContext, 
-      contextConfig:    this.contextConfig,
-      environment:      'client'
-    });
+    const echoSingleNodeCompiler = new SingleNodeCompiler({ inheritanceLevel: 'echo', nodeId: this.nodeId, nodeItem: this.nodeItem, executionContext: this.executionContext, contextConfig: this.contextConfig, environment: 'client' });
+    const echoNodeResources      = await echoSingleNodeCompiler.loadNodeResources();    
+    const deltaNodeId            = echoNodeResources?.parentId;
 
-    const echoNodeResources  = await echoSingleNodeCompiler.loadNodeResources();
-
-    this.log( echoNodeResources );
-    
-    
-    const deltaNodeId        = echoNodeResources?.parentId;
-
-
-    let charlieNodeId;
-
-    if( deltaNodeId ) {
-
-      const deltaSingleNodeCompiler = new SingleNodeCompiler({
-        inheritanceLevel: 'delta', 
-        nodeId:           deltaNodeId,
-        executionContext: this.executionContext, 
-        contextConfig:    this.abstractNodeConfig,
-        environment:      'client'
-      });
-
-      const deltaNodeResources = await deltaSingleNodeCompiler.loadNodeResources();
-
-      this.log( deltaNodeResources );
-      
-      charlieNodeId            = deltaNodeResources?.parentId;
-
+    if( !deltaNodeId ) {
+      return echoNodeResources;
     }
 
-    if( charlieNodeId  ) {
+    const nodeInheritanceLineStack = {};
 
-      const charlieSingleNodeCompiler = new SingleNodeCompiler({
-        inheritanceLevel: 'charlie', 
-        nodeId:           charlieNodeId,
-        executionContext: this.executionContext, 
-        contextConfig:    this.abstractNodeConfig,
-        environment:      'client'
-      });
+    nodeInheritanceLineStack.echo  = echoNodeResources;
 
-      const charlieNodeResources  = await charlieSingleNodeCompiler.loadNodeResources();
+    const deltaSingleNodeCompiler  = new SingleNodeCompiler({ inheritanceLevel: 'delta', nodeId: deltaNodeId, executionContext: this.executionContext, contextConfig: this.abstractNodeConfig, environment: 'client' } );
+    const deltaNodeResources       = await deltaSingleNodeCompiler.loadNodeResources();
 
+    nodeInheritanceLineStack.delta = deltaNodeResources;
+    
+    const charlieNodeId            = deltaNodeResources?.parentId;
+
+    if( !charlieNodeId ) {
+      this.compileNodeInheritanceLineStack( nodeInheritanceLineStack );
     }
 
+    const charlieSingleNodeCompiler = new SingleNodeCompiler({ inheritanceLevel: 'charlie', nodeId: charlieNodeId, executionContext: this.executionContext, contextConfig: this.abstractNodeConfig, environment: 'client' } );
+    const charlieNodeResources      = await charlieSingleNodeCompiler.loadNodeResources();
+
+    nodeInheritanceLineStack.charlie = charlieNodeResources;
+
+
+
+    this.compileNodeInheritanceLineStack( nodeInheritanceLineStack );
 
 
     return echoNodeResources;
 
-    /*
-    if( !parentId ) {
-      return nodeResources;
-    }*/
-    
+
+
+  }
+
+  compileNodeInheritanceLineStack( nodeInheritanceLineStack ) {
+    console.log( nodeInheritanceLineStack );
   }
 
 

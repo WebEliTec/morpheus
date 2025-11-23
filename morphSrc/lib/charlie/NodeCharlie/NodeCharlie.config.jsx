@@ -1,24 +1,20 @@
 const config = {
 
-  parentId: 'NodeCharlie',
-
   defaultPaths: {
     traits: '/',
   },
 
-  traits: ['deltaTrait'],
-
   coreData: {
-    deltaCoreDataPiece: 'deltaCoreDataPiece',
+    charlieCoreDataPiece: 'charlieCoreDataPiece',
   },
 
   constants: {
-    anotherContant: 'some Value',
+    charlieConstant: 'some Constant within charlie',
   },
 
   moduleRegistry: {
     
-    Wrapper: {
+    AnotherWrapper: {
       isRoot: true,
     }, 
 
