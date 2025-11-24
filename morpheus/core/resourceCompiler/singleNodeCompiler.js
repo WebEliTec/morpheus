@@ -237,7 +237,7 @@ export default class SingleNodeCompiler {
        * If a node has a 'signals' resource, it is transformed to a singalClusterItem with id 'signal'.
        */
       if ( resourceName === 'signals' && payload ) {
-        console.warn( `A 'signal' resource type has been found within node '${this.nodeId} and is now being transformed to a signalClusterItem with id 'signals'.` )
+        console.warn( `A 'signal' resource type has been found within node '${this.nodeId}' and is now being transformed to a signalClusterItem with id 'signals'.` )
         selectedResources.signalClusters               ??= {};
         selectedResources.signalClusters.signals         = {};
         selectedResources.signalClusters.signals.signals = payload;
@@ -322,7 +322,9 @@ export default class SingleNodeCompiler {
 
     if( kernel ) { 
       console.warn(`Resource type 'kernel' found within node '${this.nodeId}' and is now being transformed to trait with id 'kernel'.`);
-      
+      if( this.inheritanceLevel != 'echo' ) {
+        console.warn( 'Note that it is not recommended using kernels within library nodes.' )
+      }
       traitImplementations.kernel = kernel 
     }
 

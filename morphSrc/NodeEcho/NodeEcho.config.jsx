@@ -49,7 +49,7 @@ const config = {
     },  
   },
 
-  traits: ['testTrait', 'deltaTrait', 'kernel'],
+  traits: ['testTrait', 'deltaTrait' ],
 
   traitImplementations: {
     testTrait: {
@@ -57,13 +57,13 @@ const config = {
         console.log('Hi there!');
       }
     },
-    kernel: {
-      kernelX: {
-        lol () {
-          console.log('hahaha');
-        }
-      }
-    } 
+  },
+
+  
+  kernel: {
+    helloKernelEcho() {
+      console.log('Juhu!!');
+    }
   }
   
 }

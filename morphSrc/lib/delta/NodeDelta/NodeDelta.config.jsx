@@ -30,10 +30,11 @@ const config = {
     deltaCoreDataPiece: 'deltaCoreDataPiece',
   },
 
-  /*
-  constants: {
-    anotherContant: 'some Value',
-  },*/
+  kernel: {
+    helloKernelDeltaX() {
+      console.log('Juhu Delta!');
+    }
+  },
 
   moduleRegistry: {
     
