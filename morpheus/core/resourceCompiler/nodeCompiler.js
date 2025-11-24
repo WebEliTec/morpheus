@@ -96,13 +96,14 @@ export default class NodeCompiler {
     //const coreDataSchemas = this.resolveCoreDataSchemas( nodeInheritanceLineStack );
 
     //data assignment needs to be an intelligent process, which checks items against corresponding schemas
-    const metaData        = this.resolveResourceType( nodeInheritanceLineStack, 'metaData' );
-    const coreData        = this.resolveResourceType( nodeInheritanceLineStack, 'coreData' );
-    
-    const signalClusters  = this.resolveResourceType( nodeInheritanceLineStack, 'signalClusters' );
-    const traits          = this.resolveResourceType( nodeInheritanceLineStack, 'traits' );
-    const moduleRegistry  = this.resolveResourceType( nodeInheritanceLineStack, 'moduleRegistry' );
-    const hooks           = this.resolveResourceType( nodeInheritanceLineStack, 'hooks' );
+    const metaData         = this.resolveResourceType( nodeInheritanceLineStack, 'metaData' );
+    const coreData         = this.resolveResourceType( nodeInheritanceLineStack, 'coreData' );
+
+    const signalClusters   = this.resolveResourceType( nodeInheritanceLineStack, 'signalClusters' );
+    const traits           = this.resolveResourceType( nodeInheritanceLineStack, 'traits' );
+    const moduleRegistry   = this.resolveResourceType( nodeInheritanceLineStack, 'moduleRegistry' );
+    const hooks            = this.resolveResourceType( nodeInheritanceLineStack, 'hooks' );
+    const instanceRegistry = this.resolveResourceType( nodeInheritanceLineStack, 'instanceRegistry' );
 
     const result = {
       constants,
@@ -112,6 +113,7 @@ export default class NodeCompiler {
       traits, 
       moduleRegistry, 
       hooks, 
+      instanceRegistry,
     }
 
     console.log( result );
