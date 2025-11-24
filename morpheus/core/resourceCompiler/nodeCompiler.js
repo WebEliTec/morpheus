@@ -80,15 +80,27 @@ export default class NodeCompiler {
   }
 
   compileNodeInheritanceLineStack( nodeInheritanceLineStack ) {
-    console.log(  nodeInheritanceLineStack );
-    const constants       = this.resolveConstants( nodeInheritanceLineStack );
-    const metaDataSchemas = this.resolveMetaDataSchemas( nodeInheritanceLineStack );
-
-    this.log( constants );
-  }
-
-  resolveResource() {
     
+    //Constants maybe overwritten by child nodes
+    const constants       = this.resolveConstants( nodeInheritanceLineStack );
+
+    //metaDataSchemas need to be implemented later on
+    //const metaDataSchemas = this.resolveMetaDataSchemas( nodeInheritanceLineStack );
+
+    //coreDataSchemas need to be implemented later on
+    //const coreDataSchemas = this.resolveCoreDataSchemas( nodeInheritanceLineStack );
+
+    //metaData assignment needs to be an intelligent process, which checks items against metaDataSchemas
+    const metaData        = this.resolveMetaData( nodeInheritanceLineStack );
+
+    //coreData assignment needs to be an intelligent process, which checks items against coreDataSchemas
+    const coreData        = this.resolveCoreData( nodeInheritanceLineStack );
+
+    const signalClusters  = this.resolveSignalClusters( nodeInheritanceLineStack );
+
+    this.log( signalClusters  );
+
+
   }
 
   resolveConstants( nodeInheritanceLineStack ) {
@@ -119,10 +131,21 @@ export default class NodeCompiler {
 
   }
 
-
-  resolveMetaDataSchemas( nodeInheritanceLineStack ) {
-
+  resolveMetaData( nodeInheritanceLineStack ) {
+    return nodeInheritanceLineStack.echo?.metaData;
   }
+
+  resolveCoreData( nodeInheritanceLineStack ) {
+    return nodeInheritanceLineStack.echo?.coreData;
+  }
+
+  resolveSignalClusters( nodeInheritanceLineStack ) {
+    console.log( nodeInheritanceLineStack );
+    const signalClustersByInheritanceLevelId = {};
+
+    return null;
+  }
+
 
 
 

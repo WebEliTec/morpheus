@@ -144,6 +144,18 @@ export default class SingleNodeCompiler {
     nodeResources.hooks            = selectedResources?.hooks ?? null
     nodeResources.traits           = traits;
 
+    /**
+     * Note that all levels may have core data and meta data schemas.
+     * It is always instances that are rendered to the frontend. 
+     * So when assigining meta data and core data items to the node resources, 
+     * they need to be checked against their corresponding schemas. 
+     * 
+     * Schemas serve following purposes: 
+     * - Default value provision 
+     * - Type Safety 
+     * - Specifying if a core data item is required or not
+     */
+
     if( this.inheritanceLevel == 'echo' ) {
       nodeResources.metaData         = selectedResources?.metaData ?? null
       nodeResources.coreData         = selectedResources?.coreData ?? null
@@ -204,13 +216,30 @@ export default class SingleNodeCompiler {
       const filePayload                 = availableResources?.[resourceName];
       const payload                     = configResourcePayload ?? filePayload;
 
+      /**
+       * signalClusters are loaded first, because of the order 
+       * within resourceRegistry.
+       */
+
+      /**
+       * We check, whether a signalCluster contains an item called 'signals'.
+       * If so, we delete it, because it is reserved for the independent resource 
+       * 'signals'.
+       */
+
       if ( resourceName === 'signalClusters' && payload?.signals ) {
+        console.warn( `signalClusterItem with id 'signals' detected within node '${this.nodeId}' and is therefore excluded. Note that this is a protected keyword, because it is used for the independent resource type 'signals'.` )
         delete payload.signals;
       }
 
       selectedResources[resourceName] = payload;
 
+      
+      /**
+       * If a node has a 'signals' resource, it is transformed to a singalClusterItem with id 'signal'.
+       */
       if ( resourceName === 'signals' && payload ) {
+        console.warn( `A 'signal' resource type has been found within node '${this.nodeId} and is now being transformed to a signalClusterItem with id 'signals'.` )
         selectedResources.signalClusters               ??= {};
         selectedResources.signalClusters.signals         = {};
         selectedResources.signalClusters.signals.signals = payload;
@@ -514,6 +543,8 @@ export default class SingleNodeCompiler {
       constants:        config.constants ?? null,
       metaData:         config.metaData ?? null,
       coreData:         config.coreData ?? null,
+
+
       signalClusters:   resolvedSignalClusters ?? null,
       moduleRegistry:   initializedModuleRegistry ?? null,
       instanceRegistry: config.instanceRegistry ?? null, 

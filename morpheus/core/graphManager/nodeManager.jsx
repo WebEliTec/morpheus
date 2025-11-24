@@ -147,6 +147,8 @@ export default class NodeManager {
     kernel.parentId          = nodeProps?.parentId; 
 
     kernel.constants         = constants;
+    
+    
     kernel.metaData          = { ...metaData, ...(instanceData?.metaData || {}) };
     kernel.coreData          = { ...coreData, ...(instanceData?.coreData || {}) };
     kernel.signalClusters    = signalClusters;
@@ -197,7 +199,6 @@ export default class NodeManager {
     const nodeContext        = createContext();
     this.nodeContext         = nodeContext;
 
-    //If No Signal is defined, create one, so the rest of the code keeps running
     if( !signalClusters ) {
       console.warn(`No signal or signalCluster provided for node '${kernel.nodeId}'`);
     }
