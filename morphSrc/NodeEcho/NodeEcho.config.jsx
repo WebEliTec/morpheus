@@ -31,7 +31,7 @@ const config = {
   },
 
   signalClusters: {
-    general: {
+    EchoGeneral: {
       signals: {
         aGeneralSignal: {
           type: 'primitive', 

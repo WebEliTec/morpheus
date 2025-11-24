@@ -17,8 +17,6 @@ export default class SingleNodeCompiler {
     this.executionContextFolderName = this.executionContext == 'app' ? this.appSrcFolderName : this.devSrcFolderName;
     this.inheritanceLevelIds        = [ 'alpha', 'bravo', 'charlie', 'delta' ];
 
-    console.log( inheritanceLevel );
-
     this.setResourceRegistry();
     this.setNodeDirPath();
 

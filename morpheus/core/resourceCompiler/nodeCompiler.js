@@ -82,7 +82,12 @@ export default class NodeCompiler {
   compileNodeInheritanceLineStack( nodeInheritanceLineStack ) {
     
     //Constants maybe overwritten by child nodes
-    const constants       = this.resolveConstants( nodeInheritanceLineStack );
+    //const constants       = this.resolveConstants( nodeInheritanceLineStack );
+
+    const constants       = this.resolveResourceType( nodeInheritanceLineStack, 'constants' );
+    //const metaData        = this.resolveResourceType( nodeInheritanceLineStack, 'metaData' );
+
+    console.log( constants );
 
     //metaDataSchemas need to be implemented later on
     //const metaDataSchemas = this.resolveMetaDataSchemas( nodeInheritanceLineStack );
@@ -91,43 +96,47 @@ export default class NodeCompiler {
     //const coreDataSchemas = this.resolveCoreDataSchemas( nodeInheritanceLineStack );
 
     //metaData assignment needs to be an intelligent process, which checks items against metaDataSchemas
-    const metaData        = this.resolveMetaData( nodeInheritanceLineStack );
+    const metaData        = this.resolveResourceType( nodeInheritanceLineStack, 'metaData' );
 
     //coreData assignment needs to be an intelligent process, which checks items against coreDataSchemas
-    const coreData        = this.resolveCoreData( nodeInheritanceLineStack );
+    const coreData        = this.resolveResourceType( nodeInheritanceLineStack, 'coreData' );
 
-    const signalClusters  = this.resolveSignalClusters( nodeInheritanceLineStack );
+
+    const signalClusters  = this.resolveResourceType( nodeInheritanceLineStack, 'signalClusters' );
 
     this.log( signalClusters  );
 
 
   }
 
-  resolveConstants( nodeInheritanceLineStack ) {
+  resolveResourceType( nodeInheritanceLineStack, resourceTypeId ) {
     
-    const constantsByInheritanceLevelId = {};
+    const resourcesByInheritanceLevelId = {};
     
     this.inheritanceLevelIds.forEach((inheritanceLevelId) => {
-      const constants = nodeInheritanceLineStack[inheritanceLevelId]?.constants;
-      if (constants) {
-        constantsByInheritanceLevelId[inheritanceLevelId] = constants;
+      const resources = nodeInheritanceLineStack[inheritanceLevelId]?.[resourceTypeId];
+      if ( resources ) {
+        resourcesByInheritanceLevelId[inheritanceLevelId] = resources;
       }
     });
 
-    const constants       = {};
-    const constantOrigins = {};
-    
+    const resources       = {};
+    const resourceOrigins = {};
+
     this.inheritanceLevelIds.forEach((levelId) => {
-      const levelConstants = constantsByInheritanceLevelId[levelId];
-      if (levelConstants) {
-        Object.keys(levelConstants).forEach((key) => {
-          constants[key]       = levelConstants[key];
-          constantOrigins[key] = levelId;
+
+      const levelResources = resourcesByInheritanceLevelId[levelId];
+
+      if( levelResources ) {
+        Object.keys(levelResources).forEach((key) => {
+          resources[key]       = levelResources[key];
+          resourceOrigins[key] = levelId;
         });
       }
+
     });
-    
-    return constants;
+
+    return resources;
 
   }
 
@@ -139,12 +148,34 @@ export default class NodeCompiler {
     return nodeInheritanceLineStack.echo?.coreData;
   }
 
+  /*
   resolveSignalClusters( nodeInheritanceLineStack ) {
-    console.log( nodeInheritanceLineStack );
+ 
     const signalClustersByInheritanceLevelId = {};
 
-    return null;
-  }
+    this.inheritanceLevelIds.forEach((inheritanceLevelId) => {
+      const signalClusters = nodeInheritanceLineStack[inheritanceLevelId]?.signalClusters;
+      if (signalClusters) {
+        signalClustersByInheritanceLevelId[inheritanceLevelId] = signalClusters;
+      }
+    });
+
+    const signalClusters        = {};
+    const signalClustersOrigins = {};
+    
+    this.inheritanceLevelIds.forEach((levelId) => {
+      const levelSignalClusters = signalClustersByInheritanceLevelId[levelId];
+      if (levelSignalClusters) {
+        Object.keys(levelConstants).forEach((key) => {
+          constants[key]       = levelConstants[key];
+          constantOrigins[key] = levelId;
+        });
+      }
+    });
+    
+    return constants;
+
+  }*/
 
 
 
