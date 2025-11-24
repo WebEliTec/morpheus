@@ -296,6 +296,7 @@ export default class SingleNodeCompiler {
 
       //If kernel is specified as traitId, ignore it.
       if( traitId == 'kernel' ) {
+        console.warn(`A trait '${traitId}' has been declared in node '${this.nodeId}'. It is ignored and excluded, because 'kernel' is reserved as identifier for resource type 'kernel'. `);
         continue;
       }
 
@@ -320,6 +321,8 @@ export default class SingleNodeCompiler {
     const kernel = config?.kernel ?? availableResources?.kernel;
 
     if( kernel ) { 
+      console.warn(`Resource type 'kernel' found within node '${this.nodeId}' and is now being transformed to trait with id 'kernel'.`);
+      
       traitImplementations.kernel = kernel 
     }
 
