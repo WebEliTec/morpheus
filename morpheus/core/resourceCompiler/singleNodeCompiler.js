@@ -309,7 +309,7 @@ export default class SingleNodeCompiler {
       const result          = await this.loadResource( constructedPath );
 
       if( !result ) {
-        console.warn(`Trait '${traitId}' of node '${this.nodeId}' not found in '${this.getAbsPath(constructedPath)}'`);
+        console.warn(`Trait '${traitId}' of node '${this.nodeId}' not found as traitImplementation within ${this.nodeId}.config.jsx or in '${this.getAbsPath(constructedPath)}'`);
         continue;
       }
 

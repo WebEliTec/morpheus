@@ -1,6 +1,6 @@
 const deltaTrait = {
-  helloEcho() {
-    console.log('König von Deutschland');
+  helloDelta() {
+    console.log('König von Delta');
   }
 }
 export default deltaTrait;

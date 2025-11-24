@@ -80,14 +80,14 @@ export default class NodeCompiler {
   }
 
   compileNodeInheritanceLineStack( nodeInheritanceLineStack ) {
+
+
+    console.log( nodeInheritanceLineStack );
     
     //Constants maybe overwritten by child nodes
     //const constants       = this.resolveConstants( nodeInheritanceLineStack );
 
     const constants       = this.resolveResourceType( nodeInheritanceLineStack, 'constants' );
-    //const metaData        = this.resolveResourceType( nodeInheritanceLineStack, 'metaData' );
-
-    console.log( constants );
 
     //metaDataSchemas need to be implemented later on
     //const metaDataSchemas = this.resolveMetaDataSchemas( nodeInheritanceLineStack );
@@ -95,16 +95,13 @@ export default class NodeCompiler {
     //coreDataSchemas need to be implemented later on
     //const coreDataSchemas = this.resolveCoreDataSchemas( nodeInheritanceLineStack );
 
-    //metaData assignment needs to be an intelligent process, which checks items against metaDataSchemas
+    //data assignment needs to be an intelligent process, which checks items against corresponding schemas
     const metaData        = this.resolveResourceType( nodeInheritanceLineStack, 'metaData' );
-
-    //coreData assignment needs to be an intelligent process, which checks items against coreDataSchemas
     const coreData        = this.resolveResourceType( nodeInheritanceLineStack, 'coreData' );
-
 
     const signalClusters  = this.resolveResourceType( nodeInheritanceLineStack, 'signalClusters' );
 
-    this.log( signalClusters  );
+    const traits          = this.resolveResourceType( nodeInheritanceLineStack, 'traits' );
 
 
   }
@@ -139,46 +136,6 @@ export default class NodeCompiler {
     return resources;
 
   }
-
-  resolveMetaData( nodeInheritanceLineStack ) {
-    return nodeInheritanceLineStack.echo?.metaData;
-  }
-
-  resolveCoreData( nodeInheritanceLineStack ) {
-    return nodeInheritanceLineStack.echo?.coreData;
-  }
-
-  /*
-  resolveSignalClusters( nodeInheritanceLineStack ) {
- 
-    const signalClustersByInheritanceLevelId = {};
-
-    this.inheritanceLevelIds.forEach((inheritanceLevelId) => {
-      const signalClusters = nodeInheritanceLineStack[inheritanceLevelId]?.signalClusters;
-      if (signalClusters) {
-        signalClustersByInheritanceLevelId[inheritanceLevelId] = signalClusters;
-      }
-    });
-
-    const signalClusters        = {};
-    const signalClustersOrigins = {};
-    
-    this.inheritanceLevelIds.forEach((levelId) => {
-      const levelSignalClusters = signalClustersByInheritanceLevelId[levelId];
-      if (levelSignalClusters) {
-        Object.keys(levelConstants).forEach((key) => {
-          constants[key]       = levelConstants[key];
-          constantOrigins[key] = levelId;
-        });
-      }
-    });
-    
-    return constants;
-
-  }*/
-
-
-
 
   /* Helpers
   /* *** *** *** *** *** *** *** *** *** *** *** *** *** *** */

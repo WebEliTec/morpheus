@@ -1,9 +1,9 @@
 const signalClusters = {
   deltaGeneralX: {
     signals: {
-      aGeneralSignal: {
+      aGeneralSignalFromDelta: {
         type: 'primitive', 
-        default: true,
+        default: 'Delta',
       }
     }
   }, 

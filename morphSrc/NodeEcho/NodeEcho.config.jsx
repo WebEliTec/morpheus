@@ -38,6 +38,24 @@ const config = {
           default: true,
         }
       }
+    },
+    deltaGeneralX: {
+      signals: {
+        aGeneralSignalFromDelta: {
+          type: 'primitive', 
+          default: 'Echo',
+        }
+      }
+    },  
+  },
+
+  traits: ['testTrait', 'deltaTrait'],
+
+  traitImplementations: {
+    testTrait: {
+      helloEcho() {
+        console.log('Hi there!');
+      }
     }, 
   }
   
