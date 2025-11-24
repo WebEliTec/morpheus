@@ -4,6 +4,7 @@ const config = {
 
   defaultPaths: {
     traits: '/',
+    modules: '/'
   },
 
   constants: {
@@ -33,6 +34,12 @@ const config = {
   kernel: {
     helloKernelDeltaX() {
       console.log('Juhu Delta!');
+    }
+  },
+
+  hooks: {
+    kernelDidMount: () => {
+      console.log('haha from Delta');
     }
   },
 

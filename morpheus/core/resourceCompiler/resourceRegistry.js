@@ -26,18 +26,6 @@ const resourceRegistry = {
       
     }, 
 
-
-    dynamicDirectories: {
-
-      traits:  'traits', 
-
-      styles:  'styles',
-
-      modules: 'modules',
-
-      sharedModules: 'sharedModules'
-
-    }
   },
 
   libraryNode: {
@@ -64,18 +52,6 @@ const resourceRegistry = {
       
     }, 
 
-
-    dynamicDirectories: {
-
-      traits:  'traits', 
-
-      styles:  'styles',
-
-      modules: 'modules',
-
-      sharedModules: 'sharedModules'
-
-    }
   },
 
 };

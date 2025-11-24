@@ -21,6 +21,17 @@ const config = {
       isRoot: true,
     },
 
+    Wrapper: {},
+
+  },
+
+  hooks: {
+    holla: () => {
+      console.log('haha');
+    }, 
+    kernelDidMount: () => {
+      console.log('haha from Echo');
+    }
   },
 
   signals: {
