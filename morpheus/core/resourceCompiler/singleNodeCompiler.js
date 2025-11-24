@@ -13,17 +13,27 @@ export default class SingleNodeCompiler {
     this.nodeItem                   = nodeItem
     this.executionContext           = executionContext;
     this.executionContextConfig     = contextConfig;
-    this.resourceRegistry           = resourceRegistry.singleNode;
     this.environment                = environment;
     this.executionContextFolderName = this.executionContext == 'app' ? this.appSrcFolderName : this.devSrcFolderName;
     this.inheritanceLevelIds        = [ 'alpha', 'bravo', 'charlie', 'delta' ];
 
+    console.log( inheritanceLevel );
+
+    this.setResourceRegistry();
     this.setNodeDirPath();
 
   }
 
-  /* Set Node Dir Path
+  /* Set Resource Registry & Node Dir Path 
   /* *** *** *** *** *** *** *** *** *** *** *** *** *** *** */
+
+  setResourceRegistry() {
+    if ( this.inheritanceLevel == 'echo' ) {
+      this.resourceRegistry = resourceRegistry.singleNode;
+    } else {
+      this.resourceRegistry = resourceRegistry.libraryNode;
+    }
+  }
 
   setNodeDirPath() {
 
@@ -67,6 +77,7 @@ export default class SingleNodeCompiler {
     this.configDirSubPath = this.removeTrailingSlash ( this.nodeDirPath );
 
   }
+
 
   /* Load Config File
   /* *** *** *** *** *** *** *** *** *** *** *** *** *** *** */
@@ -119,29 +130,33 @@ export default class SingleNodeCompiler {
       console.warn( `moduleRegistry is empty for node '${this.nodeId}'` );
     }
 
-    const rootModuleId       = this.getRootModuleId( configObject, moduleRegistry );
+    const rootModuleId             = this.getRootModuleId( configObject, moduleRegistry );
 
-    const nodeResources      = {
+    const nodeResources            = {};
+    nodeResources.nodeId           = this.nodeId
+    nodeResources.executionContext = this.executionContext
+    nodeResources.inheritanceLevel = this.inheritanceLevel
+    nodeResources.parentId         = configObject?.parentId ?? null
+    nodeResources.rootModuleId     = rootModuleId ?? null
+    nodeResources.constants        = selectedResources?.constants ?? null
+    nodeResources.signalClusters   = selectedResources?.signalClusters ?? null
+    nodeResources.moduleRegistry   = moduleRegistry ?? null
+    nodeResources.hooks            = selectedResources?.hooks ?? null
+    nodeResources.traits           = traits;
 
-      nodeId:           this.nodeId,
-      executionContext: this.executionContext,
-      inheritanceLevel: this.inheritanceLevel,
-      parentId:         configObject?.parentId ?? null,
-      rootModuleId:     rootModuleId ?? null,
-      constants:        selectedResources?.constants ?? null, 
-      metaData:         selectedResources?.metaData ?? null, 
-      coreData:         selectedResources?.coreData ?? null, 
-      signalClusters:   selectedResources?.signalClusters ?? null,
-      moduleRegistry:   moduleRegistry ?? null,
-      instanceRegistry: selectedResources?.instanceRegistry ?? null, 
-      hooks:            selectedResources?.hooks ?? null,
-      traits,
-
+    if( this.inheritanceLevel == 'echo' ) {
+      nodeResources.metaData         = selectedResources?.metaData ?? null
+      nodeResources.coreData         = selectedResources?.coreData ?? null
+      nodeResources.instanceRegistry = selectedResources?.instanceRegistry ?? null 
+    } else {
+      nodeResources.metaDataSchemas  = selectedResources?.metaDataSchemas ?? null
+      nodeResources.coreDataSchemas  = selectedResources?.coreDataSchemas ?? null
     }
 
     return nodeResources;
 
   }
+
 
   /* Static Files
   /* *** *** *** *** *** *** *** *** *** *** *** *** *** *** */
@@ -285,6 +300,7 @@ export default class SingleNodeCompiler {
 
   }
 
+
   /* Module Loading
   /* *** *** *** *** *** *** *** *** *** *** *** *** *** *** */
 
@@ -312,7 +328,7 @@ export default class SingleNodeCompiler {
       const sharedModuleRegistryItem                = this.executionContextConfig?.sharedModuleRegistry?.[moduleId];
 
       const isShared                                = moduleRegistryItem?.isShared && ( this.inheritanceLevel == 'echo' );
-      const sharedModuleDirectoryDefaultPath        = this.resourceRegistry.dynamicDirectories.sharedModules;
+      const sharedModuleDirectoryDefaultPath        = 'sharedModules';
       const sharedModuleDirectorySubPath            = this.removeTrailingSlash( sharedModuleRegistryItem?.dir );
       const hasIndividualSharedModulePath           = sharedModuleDirectorySubPath && sharedModuleDirectorySubPath != '/';
       const isIndividualSharedModulePathOnRootLevel = sharedModuleDirectorySubPath == '/';
@@ -407,7 +423,7 @@ export default class SingleNodeCompiler {
 
         const isShared                                = moduleRegistryItem?.isShared;
 
-        const sharedModuleDirectoryDefaultPath        = this.resourceRegistry.dynamicDirectories.sharedModules;
+        const sharedModuleDirectoryDefaultPath        = 'sharedModules';
         const sharedModuleDirectorySubPath            = this.removeTrailingSlash( sharedModuleRegistryItem?.dir );
         const hasIndividualSharedModulePath           = sharedModuleDirectorySubPath && sharedModuleDirectorySubPath != '/';
         const isIndividualSharedModulePathOnRootLevel = sharedModuleDirectorySubPath == '/';

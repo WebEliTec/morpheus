@@ -1,7 +1,7 @@
 import React, { createContext, useContext, useState, useMemo, useEffect } from 'react';
 import NodeCompiler from '../resourceCompiler/nodeCompiler';
 import MorpheusKernel from '../resourceCompiler/MorpheusKernel';
-import * as Lucide from 'lucide-react';  // ADD THIS LINE
+import * as Lucide from 'lucide-react'; 
 
 import { shouldModuleRerender } from '@morpheus/apis/router';
 

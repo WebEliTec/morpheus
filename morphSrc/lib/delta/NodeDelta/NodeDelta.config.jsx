@@ -10,7 +10,14 @@ const config = {
     someConstant: 'Halloo Delta!',
   },
 
-  coreDataSchema: {
+  metaDataSchemas: {
+    title: {
+      type: 'string',
+      default: 'Title of the node'
+    }
+  },
+
+  coreDataSchemas: {
     someCoreData: {
       type: 'string',
       default: 'someString',

@@ -81,12 +81,17 @@ export default class NodeCompiler {
 
   compileNodeInheritanceLineStack( nodeInheritanceLineStack ) {
     console.log(  nodeInheritanceLineStack );
-    const constants = this.resolveConstants( nodeInheritanceLineStack );
+    const constants       = this.resolveConstants( nodeInheritanceLineStack );
+    const metaDataSchemas = this.resolveMetaDataSchemas( nodeInheritanceLineStack );
 
     this.log( constants );
   }
 
-  resolveConstants(nodeInheritanceLineStack) {
+  resolveResource() {
+    
+  }
+
+  resolveConstants( nodeInheritanceLineStack ) {
     
     const constantsByInheritanceLevelId = {};
     
@@ -104,13 +109,18 @@ export default class NodeCompiler {
       const levelConstants = constantsByInheritanceLevelId[levelId];
       if (levelConstants) {
         Object.keys(levelConstants).forEach((key) => {
-          constants[key] = levelConstants[key];
+          constants[key]       = levelConstants[key];
           constantOrigins[key] = levelId;
         });
       }
     });
     
     return constants;
+
+  }
+
+
+  resolveMetaDataSchemas( nodeInheritanceLineStack ) {
 
   }
 
