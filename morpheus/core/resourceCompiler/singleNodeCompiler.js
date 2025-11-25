@@ -412,9 +412,7 @@ export default class SingleNodeCompiler {
         }
 
         // Don't import, just store metadata
-        initializedModuleRegistry[moduleId].component    = null;
-        initializedModuleRegistry[moduleId].path         = constructedPath;
-        initializedModuleRegistry[moduleId].internalPath = internalPath;
+        initializedModuleRegistry[moduleId].component = null;
 
       } else {
 
@@ -425,11 +423,14 @@ export default class SingleNodeCompiler {
           continue;
         }
 
-        initializedModuleRegistry[moduleId].component    = result;
-        initializedModuleRegistry[moduleId].path         = constructedPath;
-        initializedModuleRegistry[moduleId].internalPath = internalPath;
+        initializedModuleRegistry[moduleId].component = result;
+
 
       }
+
+      initializedModuleRegistry[moduleId].path             = constructedPath;
+      initializedModuleRegistry[moduleId].internalPath     = internalPath;
+      initializedModuleRegistry[moduleId].inheritanceLevel = this.inheritanceLevel;
 
     }
 
@@ -642,9 +643,9 @@ export default class SingleNodeCompiler {
 
   }
 
-  getRootModuleId( config, moduleRegistry ) {
+  getRootModuleId( configObject, moduleRegistry ) {
 
-    let rootModuleId = config?.rootModuleId || config?.rootModule || config?.root;
+    let rootModuleId = configObject?.rootModuleId || configObject?.rootModule || configObject?.root;
 
     if( rootModuleId ) {
       return rootModuleId;
@@ -664,6 +665,8 @@ export default class SingleNodeCompiler {
         }
       }
     }
+
+    console.log( rootModuleId );
 
     return rootModuleId ?? 'Root';
 

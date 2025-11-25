@@ -86,7 +86,9 @@ export default class NodeCompiler {
 
     const signalClusters    = this.resolveResourceType( nodeInheritanceLineStack, 'signalClusters' );
     const traits            = this.resolveResourceType( nodeInheritanceLineStack, 'traits' );
+
     const moduleRegistry    = this.resolveResourceType( nodeInheritanceLineStack, 'moduleRegistry' );
+
     const hooks             = this.resolveResourceType( nodeInheritanceLineStack, 'hooks' );
     const instanceRegistry  = this.resolveResourceType( nodeInheritanceLineStack, 'instanceRegistry' );
 
@@ -104,8 +106,6 @@ export default class NodeCompiler {
       hooks, 
       instanceRegistry,
     }
-
-    this.log( nodeResources );
 
     return nodeResources;
 
@@ -138,7 +138,29 @@ export default class NodeCompiler {
 
     });
 
+    if( resourceTypeId == 'moduleRegistry' ) {
+      this.removeMultipleRootModulesDeclarations( resources )
+    }
+
     return resources;
+
+  }
+
+  removeMultipleRootModulesDeclarations(moduleRegistry) {
+    const rootModules = Object.entries(moduleRegistry).filter(([key, module]) => module.isRoot).sort((a, b) => {
+      const levelA = this.inheritanceLevelIds.indexOf(a[1].inheritanceLevel);
+      const levelB = this.inheritanceLevelIds.indexOf(b[1].inheritanceLevel);
+      return levelB - levelA; // Sort descending (echo first)
+    });
+    
+    // Keep only the first (most specific) root, remove isRoot from others
+    rootModules.forEach(([key, module], index) => {
+      if (index > 0) {
+        delete moduleRegistry[key].isRoot;
+      }
+    });
+
+    console.log( moduleRegistry );
 
   }
 
