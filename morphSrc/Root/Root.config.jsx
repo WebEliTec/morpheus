@@ -2,8 +2,6 @@
 
 const config = {
 
-  traits: ['someTrait'],
-
   moduleRegistry: {
 
     Root: {

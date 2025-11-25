@@ -17,20 +17,15 @@ const config = {
 
   moduleRegistry: {
 
-    A: {
+    Root: {
       isRoot: true,
     },
-
-    Wrapper: {},
 
   },
 
   hooks: {
-    holla: () => {
-      console.log('haha');
-    }, 
     kernelDidMount: () => {
-      console.log('haha from Echo');
+      console.log('kernelDidMountEcho');
     }
   },
 
@@ -60,11 +55,11 @@ const config = {
     },  
   },
 
-  traits: ['testTrait', 'deltaTrait' ],
+  traits: [ 'deltaTrait' ],
 
   traitImplementations: {
-    testTrait: {
-      helloEcho() {
+    deltaTrait: {
+      helloEchoX() {
         console.log('Hi there!');
       }
     },

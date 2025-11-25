@@ -289,7 +289,7 @@ export default class NodeManager {
       const context             = useContext( nodeContext );
       
       const moduleEntry         = moduleRegistry?.[moduleId];
-
+      
       if( !moduleEntry ) {
         const errorMessage = `Module "${moduleId}" of node "${kernel.nodeId}" not found.`;
         console.warn( errorMessage );

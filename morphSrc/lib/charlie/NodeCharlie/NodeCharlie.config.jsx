@@ -2,6 +2,7 @@ const config = {
 
   defaultPaths: {
     traits: '/',
+    modules: '/',
   },
 
   coreData: {
@@ -14,11 +15,7 @@ const config = {
   },
 
   moduleRegistry: {
-    
-    AnotherWrapper: {
-      isRoot: true,
-    }, 
-
+    InnerModule: {},
   }, 
 
 }

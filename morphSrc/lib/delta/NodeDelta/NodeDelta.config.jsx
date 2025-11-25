@@ -25,8 +25,6 @@ const config = {
     },
   },
 
-  traits: ['deltaTrait'],
-
   coreData: {
     deltaCoreDataPiece: 'deltaCoreDataPiece',
   },
@@ -43,7 +41,19 @@ const config = {
     }
   },
 
+  traits: [ 'deltaTrait' ],
+
+  traitImplementations: {
+    deltaTrait: {
+      helloDelta() {
+        console.log('Hi there from Delta!');
+      }
+    },
+  },
+
   moduleRegistry: {
+
+    InnerModule: {},
     
     Wrapper: {
       isRoot: true,

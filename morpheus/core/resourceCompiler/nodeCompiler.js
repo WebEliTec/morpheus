@@ -1,4 +1,3 @@
-import { forEach } from 'lodash';
 import SingleNodeCompiler from './singleNodeCompiler';
 
 export default class NodeCompiler {
@@ -24,7 +23,7 @@ export default class NodeCompiler {
     let   parentIdOfLastNodeLevel;
     let   nodeId                   = this.nodeId;
 
-    for (const inheritanceLevelId of this.inheritanceLevelIds.reverse()) {
+    for (const inheritanceLevelId of this.inheritanceLevelIds.toReversed()) {
       
       const compilerConfig = {
         inheritanceLevel: inheritanceLevelId,  
@@ -105,6 +104,8 @@ export default class NodeCompiler {
       hooks, 
       instanceRegistry,
     }
+
+    this.log( nodeResources );
 
     return nodeResources;
 
