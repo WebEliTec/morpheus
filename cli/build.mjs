@@ -78,11 +78,10 @@ for (const nodeId of nodeIds) {
           imports.push(`import ${moduleId} from '${importPath}';`);
           moduleIdentifiers[moduleId]  = moduleId;
           moduleRegistryItem.component = `__IDENTIFIER__${moduleId}`;
-          //
 
         }
 
-      }); 
+      });
 
     }
     

@@ -1,5 +1,3 @@
-//import SingularityEngine from "../services/singularityEngine";
-
 const config = {
 
   moduleRegistry: {
@@ -7,6 +5,8 @@ const config = {
     Root: {
       signals: [],
     },
+
+    Welcome: {},
 
   },
   

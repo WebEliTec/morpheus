@@ -666,8 +666,6 @@ export default class SingleNodeCompiler {
       }
     }
 
-    console.log( rootModuleId );
-
     return rootModuleId ?? 'Root';
 
   }

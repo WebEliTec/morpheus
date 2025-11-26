@@ -15,7 +15,9 @@ const config = {
   },
 
   moduleRegistry: {
-    InnerModule: {},
+    InnerModule: {
+      isRoot: true,
+    },
   }, 
 
 }
