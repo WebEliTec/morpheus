@@ -104,7 +104,7 @@ export default class SingleNodeCompiler {
     const configFileContent   = await this.loadResource( constructedPath, false );
 
     if( !configFileContent ) {
-      console.warn( `Config file '${this.nodeId}.config.jsx' not found for node '${this.nodeId}' in ${this.getAbsPath( constructedPath )}` );
+      console.warn( `Config file '${this.nodeId}.config.jsx' not found for node '${this.nodeId}' in '${this.getAbsPath( constructedPath )}'` );
       //return;
     }
 

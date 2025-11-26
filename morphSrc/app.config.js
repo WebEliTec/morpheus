@@ -2,7 +2,9 @@ const appConfig = {
 
 	nodeRegistry: {
 		Root: {},
-		NodeEcho: {},
+		NodeEcho: {
+			dir: '/test'
+		},
 	},  
 
 }
