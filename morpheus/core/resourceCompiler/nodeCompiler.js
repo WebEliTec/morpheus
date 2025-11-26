@@ -160,7 +160,7 @@ export default class NodeCompiler {
       }
     });
 
-    console.log( moduleRegistry );
+    //console.log( moduleRegistry );
 
   }
 

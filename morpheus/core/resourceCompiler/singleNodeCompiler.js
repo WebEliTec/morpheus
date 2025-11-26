@@ -62,6 +62,10 @@ export default class SingleNodeCompiler {
         this.nodeDirPath = this.nodeId;
       }
 
+      console.log('XXXX');
+      console.log( this.nodeDirPath );
+      console.log('----');
+
     } else {
 
       if( this.inheritanceLevelIds.includes( this.inheritanceLevel ) ) {
@@ -100,12 +104,13 @@ export default class SingleNodeCompiler {
     } else {
       constructedPath = `${this.nodeDirPath}/${this.nodeId}.config.jsx`;
     }
+
+    //console.log( constructedPath );
     
     const configFileContent   = await this.loadResource( constructedPath, false );
 
     if( !configFileContent ) {
       console.warn( `Config file '${this.nodeId}.config.jsx' not found for node '${this.nodeId}' in '${this.getAbsPath( constructedPath )}'` );
-      //return;
     }
 
     return configFileContent;

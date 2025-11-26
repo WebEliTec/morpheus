@@ -52,7 +52,7 @@ class MorphSrcBuildDirectoryBuilder {
 
   async createSingleResourceFiles( nodeId ) {
 
-    const nodeItem          = this.appConfig[nodeId];
+    const nodeItem          = this.appConfig.nodeRegistry[nodeId]; 
     const isSingleFile      = nodeItem?.isFile;
     const compiler          = new SingleNodeCompiler({ inheritanceLevel: 'echo',  nodeId,  nodeItem,  executionContext: 'app', contextConfig: appConfig,  environment: 'server' });
     const nodeResources     = await compiler.loadNodeResources();
