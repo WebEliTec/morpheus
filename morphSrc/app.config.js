@@ -4,9 +4,7 @@ const appConfig = {
 
 		Root: {},
 
-		NodeEcho: {
-			dir: '/test'
-		},
+		NodeEcho: {},
 
 		SingleFile: {
 			isFile: true,
