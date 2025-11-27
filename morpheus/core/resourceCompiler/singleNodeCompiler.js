@@ -37,8 +37,8 @@ export default class SingleNodeCompiler {
 
     if ( this.inheritanceLevel == 'echo' ) {
 
-      this.defaultNodeDirPath   = this.removeTrailingSlash( this.executionContextConfig?.defaultPaths?.nodes );
-      this.customNodeDirPath    = this.nodeItem?.dir;
+      this.defaultNodeDirPath   = this.removeTrailingSlash( this.executionContextConfig?.defaultPaths?.nodes ) ?? null;
+      this.customNodeDirPath    = this.nodeItem?.dir ?? null;
       this.hasCustomNodeDirPath = this.customNodeDirPath != null && this.customNodeDirPath != '/';
       const isFile              = this.nodeItem?.isFile;
 
@@ -50,6 +50,8 @@ export default class SingleNodeCompiler {
         this.nodeDirPath = '';
       } else if( isFile && this.defaultNodeDirPath && this.defaultNodeDirPath != '/' ) {
         this.nodeDirPath = this.removeTrailingSlash ( this.defaultNodeDirPath );
+      } else if( isFile ) {
+        this.nodeDirPath = '';
       } else if( !isFile && this.customNodeDirPath && this.customNodeDirPath == '/' ) {
         this.nodeDirPath = this.nodeId;
       } else if( !isFile && this.customNodeDirPath && this.customNodeDirPath != '/' ) {
@@ -61,10 +63,6 @@ export default class SingleNodeCompiler {
       } else {
         this.nodeDirPath = this.nodeId;
       }
-
-      console.log('XXXX');
-      console.log( this.nodeDirPath );
-      console.log('----');
 
     } else {
 

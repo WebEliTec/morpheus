@@ -7,7 +7,7 @@ const config = {
     },
 
     Welcome: {},
-
+    
     Test: {
       dir: '/modules'
     },
