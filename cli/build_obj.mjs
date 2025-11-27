@@ -12,27 +12,29 @@ class MorphSrcBuildDirectoryBuilder {
   }
 
   build() {
-      //this.setDirectory();
-      this.createResourceFiles();
+    this.resetMorphBuildSrcDirectory();
+    this.createResourceFiles();
+    this.cleanupMorphBuildSrc();
+    this.createResourceProvider();
   }
 
-  setDirectory() {
+  resetMorphBuildSrcDirectory() {
 
-      try {
-        if (fse.existsSync('morphBuildSrc')) {
-          fse.removeSync('morphBuildSrc');
-        }
-      } catch (error) {
-        console.error('Failed to delete former directory "morphBuildSrc":', error.message);
-        process.exit(1);
+    try {
+      if (fse.existsSync('morphBuildSrc')) {
+        fse.removeSync('morphBuildSrc');
       }
-      
-      try {
-        fse.copySync('morphSrc', 'morphBuildSrc');
-      } catch (error) {
-        console.error('Failed to create duplicate of directory "morphSrc":', error.message);
-        process.exit(1);
-      }
+    } catch (error) {
+      console.error('Failed to delete former directory "morphBuildSrc":', error.message);
+      process.exit(1);
+    }
+    
+    try {
+      fse.copySync('morphSrc', 'morphBuildSrc');
+    } catch (error) {
+      console.error('Failed to create duplicate of directory "morphSrc":', error.message);
+      process.exit(1);
+    }
 
   }
 
@@ -90,22 +92,22 @@ class MorphSrcBuildDirectoryBuilder {
     appConfig.nodeRegistry[nodeId].configDirSubPath = nodeResources.configDirSubPath;
     delete nodeResources.configDirSubPath;
 
-    //console.log( nodeResources );
-
     const serializedResources       = this.serializeValue( nodeResources, 0, moduleIdentifiers );
     const componentExportStatements = componentExports.length > 0 ? '\n\n' + componentExports.join('\n\n'): '';
     
     const resourceFileName          = `${nodeId}.resources.jsx`;
     const resourceFileSourceCode    = `${resourceFileImports}const nodeResources = ${serializedResources};\n\nexport default nodeResources;${componentExportStatements}`;
 
-    const outputPath                = configDirPath ? `morphBuildSrc/${configDirSubPath}/${resourceFileName}` : `morphBuildSrc/${resourceFileName}`;
+    const targetPath                = configDirPath ? `morphBuildSrc/${configDirSubPath}/${resourceFileName}` : `morphBuildSrc/${resourceFileName}`;
 
-    console.log(outputPath);
-
-    //console.log( serializedResources );
+    //Create MorphBuildSrc Directory
+    console.log('Writing to path ' +  targetPath );
+    fs.writeFileSync(targetPath, resourceFileSourceCode, 'utf8');
     
-
   }
+
+  /* Directory Handling
+  /* *** *** *** *** *** *** *** *** *** *** *** *** *** *** */
 
   extractSourceCode( configFilePath ) {
     const sourceCode = fs.readFileSync(configFilePath, 'utf8');
@@ -242,6 +244,67 @@ class MorphSrcBuildDirectoryBuilder {
   
     // Fallback for primitives (strings, numbers, booleans)
     return JSON.stringify(value);
+  }
+
+  cleanupMorphBuildSrc() {
+
+    const directoryPath = 'morphBuildSrc';
+    
+    const filesToDelete = [
+      'constants.js',
+      'constants.jsx',
+      'metaData.js',
+      'metaData.jsx',
+      'coreData.js',
+      'coreData.jsx',
+      'signalClusters.js',
+      'signalClusters.jsx',
+      'signals.js',
+      'signals.jsx',
+      'moduleRegistry.js',
+      'moduleRegistry.jsx',
+      'instanceRegistry.js',
+      'instanceRegistry.jsx',
+      'kernel.js',
+      'kernel.jsx'
+    ];
+    
+    function deleteFilesRecursively(dir) {
+      if (!fs.existsSync(dir)) {
+        return;
+      }
+      
+      const items = fs.readdirSync(dir);
+      
+      for (const item of items) {
+  
+        const fullPath = `${dir}/${item}`;
+        const stat     = fs.statSync(fullPath);
+        
+        if (stat.isDirectory()) {
+          deleteFilesRecursively(fullPath);
+        } else if (stat.isFile()) {
+          if (item.includes('.config.')) {
+            fs.unlinkSync(fullPath);
+            continue;
+          }
+          
+          if (filesToDelete.includes(item)) {
+            fs.unlinkSync(fullPath);
+          }
+        }
+      }
+    }
+    
+    deleteFilesRecursively(directoryPath);
+
+  }
+
+  /* Resource Provider Creation
+  /* *** *** *** *** *** *** *** *** *** *** *** *** *** *** */
+
+  createResourceProvider() {
+    console.log('Creating Resource Provider...');
   }
 
 
