@@ -352,9 +352,7 @@ class MorphSrcBuildDirectoryBuilder {
     //Remove until singleFiles are not supported
     registryItemsArray.filter(item => item !== null);
 
-    const registryItems = registryItemsArray.join(',\n      ');
-
-
+    const registryItems              = registryItemsArray.join(',\n      ');
 
     const resourceProviderSourceCode = 
 `
