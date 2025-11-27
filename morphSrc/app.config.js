@@ -7,7 +7,7 @@ const appConfig = {
 		NodeEcho: {
 			dir: '/test'
 		},
-		
+
 		SingleFile: {
 			isFile: true,
 		}

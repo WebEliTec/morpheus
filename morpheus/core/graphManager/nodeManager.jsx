@@ -95,7 +95,7 @@ export default class NodeManager {
 
       } catch (error) {
 
-        console.error(`Failed to compile resources for ${nodeId}:`, error);
+        console.error(`Failed to compile resources for node '${nodeId}':`, error);
         throw error;
 
       }

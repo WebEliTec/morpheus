@@ -53,6 +53,11 @@ class MorphSrcBuildDirectoryBuilder {
 
     const nodeItem          = this.appConfig.nodeRegistry[nodeId]; 
     const isSingleFile      = nodeItem?.isFile;
+
+    if ( isSingleFile ) {
+      console.log( `Node '${nodeId}' is a single file. Single file compilation is currently not supported.` );
+      return;
+    }
     
     const compiler          = new SingleNodeCompiler({ inheritanceLevel: 'echo',  nodeId,  nodeItem,  executionContext: 'app', contextConfig: appConfig,  environment: 'server' });
     const nodeResources     = await compiler.loadNodeResources();

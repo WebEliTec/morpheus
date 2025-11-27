@@ -3,7 +3,6 @@ export default function Root( { Node, Module } ) {
     <div>
       Root of NodeEcho
       <Module id="InnerModule" />
-      <Node id="SingleFile" />
     </div>
   )
 }

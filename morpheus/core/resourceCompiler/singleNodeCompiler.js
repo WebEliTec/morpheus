@@ -86,6 +86,12 @@ export default class SingleNodeCompiler {
 
     const configFileContent        = await this.preLoadConfigFile();
     const isFile                   = this.inheritanceLevel == 'echo' ? this.nodeItem?.isFile : configFileContent.default?.isFile;
+
+    if( isFile ) {
+      console.warn( `Node '${this.nodeId}' is a single file. Single file compilation is currently not supported at morpheus buildtime and will be ignored.` );
+      //return null;
+    }
+
     const nodeResources            = isFile ? await this.compileResourcesFromFile( configFileContent ) : await this.compileResourcesFromDirectory( configFileContent );
     nodeResources.configDirSubPath = this.configDirSubPath;
 
