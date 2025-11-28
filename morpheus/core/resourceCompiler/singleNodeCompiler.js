@@ -372,6 +372,7 @@ export default class SingleNodeCompiler {
 
       initializedModuleRegistry[ moduleId ]         = moduleRegistryItem;
 
+      const sharedModuleRegistry                    = this.executionContextConfig?.sharedModuleRegistry;
       const sharedModuleRegistryItem                = this.executionContextConfig?.sharedModuleRegistry?.[moduleId];
 
       const isShared                                = moduleRegistryItem?.isShared && ( this.inheritanceLevel == 'echo' );
@@ -389,8 +390,11 @@ export default class SingleNodeCompiler {
 
 
       if( isShared && !sharedModuleRegistryItem ) {
-        console.warn( 'No Item found in sharedModuleRegistry' );
-        return;
+        console.warn( 'Shared module requested, but there has been no corresponding item found in sharedModuleRegistry' );
+        if( !sharedModuleRegistry ) {
+          console.warn(`There is no "sharedModuleRegistry" defined in config file of executionContex "${this.executionContext}".`);
+        }
+        continue;
       }
 
       if ( isShared && isIndividualSharedModulePathOnRootLevel ) {

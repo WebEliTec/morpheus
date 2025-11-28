@@ -9,6 +9,8 @@ export default function Root( { _, Node, Module, Router } ) {
       <h1 className ="heading-gamma">Root Element XXX</h1>       
       Inherited Module: 
       <Module id="Delta"/>
+      SharedModule: 
+      <Module id="ASharedModule" />
     </>
   )
 }

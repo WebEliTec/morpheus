@@ -8,6 +8,10 @@ const config = {
       signals: [],
     },
 
+    ASharedModule: {
+      isShared: true,
+    }
+
   },
 
   kernel: {

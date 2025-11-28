@@ -13,6 +13,12 @@ const appConfig = {
 
 	},  
 
+	sharedModuleRegistry: {
+		ASharedModule: {
+			dir: '/test',
+		},
+	}
+
 }
 
 export default appConfig;
