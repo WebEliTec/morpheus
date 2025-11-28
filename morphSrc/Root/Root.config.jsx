@@ -10,7 +10,11 @@ const config = {
 
     ASharedModule: {
       isShared: true,
-    }
+    },
+
+    Delta: {
+
+    },
 
   },
 

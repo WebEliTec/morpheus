@@ -4,13 +4,6 @@ const appConfig = {
 
 		Root: {},
 
-		/*
-		NodeEcho: {},
-
-		SingleFile: {
-			isFile: true,
-		}*/
-
 	},  
 
 	sharedModuleRegistry: {
