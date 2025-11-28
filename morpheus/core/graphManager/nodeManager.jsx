@@ -15,11 +15,11 @@ const ParentKernelContext = createContext(null);
 export default class NodeManager {
 
 
-  constructor( { executionContext, contextConfig, abstractNodeConfig, app, notifyGraphOnNodeMount, notifyGraphOnNodeUnmount, mayCreateNode } ) {
+  constructor( { executionContext, contextConfig, libraryNodeConfig, app, notifyGraphOnNodeMount, notifyGraphOnNodeUnmount, mayCreateNode } ) {
 
     this.executionContext         = executionContext;
     this.contextConfig            = contextConfig;
-    this.abstractNodeConfig       = abstractNodeConfig;
+    this.libraryNodeConfig        = libraryNodeConfig;
     this.app                      = app;
     this.nodeRegistry             = this.contextConfig.nodeRegistry;
     this.notifyGraphOnNodeMount   = notifyGraphOnNodeMount;    
@@ -88,7 +88,7 @@ export default class NodeManager {
           nodeId, 
           executionContext:   this.executionContext, 
           contextConfig:      this.contextConfig,
-          abstractNodeConfig: this.abstractNodeConfig,
+          libraryNodeConfig:  this.libraryNodeConfig,
           environment:        'client',
         });
 

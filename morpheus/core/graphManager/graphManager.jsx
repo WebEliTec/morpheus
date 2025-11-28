@@ -7,7 +7,7 @@ export default class GraphManager {
     this.app                 = config.app;
     this.executionContext    = config.executionContext;
     this.contextConfig       = config.contextConfig;
-    this.abstractNodeConfig  = config.abstractNodeConfig;
+    this.libraryNodeConfig  = config.libraryNodeConfig;
     
     this.nodeManager  = new NodeManager({
       app:                      this.app,
@@ -15,7 +15,7 @@ export default class GraphManager {
       notifyGraphOnNodeUnmount: this.notifyGraphOnNodeUnmount.bind(this), 
       mayCreateNode:            this.mayCreateNode.bind(this), 
       contextConfig:            this.contextConfig,
-      abstractNodeConfig:       this.abstractNodeConfig,
+      libraryNodeConfig:        this.libraryNodeConfig,
       executionContext:         this.executionContext
     });
 

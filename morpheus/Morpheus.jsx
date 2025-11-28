@@ -5,7 +5,7 @@ import GraphManager from './core/graphManager/graphManager';
 
 import appConfig from '../morphSrc/app.config';
 import devToolConfig from './dev/ui/devTool.config';
-import abstractNodeConfig from './abstractNode.config';
+import libraryNodeConfig from './libraryNode.config';
 
 import MediaManager from './apis/mediaManager';
 import Graph from './apis/graph';
@@ -66,7 +66,7 @@ export class Morpheus {
       executionContext: 'app',
       app:              this.app, 
       contextConfig:    appConfig,
-      abstractNodeConfig,
+      libraryNodeConfig,
       graphChangeListener: this.graphChangeListener.bind( this ),
     }
 
@@ -88,7 +88,7 @@ export class Morpheus {
       executionContext: 'dev',
       app:                this.devToolApp, 
       contextConfig:      devToolConfig, 
-      abstractNodeConfig,
+      libraryNodeConfig,
     }
 
     this.devToolGraphManager  = new GraphManager( config );

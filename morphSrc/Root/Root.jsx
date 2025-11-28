@@ -1,6 +1,8 @@
 import '../globals.scss';
 
-export default function Root( { Kernel, Node, Module, Router } ) {
+export default function Root( { _, Node, Module, Router } ) {
+
+  console.log( _.hello() );
 
   return (
     <> 

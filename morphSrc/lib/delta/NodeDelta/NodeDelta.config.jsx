@@ -29,6 +29,7 @@ const config = {
     deltaCoreDataPiece: 'deltaCoreDataPiece',
   },
 
+
   kernel: {
     helloKernelDeltaX() {
       console.log('Juhu Delta!');

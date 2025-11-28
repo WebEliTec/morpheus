@@ -1,4 +1,4 @@
-const abstractNodeConfig = {
+const libraryNodeConfig = {
 
   defaultPaths: {
     nodes:   '/',
@@ -8,4 +8,4 @@ const abstractNodeConfig = {
   
 }
 
-export default abstractNodeConfig;
+export default libraryNodeConfig;
