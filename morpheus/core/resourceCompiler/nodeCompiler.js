@@ -2,13 +2,14 @@ import SingleNodeCompiler from './singleNodeCompiler';
 
 export default class NodeCompiler {
 
-  constructor( { nodeRegistry, nodeId, executionContext, contextConfig, abstractNodeConfig } ) {
+  constructor( { nodeRegistry, nodeId, executionContext, contextConfig, abstractNodeConfig, environment } ) {
 
     this.nodeId               = nodeId;
     this.nodeItem             = nodeRegistry[ nodeId ];
     this.executionContext     = executionContext;
     this.contextConfig        = contextConfig;
     this.abstractNodeConfig   = abstractNodeConfig;
+    this.environment          = environment,
     this.inheritanceLevelIds  = [ 'alpha', 'bravo', 'charlie', 'delta', 'echo' ];
     
   }
@@ -30,7 +31,7 @@ export default class NodeCompiler {
         nodeId:           nodeId, 
         executionContext: this.executionContext, 
         contextConfig:    this.contextConfig, 
-        environment:      'client' 
+        environment:      this.environment 
       }
       
       if (inheritanceLevelId == 'echo') {
