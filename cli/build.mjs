@@ -44,17 +44,17 @@ class MorphSrcBuildDirectoryBuilder {
   async createResourceFiles() {
 
     for (const nodeId of this.nodeIds) {
-        try {
-            console.log( `Processing ${nodeId}...` );
-            await this.createSingleResourceFile( nodeId );
-        } catch(e) {
-            console.log(`Falied to compile resource file of node '${nodeId}'`);
-        }
+      try {
+          console.log( `Processing ${nodeId}...` );
+          await this.createResourceFile( nodeId );
+      } catch(e) {
+          console.log(`Falied to compile resource file of node '${nodeId}'`);
+      }
     }
 
   }
 
-  async createSingleResourceFile( nodeId ) {
+  async createResourceFile( nodeId ) {
 
     const nodeItem          = this.nodeRegistry[nodeId]; 
     const isSingleFile      = nodeItem?.isFile;
@@ -166,6 +166,13 @@ class MorphSrcBuildDirectoryBuilder {
       if ( isSingleFile && !isShared ) {
         return;
       } 
+
+      console.log( 'ModuleId: ', moduleId );
+      console.log('-------');
+      console.log( moduleRegistryItem );
+      console.log('-------');
+      console.log( 'configDirSubPath: ', configDirSubPath );
+      console.log('-------');
         
       const importPath = `@morphBuildSrc/${configDirSubPath}/${internalModulePath}`;
 

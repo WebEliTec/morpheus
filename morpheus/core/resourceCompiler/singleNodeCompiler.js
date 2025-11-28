@@ -85,6 +85,12 @@ export default class SingleNodeCompiler {
   async loadNodeResources() {
 
     const configFileContent        = await this.preLoadConfigFile();
+
+    if( !configFileContent ) {
+      console.warn( `Config file of node '${this.nodeId}' could not be loaded.` );
+      return null;
+    }
+
     const isFile                   = this.inheritanceLevel == 'echo' ? this.nodeItem?.isFile : configFileContent.default?.isFile;
 
     if( isFile ) {
@@ -438,7 +444,9 @@ export default class SingleNodeCompiler {
       }
 
       initializedModuleRegistry[moduleId].path             = constructedPath;
-      initializedModuleRegistry[moduleId].internalPath     = internalPath;
+
+      //Used for sharedModules
+      //initializedModuleRegistry[moduleId].internalPath     = internalPath;
       initializedModuleRegistry[moduleId].inheritanceLevel = this.inheritanceLevel;
 
     }

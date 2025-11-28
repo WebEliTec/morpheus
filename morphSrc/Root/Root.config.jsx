@@ -1,15 +1,11 @@
 const config = {
 
+  parentId: 'NodeDelta',
+
   moduleRegistry: {
 
     Root: {
       signals: [],
-    },
-
-    Welcome: {},
-    
-    Test: {
-      dir: '/modules'
     },
 
   },
