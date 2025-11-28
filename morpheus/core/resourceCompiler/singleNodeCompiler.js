@@ -447,7 +447,7 @@ export default class SingleNodeCompiler {
 
       }
 
-      initializedModuleRegistry[moduleId].path             = constructedPath;
+      initializedModuleRegistry[moduleId].subPath         = constructedPath;
 
       //Used for sharedModules
       //initializedModuleRegistry[moduleId].internalPath     = internalPath;
