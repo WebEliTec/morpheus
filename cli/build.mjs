@@ -1,7 +1,9 @@
 import fs from 'fs';
 import fse from 'fs-extra';
 import SingleNodeCompiler from '../morpheus/core/resourceCompiler/singleNodeCompiler.js';
+import NodeCompiler from '../morpheus/core/resourceCompiler/nodeCompiler.js';
 import appConfig from '../morphSrc/app.config.js';
+import libraryNodeConfig from '../morpheus/libraryNode.config';
 import chalk from 'chalk';
 
 class MorphSrcBuildDirectoryBuilder {
@@ -63,8 +65,18 @@ class MorphSrcBuildDirectoryBuilder {
     }
 
     
-    const compiler          = new SingleNodeCompiler({ inheritanceLevel: 'echo',  nodeId,  nodeItem,  executionContext: 'app', contextConfig: appConfig,  environment: 'server' });
-    const nodeResources     = await compiler.loadNodeResources();
+    //const compiler        = new SingleNodeCompiler({ inheritanceLevel: 'echo',  nodeId,  nodeItem,  executionContext: 'app', contextConfig: appConfig,  environment: 'server' });
+    const compiler          = new NodeCompiler({
+      nodeRegistry: this.nodeRegistry,
+      nodeId, 
+      executionContext: 'app', 
+      contextConfig: this.appConfig, 
+      libraryNodeConfig, 
+      environment: 'server',
+    })
+
+    //const nodeResources     = await compiler.loadNodeResources();
+    const nodeResources     = await compiler.exec();
     
     const configDirSubPath  = nodeResources?.configDirSubPath;
     const configDirPath     = `morphSrc/${configDirSubPath}`;
