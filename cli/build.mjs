@@ -158,7 +158,8 @@ class MorphSrcBuildDirectoryBuilder {
     Object.entries( moduleRegistry ).forEach( ( [ moduleId, moduleRegistryItem ] ) => {
 
       const isShared               = moduleRegistryItem?.isShared;
-      const internalModulePath     = moduleRegistryItem.internalPath;
+      const internalModulePath     = moduleRegistryItem.subPath;
+      console.log( internalModulePath );
       moduleIdentifiers[moduleId]  = moduleId;
 
       moduleRegistryItem.component = `__IDENTIFIER__${moduleId}`;
@@ -166,15 +167,19 @@ class MorphSrcBuildDirectoryBuilder {
       if ( isSingleFile && !isShared ) {
         return;
       } 
+      
+      // console.log('-------');
+      // console.log( 'ModuleId: ', moduleId );
+      // console.log( moduleRegistryItem );
+      // console.log( 'configDirSubPath: ', configDirSubPath );
+      // console.log('-------');
 
-      console.log( 'ModuleId: ', moduleId );
-      console.log('-------');
-      console.log( moduleRegistryItem );
-      console.log('-------');
-      console.log( 'configDirSubPath: ', configDirSubPath );
-      console.log('-------');
         
-      const importPath = `@morphBuildSrc/${configDirSubPath}/${internalModulePath}`;
+      console.log( 'ImportPath---------' );
+      const importPath = `@morphBuildSrc/${internalModulePath}`;
+
+      console.log( importPath );
+      console.log( '---------' );
 
       imports.push(`import ${moduleId} from '${importPath}';`);
 

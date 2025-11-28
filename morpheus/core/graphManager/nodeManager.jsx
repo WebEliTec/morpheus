@@ -297,6 +297,8 @@ export default class NodeManager {
         return <h1>{errorMessage }</h1>;
       }
 
+      console.log( moduleEntry );
+
       const Component           = moduleEntry?.component;
 
       /* Routing Reactivity
