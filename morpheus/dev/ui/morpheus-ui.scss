@@ -79,6 +79,25 @@ $bg-transparent: #000c159f;
     left: 0;
     width: 100%;
     z-index: 10;
+
+    .logo {
+        padding-top: 0.5rem;
+        padding-bottom: 0.5rem;
+    }
+
+
+    .inner {
+        height: 40px;
+        h2 {
+            margin-left: .5rem;
+        }
+    }
+
+    #MorpheusLogo {
+        height: 40px;
+        width: 40px;
+    }
+
 }
 
 #morpheus-ui #morpheus-ui-header .logo {

@@ -64,8 +64,6 @@ class MorphSrcBuildDirectoryBuilder {
       return;
     }
 
-    
-    //const compiler        = new SingleNodeCompiler({ inheritanceLevel: 'echo',  nodeId,  nodeItem,  executionContext: 'app', contextConfig: appConfig,  environment: 'server' });
     const compiler          = new NodeCompiler({
       nodeRegistry: this.nodeRegistry,
       nodeId, 
@@ -75,7 +73,6 @@ class MorphSrcBuildDirectoryBuilder {
       environment: 'server',
     })
 
-    //const nodeResources     = await compiler.loadNodeResources();
     const nodeResources     = await compiler.exec();
     
     const configDirSubPath  = nodeResources?.configDirSubPath;
@@ -158,28 +155,19 @@ class MorphSrcBuildDirectoryBuilder {
     Object.entries( moduleRegistry ).forEach( ( [ moduleId, moduleRegistryItem ] ) => {
 
       const isShared               = moduleRegistryItem?.isShared;
-      const internalModulePath     = moduleRegistryItem.subPath;
-      console.log( internalModulePath );
+      const moduleSubPath          = moduleRegistryItem.subPath;
+
+      
       moduleIdentifiers[moduleId]  = moduleId;
 
       moduleRegistryItem.component = `__IDENTIFIER__${moduleId}`;
+      delete moduleRegistryItem.inheritanceLevel;
 
       if ( isSingleFile && !isShared ) {
         return;
       } 
-      
-      // console.log('-------');
-      // console.log( 'ModuleId: ', moduleId );
-      // console.log( moduleRegistryItem );
-      // console.log( 'configDirSubPath: ', configDirSubPath );
-      // console.log('-------');
-
-        
-      console.log( 'ImportPath---------' );
-      const importPath = `@morphBuildSrc/${internalModulePath}`;
-
-      console.log( importPath );
-      console.log( '---------' );
+  
+      const importPath = `@morphBuildSrc/${moduleSubPath}`;
 
       imports.push(`import ${moduleId} from '${importPath}';`);
 

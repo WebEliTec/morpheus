@@ -12,10 +12,6 @@ const config = {
       isShared: true,
     },
 
-    Delta: {
-
-    },
-
   },
 
   kernel: {
