@@ -4,123 +4,206 @@ import path from 'path';
 
 export default class SingleNodeCompiler {
 
-  constructor( nodeId, nodeItem, executionContext, contextConfig, environment = 'client' ) {
-    this.nodeId           = nodeId;
-    this.nodeItem         = nodeItem;
-    this.executionContext = executionContext;
-    this.contextConfig    = contextConfig;
-    this.resourceRegistry = resourceRegistry.singleNode;
-    this.environment      = environment;
+  constructor( { inheritanceLevel, nodeId, nodeItem, executionContext, contextConfig, environment } ) {
+    
+    this.appSrcFolderName           = 'morphSrc';
+    this.devSrcFolderName           = 'dev/ui';
+    this.inheritanceLevel           = inheritanceLevel;
+    this.nodeId                     = nodeId;
+    this.nodeItem                   = nodeItem
+    this.executionContext           = executionContext;
+    this.executionContextConfig     = contextConfig;
+    this.environment                = environment;
+    this.executionContextFolderName = this.executionContext == 'app' ? this.appSrcFolderName : this.devSrcFolderName;
+    this.inheritanceLevelIds        = [ 'alpha', 'bravo', 'charlie', 'delta' ];
+
+    this.setResourceRegistry();
+    this.setNodeDirPath();
+
   }
+
+  /* Set Resource Registry & Node Dir Path 
+  /* *** *** *** *** *** *** *** *** *** *** *** *** *** *** */
+
+  setResourceRegistry() {
+    if ( this.inheritanceLevel == 'echo' ) {
+      this.resourceRegistry = resourceRegistry.singleNode;
+    } else {
+      this.resourceRegistry = resourceRegistry.libraryNode;
+    }
+  }
+
+  setNodeDirPath() {
+
+    if ( this.inheritanceLevel == 'echo' ) {
+
+      this.defaultNodeDirPath   = this.removeTrailingSlash( this.executionContextConfig?.defaultPaths?.nodes ) ?? null;
+      this.customNodeDirPath    = this.nodeItem?.dir ?? null;
+      this.hasCustomNodeDirPath = this.customNodeDirPath != null && this.customNodeDirPath != '/';
+      const isFile              = this.nodeItem?.isFile;
+
+      if( isFile && this.customNodeDirPath && this.customNodeDirPath == '/' ) {
+        this.nodeDirPath = '';
+      } else if( isFile && this.customNodeDirPath && this.customNodeDirPath != '/' ) {
+        this.nodeDirPath = this.removeTrailingSlash ( this.customNodeDirPath );
+      } else if( isFile && this.defaultNodeDirPath && this.defaultNodeDirPath == '/' ) {
+        this.nodeDirPath = '';
+      } else if( isFile && this.defaultNodeDirPath && this.defaultNodeDirPath != '/' ) {
+        this.nodeDirPath = this.removeTrailingSlash ( this.defaultNodeDirPath );
+      } else if( isFile ) {
+        this.nodeDirPath = '';
+      } else if( !isFile && this.customNodeDirPath && this.customNodeDirPath == '/' ) {
+        this.nodeDirPath = this.nodeId;
+      } else if( !isFile && this.customNodeDirPath && this.customNodeDirPath != '/' ) {
+        this.nodeDirPath = this.removeTrailingSlash ( `${this.customNodeDirPath}/${this.nodeId}` );
+      } else if( !isFile && this.defaultNodeDirPath && this.defaultNodeDirPath == '/' ) {
+        this.nodeDirPath = this.nodeId;
+      } else if( !isFile && this.defaultNodeDirPath && this.defaultNodeDirPath != '/' ) {
+        this.nodeDirPath = this.removeTrailingSlash ( `${this.defaultNodeDirPath}/${this.nodeId}` );
+      } else {
+        this.nodeDirPath = this.nodeId;
+      }
+
+    } else {
+
+      if( this.inheritanceLevelIds.includes( this.inheritanceLevel ) ) {
+        this.nodeDirPath = `lib/${this.inheritanceLevel}/${this.nodeId}`
+      } else {
+        throw new Error('Unknow levelID: ' + this.inheritanceLevel );
+      }
+
+    }
+
+    this.configDirSubPath = this.removeTrailingSlash ( this.nodeDirPath );
+
+  }
+
+
+  /* Load Config File
+  /* *** *** *** *** *** *** *** *** *** *** *** *** *** *** */
 
   async loadNodeResources() {
 
-    const isFile        = this.nodeItem?.isFile;
-    const nodeResources = isFile ? await this.compileResourcesFromFile() : await this.compileResourcesFromDirectory();
+    const configFileContent        = await this.preLoadConfigFile();
 
-    nodeResources.subConfigDirPath = this.subConfigDirPath
+    if( !configFileContent ) {
+      console.warn( `Config file of node '${this.nodeId}' could not be loaded.` );
+      return null;
+    }
+
+    const isFile                   = this.inheritanceLevel == 'echo' ? this.nodeItem?.isFile : configFileContent.default?.isFile;
+
+    if( isFile ) {
+      console.warn( `Node '${this.nodeId}' is a single file. Single file compilation is currently not supported at morpheus buildtime and will be ignored.` );
+      //return null;
+    }
+
+    const nodeResources            = isFile ? await this.compileResourcesFromFile( configFileContent ) : await this.compileResourcesFromDirectory( configFileContent );
+    nodeResources.configDirSubPath = this.configDirSubPath;
 
     return nodeResources;
 
   }
+
+  async preLoadConfigFile() {
+
+    let constructedPath;
+
+    if( this.nodeDirPath == '/' || this.nodeDirPath == '' ) {
+      constructedPath = `${this.nodeId}.config.jsx`;
+    } else {
+      constructedPath = `${this.nodeDirPath}/${this.nodeId}.config.jsx`;
+    }
+
+    //console.log( constructedPath );
+    
+    const configFileContent   = await this.loadResource( constructedPath, false );
+
+    if( !configFileContent ) {
+      console.warn( `Config file '${this.nodeId}.config.jsx' not found for node '${this.nodeId}' in '${this.getAbsPath( constructedPath )}'` );
+    }
+
+    return configFileContent;
+  }
+
 
   /* Directory Compilation
   /* *** *** *** *** *** *** *** *** *** *** *** *** *** *** */
 
-  async compileResourcesFromDirectory() {
+  async compileResourcesFromDirectory( configFileContent ) {
 
-    //console.log( this.nodeId );
+    const configObject       = configFileContent.default;
 
-    const availableResources = await this.loadAvailableResources();
-
-    //console.log( availableResources );
-
-    const selectedResources  = this.selectResources( availableResources );
-
-    //console.log( resolvedStaticFiles );
-
-    const traits             = await this.loadTraits( availableResources );
-
-    const moduleRegistry     = await this.loadModules( selectedResources?.moduleRegistry, availableResources.config );
-
-    const rootModuleId       = this.getRootModuleId( selectedResources.config, moduleRegistry );
-
-
-    const nodeResources      = {
-
-      nodeId:           this.nodeId,
-      parentId:         selectedResources.config?.parentId,        
-      //config:         selectedResources.config,
-      rootModuleId,
-      constants:        selectedResources?.constants, 
-      metaData:         selectedResources?.metaData, 
-      coreData:         selectedResources?.coreData, 
-      signalClusters:   selectedResources?.signalClusters,
-      moduleRegistry,
-      instanceRegistry: selectedResources?.instanceRegistry, 
-      hooks:            selectedResources?.hooks,
-      traits,
-
+    const availableResources = await this.loadAvailableResources( configObject );
+    const selectedResources  = this.selectResources( availableResources, configObject );
+    const traits             = await this.loadTraits( availableResources, configObject );
+    const moduleRegistry     = await this.loadModules( selectedResources?.moduleRegistry, configObject );
+    
+    if( !moduleRegistry ) {
+      console.warn( `moduleRegistry is empty for node '${this.nodeId}'` );
     }
 
-    //console.log( nodeResources );
+    const rootModuleId             = this.getRootModuleId( configObject, moduleRegistry );
+
+    const nodeResources            = {};
+    nodeResources.nodeId           = this.nodeId
+    nodeResources.executionContext = this.executionContext
+    nodeResources.inheritanceLevel = this.inheritanceLevel
+    nodeResources.parentId         = configObject?.parentId ?? null
+    nodeResources.rootModuleId     = rootModuleId ?? null
+    nodeResources.constants        = selectedResources?.constants ?? null
+    nodeResources.signalClusters   = selectedResources?.signalClusters ?? null
+    nodeResources.moduleRegistry   = moduleRegistry ?? null
+    nodeResources.hooks            = selectedResources?.hooks ?? null
+    nodeResources.traits           = traits;
+
+    /**
+     * Note that all levels may have core data and meta data schemas.
+     * It is always instances that are rendered to the frontend. 
+     * So when assigining meta data and core data items to the node resources, 
+     * they need to be checked against their corresponding schemas. 
+     * 
+     * Schemas serve following purposes: 
+     * - Default value provision 
+     * - Type Safety 
+     * - Specifying if a core data item is required or not
+     */
+
+    if( this.inheritanceLevel == 'echo' ) {
+      nodeResources.metaData         = selectedResources?.metaData ?? null
+      nodeResources.coreData         = selectedResources?.coreData ?? null
+      nodeResources.instanceRegistry = selectedResources?.instanceRegistry ?? null 
+    } else {
+      nodeResources.metaDataSchemas  = selectedResources?.metaDataSchemas ?? null
+      nodeResources.coreDataSchemas  = selectedResources?.coreDataSchemas ?? null
+    }
 
     return nodeResources;
 
   }
 
+
   /* Static Files
   /* *** *** *** *** *** *** *** *** *** *** *** *** *** *** */
 
-  async loadAvailableResources() {
+  async loadAvailableResources( configObject ) {
 
-    const availableResources = {};
+    const availableResources  = {};
+    availableResources.config = configObject;
     
-    for (const [resourceName, resourceFileLocation] of Object.entries(this.resourceRegistry.staticFiles)) {
-      
-      const customNodeDirPath = this.removeTrailingSlash(this.nodeItem?.dir);
-      let constructedPath;
-      
-      if (!customNodeDirPath || customNodeDirPath == '/') {
+    for (const [resourceName, resourceFileLocation] of Object.entries(this.resourceRegistry.resourceTypes)) {
 
-        if (resourceName == 'config') {
-          constructedPath       = `${this.nodeId}/${this.nodeId}.config.jsx`;
-          this.subConfigDirPath = `${this.nodeId}`
-        } else {
-          constructedPath       = `${this.nodeId}/${resourceFileLocation}`;
-        }
-
-      } else {
-        if (resourceName == 'config') {
-          constructedPath       = `${customNodeDirPath}/${this.nodeId}/${this.nodeId}.config.jsx`;
-          this.subConfigDirPath = `${customNodeDirPath}/${this.nodeId}`;
-        } else {
-          constructedPath       = `${customNodeDirPath}/${this.nodeId}/${resourceFileLocation}`;
-        }
-      }
-      
-      //console.log(`Attempting to load ${resourceName} from:`, constructedPath);
-      
-      const resourceFileImportMethod = this.generateImportMethod( constructedPath );
-      console.log( 'constructedPath ' + constructedPath );
-      let module;
-      try {
-        module = await resourceFileImportMethod();
-        //console.log(`✓ Successfully loaded ${resourceName}`);
-      } catch (error) {
-        console.log(`✗ Failed to load ${resourceName}:`, error.message);
-        availableResources[resourceName] = null;
+      if( resourceName === 'config' ) {
         continue;
       }
 
-      const moduleValidation = this.validateModuleExports( module );
+      const constructedPath = `${this.nodeDirPath}/${resourceFileLocation}`;
 
-      if ( moduleValidation.hasNamedExportsButNoDefaultExport || moduleValidation.hasNoMeaningfulDefaultExport ) {
-        availableResources[resourceName] = null;
-        continue;
-      } 
+      const result          = await this.loadResource( constructedPath ); 
 
-      availableResources[resourceName] = module.default;
+      if( result ) {
+        availableResources[resourceName] = result;
+      }
 
     }
 
@@ -128,30 +211,48 @@ export default class SingleNodeCompiler {
 
   }
 
-  selectResources( availableResources ) {
+  selectResources( availableResources, configObject ) {
 
     const selectedResources = {};
 
-    for (const [ resourceName, resourceFileLocation ] of Object.entries( this.resourceRegistry.staticFiles ) ) {
+    selectedResources.config = configObject;
+
+    for (const [ resourceName, resourceFileLocation ] of Object.entries( this.resourceRegistry.resourceTypes ) ) {
 
       if( resourceName == 'config' ) {
-        selectedResources.config = availableResources.config;
         continue;
       }
 
       selectedResources[ resourceName ] = {};
 
-      const configPayload = availableResources.config?.[resourceName];
-      const filePayload   = availableResources?.[resourceName];
-      const payload       = configPayload ?? filePayload;
+      const configResourcePayload       = availableResources.config?.[resourceName];
+      const filePayload                 = availableResources?.[resourceName];
+      const payload                     = configResourcePayload ?? filePayload;
+
+      /**
+       * signalClusters are loaded first, because of the order 
+       * within resourceRegistry.
+       */
+
+      /**
+       * We check, whether a signalCluster contains an item called 'signals'.
+       * If so, we delete it, because it is reserved for the independent resource 
+       * 'signals'.
+       */
 
       if ( resourceName === 'signalClusters' && payload?.signals ) {
+        console.warn( `signalClusterItem with id 'signals' detected within node '${this.nodeId}' and is therefore excluded. Note that this is a protected keyword, because it is used for the independent resource type 'signals'.` )
         delete payload.signals;
       }
 
       selectedResources[resourceName] = payload;
 
+      
+      /**
+       * If a node has a 'signals' resource, it is transformed to a singalClusterItem with id 'signal'.
+       */
       if ( resourceName === 'signals' && payload ) {
+        console.warn( `A 'signal' resource type has been found within node '${this.nodeId}' and is now being transformed to a signalClusterItem with id 'signals'. Execution context: '${this.executionContext}'.` );
         selectedResources.signalClusters               ??= {};
         selectedResources.signalClusters.signals         = {};
         selectedResources.signalClusters.signals.signals = payload;
@@ -166,15 +267,10 @@ export default class SingleNodeCompiler {
   /* Traits
   /* *** *** *** *** *** *** *** *** *** *** *** *** *** *** */
 
-  async loadTraits( availableResources ) {
+  async loadTraits( availableResources, configObject ) {
 
-    const config = availableResources.config;
-    
-    //console.log(config);
+    const config = configObject;
 
-    //If config has no kernelIds specified in 'traits', check if a kernel is present. 
-    //If so, add it as trait.
-    
     if (!config?.traits || config.traits.length === 0) {
 
       const traitImplementations = {};
@@ -190,17 +286,32 @@ export default class SingleNodeCompiler {
     }
 
     const configTraitImplementations = config?.traitImplementations;
-    const defaultTraitDirPath        = this.removeTrailingSlash( this.contextConfig.defaultPaths.traits );
+    const defaultTraitDirPath        = this.removeTrailingSlash( this.executionContextConfig?.defaultPaths?.traits );
     const nodeSpecificTraitDirPath   = this.removeTrailingSlash( config?.defaultPaths?.traits );
 
     const traitIds                   = config.traits;
 
     const traitImplementations       = {};
 
+    let traitDirPath;
+
+    if( nodeSpecificTraitDirPath == '/' ) {
+      traitDirPath = this.nodeDirPath;
+    } else if( nodeSpecificTraitDirPath != '/' && nodeSpecificTraitDirPath ) {
+      traitDirPath = `${this.nodeDirPath}/${nodeSpecificTraitDirPath}`;
+    } else if( defaultTraitDirPath == '/' ) {
+      traitDirPath = this.nodeDirPath;
+    } else if( defaultTraitDirPath != '/' && defaultTraitDirPath ) {
+      traitDirPath = `${this.nodeDirPath}/${defaultTraitDirPath}`;
+    } else {
+      traitDirPath = this.nodeId;
+    }
+
     for (const traitId of traitIds) {
 
       //If kernel is specified as traitId, ignore it.
       if( traitId == 'kernel' ) {
+        console.warn(`A trait '${traitId}' has been declared in node '${this.nodeId}'. It is ignored and excluded, because 'kernel' is reserved as identifier for resource type 'kernel'. `);
         continue;
       }
 
@@ -210,63 +321,25 @@ export default class SingleNodeCompiler {
         continue;
       } 
 
-      //External Trait Loading begins
-      let   trait             = null;
-      const customNodeDirPath = this.removeTrailingSlash( this.nodeItem?.dir );
-      let   constructedPath;
+      const constructedPath = `${traitDirPath}/${traitId}`;
+      const result          = await this.loadResource( constructedPath );
 
-      if ( !customNodeDirPath || customNodeDirPath == '/' ) {
-        
-        if( nodeSpecificTraitDirPath && nodeSpecificTraitDirPath != '/' ) {
-          constructedPath = `${this.nodeId}/${nodeSpecificTraitDirPath}/${traitId}`;
-        } else if( nodeSpecificTraitDirPath == '/' ) {
-          constructedPath = `${this.nodeId}/${traitId}`;
-        } else if( defaultTraitDirPath && defaultTraitDirPath != '/' ) {
-          constructedPath = `${this.nodeId}/${defaultTraitDirPath}/${traitId}`;
-        } else {
-          constructedPath = `${this.nodeId}/${traitId}`;
-        }
-
-      } else {
-
-        if( nodeSpecificTraitDirPath && nodeSpecificTraitDirPath != '/' ) {
-          constructedPath = `${customNodeDirPath}/${this.nodeId}/${nodeSpecificTraitDirPath}/${traitId}`;
-        } else if( nodeSpecificTraitDirPath == '/' ) {
-          constructedPath = `${customNodeDirPath}/${this.nodeId}/${traitId}`;
-        } else if( defaultTraitDirPath && defaultTraitDirPath != '/' ) {
-          constructedPath = `${customNodeDirPath}/${this.nodeId}/${defaultTraitDirPath}/${traitId}`;
-        } else {
-          constructedPath = `${customNodeDirPath}/${this.nodeId}/${traitId}`;
-        }
-
-      }
-
-      const traitImportMethod = this.generateImportMethod( constructedPath );
-
-
-      try {
-
-        const module           = await traitImportMethod();
-        
-        const moduleValidation = this.validateModuleExports(module);
-
-        if (moduleValidation.hasNamedExportsButNoDefaultExport || moduleValidation.hasNoMeaningfulDefaultExport ) {
-          continue;
-        } 
-
-        trait = module.default;
-        
-      } catch (error) {
+      if( !result ) {
+        console.warn(`Trait '${traitId}' of node '${this.nodeId}' not found as traitImplementation within ${this.nodeId}.config.jsx or in '${this.getAbsPath(constructedPath)}'`);
         continue;
       }
 
-      traitImplementations[traitId] = trait;
+      traitImplementations[traitId] = result;
 
     }
 
     const kernel = config?.kernel ?? availableResources?.kernel;
 
     if( kernel ) { 
+      console.warn(`Resource type 'kernel' found within node '${this.nodeId}' and is now being transformed to trait with id 'kernel'.`);
+      if( this.inheritanceLevel != 'echo' ) {
+        console.warn( 'Note that it is not recommended using kernels within library nodes.' )
+      }
       traitImplementations.kernel = kernel 
     }
 
@@ -274,130 +347,111 @@ export default class SingleNodeCompiler {
 
   }
 
+
   /* Module Loading
   /* *** *** *** *** *** *** *** *** *** *** *** *** *** *** */
 
-  async loadModules( moduleRegistry, config ) {
+  async loadModules( moduleRegistry, configObject ) {
 
     if( !moduleRegistry ) {
+      console.warn( `No moduleRegistry passed to singleNodeCompiler.loadModules() while compiling node '${this.nodeId}'` )
       return;
     }
 
-    const customNodeDirPath                = this.removeTrailingSlash( this.nodeItem?.dir );
-    const defaultModuleDirPath             = this.removeTrailingSlash( this.contextConfig.defaultPaths.modules );
-    const nodeSpecificDefaultModuleDirPath = this.removeTrailingSlash( config?.defaultPaths?.modules );
-    const initializedModuleRegistry           = {};
+    const initializedModuleRegistry                     = {};
+
+    const defaultModuleDirPath                          = this.removeTrailingSlash( this.executionContextConfig?.defaultPaths?.modules );
+    const hasDefaultModuleDirPath                       = defaultModuleDirPath && defaultModuleDirPath != '/';
+
+    const nodeSpecificDefaultModuleDirPath              = this.removeTrailingSlash( configObject?.defaultPaths?.modules );
+    const hasNodeSpecificDefaultModuleDirPath           = nodeSpecificDefaultModuleDirPath && nodeSpecificDefaultModuleDirPath != '/';
+    const isNodeSpecificDefaultModuleDirPathOnRootLevel = nodeSpecificDefaultModuleDirPath == '/';
+    
 
     for (const [ moduleId, moduleRegistryItem ] of Object.entries( moduleRegistry ) ) {
-      
-      let module;
 
-      initializedModuleRegistry[ moduleId ] = moduleRegistryItem;
-      const isShared                     = moduleRegistryItem?.isShared;
-      const individualModulePath         = this.removeTrailingSlash( moduleRegistryItem?.dir, false );
+      initializedModuleRegistry[ moduleId ]         = moduleRegistryItem;
+
+      const sharedModuleRegistry                    = this.executionContextConfig?.sharedModuleRegistry;
+      const sharedModuleRegistryItem                = this.executionContextConfig?.sharedModuleRegistry?.[moduleId];
+
+      const isShared                                = moduleRegistryItem?.isShared && ( this.inheritanceLevel == 'echo' );
+      const sharedModuleDirectoryDefaultPath        = 'sharedModules';
+      const sharedModuleDirectorySubPath            = this.removeTrailingSlash( sharedModuleRegistryItem?.dir );
+      const hasIndividualSharedModulePath           = sharedModuleDirectorySubPath && sharedModuleDirectorySubPath != '/';
+      const isIndividualSharedModulePathOnRootLevel = sharedModuleDirectorySubPath == '/';
+
+      const individualModulePath                    = this.removeTrailingSlash( moduleRegistryItem?.dir, false );
+      const hasIndividualModulePath                 = individualModulePath && individualModulePath != '/';
+      const isIndividualModulePathOnRootLevel       = individualModulePath == '/';
 
       let constructedPath;
       let internalPath;
 
-      if( !isShared ) {
 
-        if ( !customNodeDirPath || customNodeDirPath == '/' ) {
-
-          if ( individualModulePath && individualModulePath != '/' ) {
-            constructedPath = `${this.nodeId}/${individualModulePath}/${moduleId}`;
-            internalPath    = `${individualModulePath}/${moduleId}`;  
-          } else if ( individualModulePath == '/' ) {
-            constructedPath = `${this.nodeId}/${moduleId}`;
-            internalPath    = `${moduleId}`;
-          } else if ( nodeSpecificDefaultModuleDirPath && nodeSpecificDefaultModuleDirPath != '/' ) {
-            constructedPath = `${this.nodeId}/${nodeSpecificDefaultModuleDirPath}/${moduleId}`;
-            internalPath    = `${nodeSpecificDefaultModuleDirPath}/${moduleId}`;
-          } else if( nodeSpecificDefaultModuleDirPath == '/' ) {
-            constructedPath = `${this.nodeId}/${moduleId}`;
-            internalPath    = `${moduleId}`;
-          } else if( defaultModuleDirPath && defaultModuleDirPath != '/' ) {
-            constructedPath = `${this.nodeId}/${defaultModuleDirPath}/${moduleId}`;
-            internalPath    = `${defaultModuleDirPath}/${moduleId}`;
-          } else {
-            constructedPath = `${this.nodeId}/${moduleId}`;
-            internalPath    = `${moduleId}`;
-          }
-
-        } else  {
-
-          if ( individualModulePath && individualModulePath != '/' ) {
-            constructedPath = `${customNodeDirPath}/${this.nodeId}/${individualModulePath}/${moduleId}`;
-            internalPath    = `${individualModulePath}/${moduleId}`;
-          } else if ( individualModulePath == '/' ) {
-            constructedPath = `${customNodeDirPath}/${this.nodeId}/${moduleId}`;
-            internalPath    = `${moduleId}`;
-          } else if ( nodeSpecificDefaultModuleDirPath && nodeSpecificDefaultModuleDirPath != '/' ) {
-            constructedPath = `${customNodeDirPath}/${this.nodeId}/${nodeSpecificDefaultModuleDirPath}/${moduleId}`;
-            internalPath    = `${nodeSpecificDefaultModuleDirPath}/${moduleId}`;
-          } else if( nodeSpecificDefaultModuleDirPath == '/' ) {
-            constructedPath = `${customNodeDirPath}/${this.nodeId}/${moduleId}`;
-            internalPath    = `${moduleId}`;
-          } else if( defaultModuleDirPath && defaultModuleDirPath != '/' ) {
-            constructedPath = `${customNodeDirPath}/${this.nodeId}/${defaultModuleDirPath}/${moduleId}`;
-            internalPath    = `${defaultModuleDirPath}/${moduleId}`;
-          } else {
-            constructedPath = `${customNodeDirPath}/${customNodeDirPath}/${this.nodeId}/${moduleId}`;
-            internalPath    = `${this.nodeId}/${moduleId}`;
-          }
-
+      if( isShared && !sharedModuleRegistryItem ) {
+        console.warn( 'Shared module requested, but there has been no corresponding item found in sharedModuleRegistry' );
+        if( !sharedModuleRegistry ) {
+          console.warn(`There is no "sharedModuleRegistry" defined in config file of executionContex "${this.executionContext}".`);
         }
+        continue;
+      }
+
+      if ( isShared && isIndividualSharedModulePathOnRootLevel ) {
+        internalPath = `${sharedModuleDirectoryDefaultPath}/${moduleId}`; 
+      } else if( isShared && hasIndividualSharedModulePath ) {
+        internalPath = `${sharedModuleDirectoryDefaultPath}/${sharedModuleDirectorySubPath}/${moduleId}`; 
+      } else if( isShared && !hasIndividualSharedModulePath ) {
+        internalPath = `${sharedModuleDirectoryDefaultPath}/${moduleId}`;
+      } else if( hasIndividualModulePath ) {
+        internalPath = `${individualModulePath}/${moduleId}`; 
+      } else if( isIndividualModulePathOnRootLevel ) {
+        internalPath = `${moduleId}`;
+      } else if( hasNodeSpecificDefaultModuleDirPath ) {
+        internalPath = `${nodeSpecificDefaultModuleDirPath}/${moduleId}`;
+      } else if( isNodeSpecificDefaultModuleDirPathOnRootLevel ) {
+        internalPath = `${moduleId}`;
+      } else if( hasDefaultModuleDirPath ) {
+        internalPath = `${defaultModuleDirPath}/${moduleId}`;
+      } else {
+        internalPath = `${moduleId}`;
+      }
+
+      constructedPath = isShared ? internalPath : `${this.nodeDirPath}/${internalPath}`;
+
+
+      if (this.environment === 'server') {
+
+        // Build time: just validate file exists
+        const fs       = await import( /* @vite-ignore */ 'fs');
+        const fullPath = path.resolve(process.cwd(), this.appSrcFolderName, `${constructedPath}.jsx`);
+
+        if (!fs.existsSync(fullPath)) {
+          throw new Error(`Module ${moduleId} not found at ${fullPath}`);
+        }
+
+        // Don't import, just store metadata
+        initializedModuleRegistry[moduleId].component = null;
 
       } else {
 
-        const sharedModuleRegistryItem = this.contextConfig?.sharedModuleRegistry?.[moduleId];
-        
-        if( !sharedModuleRegistryItem ) {
-          console.warn( 'No Item found in sharedModuleRegistry' );
-          return;
-        }
+        const result = await this.loadResource( constructedPath );
 
-        const sharedModuleDirectoryPath  = this.resourceRegistry.dynamicDirectories.sharedModules;
-        const individualSharedModulePath = this.removeTrailingSlash( sharedModuleRegistryItem?.dir );
-
-        if ( individualSharedModulePath && individualSharedModulePath !== '/' ) {
-          constructedPath = `${sharedModuleDirectoryPath}/${individualSharedModulePath}/${moduleId}`;
-          internalPath    = `${sharedModuleDirectoryPath}/${individualSharedModulePath}/${moduleId}`;
-        } else {
-          constructedPath = `${sharedModuleDirectoryPath}/${moduleId}`;
-          internalPath    = `${sharedModuleDirectoryPath}/${moduleId}`;
-        } 
-
-      }
-
-      //console.log( constructedPath );
-
-        if (this.environment === 'server') {
-          // Build time: just validate file exists
-          const fs = await import( /* @vite-ignore */ 'fs');
-          const fullPath = path.resolve(process.cwd(), 'morphSrc', `${constructedPath}.jsx`);
-          if (!fs.existsSync(fullPath)) {
-            throw new Error(`Module ${moduleId} not found at ${fullPath}`);
-          }
-          // Don't import, just store metadata
-          initializedModuleRegistry[moduleId].component = null;
-          initializedModuleRegistry[moduleId].path         = constructedPath;
-          initializedModuleRegistry[moduleId].internalPath = internalPath;
-        } else {
-        // Runtime: actually import
-        const moduleImportMethod = this.generateImportMethod(constructedPath);
-        try {
-          const module = await moduleImportMethod();
-          const moduleValidation = this.validateModuleExports(module);
-          if (moduleValidation.hasNamedExportsButNoDefaultExport || moduleValidation.hasNoMeaningfulDefaultExport) {
-            continue;
-          }
-          initializedModuleRegistry[moduleId].component = module.default;
-          initializedModuleRegistry[moduleId].path      = constructedPath;
-        } catch (error) {
-          console.log(error);
+        if( !result ) {
+          console.warn(`Module '${moduleId}' of node '${this.nodeId}' not found in '${ this.getAbsPath( constructedPath ) }'. This will cause an error at morpheus buildtime.`);
           continue;
         }
+
+        initializedModuleRegistry[moduleId].component = result;
+
+
       }
+
+      initializedModuleRegistry[moduleId].path             = constructedPath;
+
+      //Used for sharedModules
+      //initializedModuleRegistry[moduleId].internalPath     = internalPath;
+      initializedModuleRegistry[moduleId].inheritanceLevel = this.inheritanceLevel;
 
     }
 
@@ -405,103 +459,85 @@ export default class SingleNodeCompiler {
 
   }
 
+
   /* Single File Loading
   /* *** *** *** *** *** *** *** *** *** *** *** *** *** *** */
 
-  async compileResourcesFromFile() {
-      
-    const customNodeDirPath = this.removeTrailingSlash ( this.nodeItem?.dir );
-    const configFileName    = this.nodeItem?.configFileName ?`${this.nodeItem.configFileName}.config.jsx` : `${this.nodeId}.config.jsx`;
-    let constructedPath;
+  async compileResourcesFromFile( configFileContent ) {
 
-    if ( !customNodeDirPath || customNodeDirPath == '/' ) {
-      constructedPath       = `${configFileName}`;
-      this.subConfigDirPath = '';
-    } else {
-      constructedPath       = `${customNodeDirPath}/${configFileName}`;
-      this.subConfigDirPath = `${configFileName}`;
-    } 
+    const config                    = configFileContent.default;
 
-    const staticFileImportMethod = this.generateImportMethod( constructedPath );
-
-    let module;
-
-    try {
-      module = await staticFileImportMethod();
-    } catch (error) {
-      //console.log( error );
-      return;
-    }
-
-    const moduleValidation = this.validateModuleExports( module );
-
-    if ( moduleValidation.hasNamedExportsButNoDefaultExport || moduleValidation.hasNoMeaningfulDefaultExport ) {
-      return;
-    } 
-
-    const config = module.default;
-
-    // Hydrate module registry with components from named exports
     const initializedModuleRegistry = {};
     
-    if (config?.moduleRegistry) {
+    if ( config?.moduleRegistry ) {
 
       for (const [moduleId, moduleRegistryItem] of Object.entries(config.moduleRegistry)) {
 
-        const isShared = moduleRegistryItem?.isShared;
+        const sharedModuleRegistryItem                = this.executionContextConfig?.sharedModuleRegistry?.[moduleId];
+
+        const isShared                                = moduleRegistryItem?.isShared;
+
+        const sharedModuleDirectoryDefaultPath        = 'sharedModules';
+        const sharedModuleDirectorySubPath            = this.removeTrailingSlash( sharedModuleRegistryItem?.dir );
+        const hasIndividualSharedModulePath           = sharedModuleDirectorySubPath && sharedModuleDirectorySubPath != '/';
+        const isIndividualSharedModulePathOnRootLevel = sharedModuleDirectorySubPath == '/';
+
+        let internalPath;
+
+        if ( isShared && isIndividualSharedModulePathOnRootLevel ) {
+          internalPath = `${sharedModuleDirectoryDefaultPath}/${moduleId}`; 
+        } else if ( isShared && hasIndividualSharedModulePath ) {
+          internalPath = `${sharedModuleDirectoryDefaultPath}/${sharedModuleDirectorySubPath}/${moduleId}`; 
+        } else if ( isShared && !hasIndividualSharedModulePath ) {
+          internalPath = `${sharedModuleDirectoryDefaultPath}/${moduleId}`;
+        }
+
+
+        if ( isShared  && this.environment == 'server' ) {
+          // Build time: just validate file exists
+          const fs       = await import( /* @vite-ignore */ 'fs');
+          const fullPath = path.resolve(process.cwd(), this.appSrcFolderName, `${internalPath}.jsx`);
+
+          if (!fs.existsSync(fullPath)) {
+            throw new Error(`Module ${moduleId} not found at ${fullPath}`);
+          }
+
+          // Don't import, just store metadata
+          initializedModuleRegistry[moduleId] = {};
+
+          initializedModuleRegistry[moduleId] = {
+              ...moduleRegistryItem,
+              component: null,
+              path: internalPath,
+              internalPath,
+            };
+
+        } 
+
+        if( isShared  && this.environment != 'server' ) {
+
+          const result = await this.loadResource( internalPath );
+
+          if( result ) {
+            initializedModuleRegistry[moduleId] = {
+              ...moduleRegistryItem,
+              component: result,
+            };
+          }
+
+        }
 
         if( !isShared ) {
           initializedModuleRegistry[moduleId] = {
             ...moduleRegistryItem,
-            component: module[moduleId]
+            component: configFileContent[moduleId]
           };
-        } else {
-
-          let module;
-
-          const sharedModuleRegistryItem = this.contextConfig?.sharedModuleRegistry?.[moduleId];
-          
-          if( !sharedModuleRegistryItem ) {
-            console.warn( 'No Item found in sharedModuleRegistry' );
-            return;
-          }
-
-          const sharedModuleDirectoryPath  = this.resourceRegistry.dynamicDirectories.sharedModules;
-          const individualSharedModulePath = this.removeTrailingSlash( sharedModuleRegistryItem?.dir );
-
-          if ( individualSharedModulePath && individualSharedModulePath !== '/' ) {
-            constructedPath = `${sharedModuleDirectoryPath}/${individualSharedModulePath}/${moduleId}`;
-          } else {
-            constructedPath = `${sharedModuleDirectoryPath}/${moduleId}`;
-          } 
-
-          const moduleImportMethod = this.generateImportMethod( constructedPath );
-      
-          try {
-            module = await moduleImportMethod();
-          } catch (error) {
-            console.log(error);
-            continue;
-          }
-
-          const moduleValidation = this.validateModuleExports(module);
-
-          if ( moduleValidation.hasNamedExportsButNoDefaultExport || moduleValidation.hasNoMeaningfulDefaultExport ) {
-            continue;
-          } 
-
-          initializedModuleRegistry[moduleId] = {
-            ...moduleRegistryItem,
-            component: module.default
-          };
-
         }
 
       }
 
     }
 
-    // Handle signals - similar to resolveStaticFiles logic
     let resolvedSignalClusters = config.signalClusters;
     
     if (config.signals) {
@@ -513,7 +549,6 @@ export default class SingleNodeCompiler {
       };
     }
 
-    // Build traits - include kernel if present
     const traits = {};
     if ( config.kernel ) {
       traits.kernel = config.kernel;
@@ -523,19 +558,24 @@ export default class SingleNodeCompiler {
       Object.assign(traits, config.traitImplementations);
     }
 
-    // Build the identity resource collection
     const nodeResources = {
-      //config:           config,
-      hasParent:        config?.hasParent,
-      rootModuleId:     this.getRootModuleId( config, initializedModuleRegistry ),
-      constants:        config.constants,
-      metaData:         config.metaData,
-      coreData:         config.coreData,
-      signalClusters:   resolvedSignalClusters,
-      moduleRegistry:   initializedModuleRegistry,
-      instanceRegistry: config?.instanceRegistry, 
-      hooks:            config?.hooks,
-      traits,
+
+      nodeId:           this.nodeId,
+      executionContext: this.executionContext,
+      inheritanceLevel: this.inheritanceLevel,
+      parentId:         config.parentId ?? null,
+      rootModuleId:     this.getRootModuleId( config, initializedModuleRegistry ) ?? null,
+      constants:        config.constants ?? null,
+      metaData:         config.metaData ?? null,
+      coreData:         config.coreData ?? null,
+
+
+      signalClusters:   resolvedSignalClusters ?? null,
+      moduleRegistry:   initializedModuleRegistry ?? null,
+      instanceRegistry: config.instanceRegistry ?? null, 
+      hooks:            config.hook ?? null,
+      traits:           traits ?? null,
+
     };
 
     return nodeResources;
@@ -546,18 +586,26 @@ export default class SingleNodeCompiler {
   /* Helpers
   /* *** *** *** *** *** *** *** *** *** *** *** *** *** *** */
 
-  removeTrailingSlash( path, shouldRemoveIfSingleTrailingSlash = false ) {
+  async loadResource( constructedPath, loadDefault = true ) {
 
-    if( path == null ) {
-      return;
-    }
-
-    if( !shouldRemoveIfSingleTrailingSlash && path == '/' ) {
-      return path;
-    }
+    const resourceFileImportMethod = this.generateImportMethod( constructedPath );
     
-    return path.startsWith('/') ? path.slice(1) : path;
+    let module;
 
+    try {
+      module = await resourceFileImportMethod();
+    } catch (error) {
+      return null;
+    }
+
+    const moduleValidation = this.validateModuleExports( module );
+
+    if ( moduleValidation.hasNamedExportsButNoDefaultExport || moduleValidation.hasNoMeaningfulDefaultExport ) {
+      console.warn( `Resource has no valid export in '${constructedPath}'` );
+      return null;
+    } 
+
+    return loadDefault ? module.default : module;
   }
 
   generateImportMethod(constructedPath) {
@@ -567,21 +615,18 @@ export default class SingleNodeCompiler {
     if (this.environment === 'server') {
 
       if (this.executionContext === 'app') {
-        const fullPath = path.resolve(process.cwd(), 'morphSrc', serverPath);
+        const fullPath = path.resolve(process.cwd(), this.appSrcFolderName, serverPath);
         return () => import( /* @vite-ignore */ fullPath);
       } else {
-        const fullPath = path.resolve(process.cwd(), 'morpheus/dev/ui', serverPath);
+        const fullPath = path.resolve(process.cwd(), `morpheus/${this.devSrcFolderName}`, serverPath);
         return () => import( /* @vite-ignore */ fullPath);
       }
-
     }
     
-    console.log( constructedPath );
-
     if (this.executionContext === 'app') {
-      return () => import(/* @vite-ignore */ `../../../morphSrc/${constructedPath}`);
+      return () => import(/* @vite-ignore */ `../../../${this.appSrcFolderName}/${constructedPath}`);
     } else {
-      return () => import(/* @vite-ignore */`../../dev/ui/${constructedPath}`);
+      return () => import(/* @vite-ignore */`../../${this.devSrcFolderName}/${constructedPath}`);
     }
 
   }
@@ -605,9 +650,23 @@ export default class SingleNodeCompiler {
 
   }
 
-  getRootModuleId( config, moduleRegistry ) {
+  removeTrailingSlash( path, shouldRemoveIfSingleTrailingSlash = false ) {
 
-    let rootModuleId = config?.rootModuleId || config?.rootModule || config?.root;
+    if( path == null ) {
+      return;
+    }
+
+    if( !shouldRemoveIfSingleTrailingSlash && path == '/' ) {
+      return path;
+    }
+    
+    return path.startsWith('/') ? path.slice(1) : path;
+
+  }
+
+  getRootModuleId( configObject, moduleRegistry ) {
+
+    let rootModuleId = configObject?.rootModuleId || configObject?.rootModule || configObject?.root;
 
     if( rootModuleId ) {
       return rootModuleId;
@@ -630,6 +689,10 @@ export default class SingleNodeCompiler {
 
     return rootModuleId ?? 'Root';
 
+  }
+
+  getAbsPath( constructedPath ) {
+    return `${this.executionContextFolderName}/${constructedPath}`;
   }
 
 }

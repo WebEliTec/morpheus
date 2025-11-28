@@ -7,14 +7,16 @@ export default class GraphManager {
     this.app                 = config.app;
     this.executionContext    = config.executionContext;
     this.contextConfig       = config.contextConfig;
+    this.libraryNodeConfig  = config.libraryNodeConfig;
     
     this.nodeManager  = new NodeManager({
-      app:              this.app,
-      onNodeMount:      this.onNodeMount.bind(this),  
-      onNodeUnmount:    this.onNodeUnmount.bind(this), 
-      mayCreateNode:    this.mayCreateNode.bind(this), 
-      contextConfig:    this.contextConfig,
-      executionContext: this.executionContext
+      app:                      this.app,
+      notifyGraphOnNodeMount:   this.notifyGraphOnNodeMount.bind(this),  
+      notifyGraphOnNodeUnmount: this.notifyGraphOnNodeUnmount.bind(this), 
+      mayCreateNode:            this.mayCreateNode.bind(this), 
+      contextConfig:            this.contextConfig,
+      libraryNodeConfig:        this.libraryNodeConfig,
+      executionContext:         this.executionContext
     });
 
     this.graphChangeListener = config?.graphChangeListener;
@@ -36,13 +38,13 @@ export default class GraphManager {
     }
   }
   
-  onNodeMount(kernel) {
+  notifyGraphOnNodeMount(kernel) {
 
     const { id: fullyQualifiedId } = kernel;
     const parentId                 = kernel.props?.parentId;
     
     const nodeData = {
-      id: fullyQualifiedId,
+      id:       fullyQualifiedId,
       parentId,
       children: [],
       kernel,
@@ -79,7 +81,7 @@ export default class GraphManager {
 
   }
   
-  onNodeUnmount(fullyQualifiedId) {
+  notifyGraphOnNodeUnmount(fullyQualifiedId) {
     
     const node = this.findNodeById(fullyQualifiedId);
     
@@ -114,19 +116,27 @@ export default class GraphManager {
   }
   
   findNodeById(id) {
+
     if (!this.graphData.nodeHierarchy) return null;
     
     const search = (node) => {
-      if (node.id === id) return node;
+
+      if (node.id === id) {
+        return node;
+      } 
       
       for (const child of node.children) {
         const found = search(child);
-        if (found) return found;
+        if (found) {
+          return found;
+        }
       }
       
       return null;
+
     };
     
     return search(this.graphData.nodeHierarchy);
+
   }
 }

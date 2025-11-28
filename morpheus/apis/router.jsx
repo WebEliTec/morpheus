@@ -176,11 +176,6 @@ export function matchPattern(pattern, route) {
 }
 
 
-
-
-
-
-
 // Router.js
 
 export class Router_I {

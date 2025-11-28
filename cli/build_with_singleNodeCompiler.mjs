@@ -1,9 +1,7 @@
 import fs from 'fs';
 import fse from 'fs-extra';
 import SingleNodeCompiler from '../morpheus/core/resourceCompiler/singleNodeCompiler.js';
-import NodeCompiler from '../morpheus/core/resourceCompiler/nodeCompiler.js';
 import appConfig from '../morphSrc/app.config.js';
-import libraryNodeConfig from '../morpheus/libraryNode.config';
 import chalk from 'chalk';
 
 class MorphSrcBuildDirectoryBuilder {
@@ -44,17 +42,17 @@ class MorphSrcBuildDirectoryBuilder {
   async createResourceFiles() {
 
     for (const nodeId of this.nodeIds) {
-      try {
-          console.log( `Processing ${nodeId}...` );
-          await this.createResourceFile( nodeId );
-      } catch(e) {
-          console.log(`Falied to compile resource file of node '${nodeId}'`);
-      }
+        try {
+            console.log( `Processing ${nodeId}...` );
+            await this.createSingleResourceFile( nodeId );
+        } catch(e) {
+            console.log(`Falied to compile resource file of node '${nodeId}'`);
+        }
     }
 
   }
 
-  async createResourceFile( nodeId ) {
+  async createSingleResourceFile( nodeId ) {
 
     const nodeItem          = this.nodeRegistry[nodeId]; 
     const isSingleFile      = nodeItem?.isFile;
@@ -65,18 +63,8 @@ class MorphSrcBuildDirectoryBuilder {
     }
 
     
-    //const compiler        = new SingleNodeCompiler({ inheritanceLevel: 'echo',  nodeId,  nodeItem,  executionContext: 'app', contextConfig: appConfig,  environment: 'server' });
-    const compiler          = new NodeCompiler({
-      nodeRegistry: this.nodeRegistry,
-      nodeId, 
-      executionContext: 'app', 
-      contextConfig: this.appConfig, 
-      libraryNodeConfig, 
-      environment: 'server',
-    })
-
-    //const nodeResources     = await compiler.loadNodeResources();
-    const nodeResources     = await compiler.exec();
+    const compiler          = new SingleNodeCompiler({ inheritanceLevel: 'echo',  nodeId,  nodeItem,  executionContext: 'app', contextConfig: appConfig,  environment: 'server' });
+    const nodeResources     = await compiler.loadNodeResources();
     
     const configDirSubPath  = nodeResources?.configDirSubPath;
     const configDirPath     = `morphSrc/${configDirSubPath}`;
@@ -166,13 +154,6 @@ class MorphSrcBuildDirectoryBuilder {
       if ( isSingleFile && !isShared ) {
         return;
       } 
-
-      console.log( 'ModuleId: ', moduleId );
-      console.log('-------');
-      console.log( moduleRegistryItem );
-      console.log('-------');
-      console.log( 'configDirSubPath: ', configDirSubPath );
-      console.log('-------');
         
       const importPath = `@morphBuildSrc/${configDirSubPath}/${internalModulePath}`;
 

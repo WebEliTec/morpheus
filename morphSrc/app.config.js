@@ -1,38 +1,17 @@
 const appConfig = {
 
-	defaultPaths: {
-		nodes:   '/',
-		modules: '/',
-		traits:  '/traits',
-	},
-
 	nodeRegistry: {
 
-		Root:     {},
-
-		SideBar:  {},
-
-		SideMenu: {},
-
-		Main:     {
-			isFile: true,
-		},
-
-		TestNode: {},
+		Root: {},
 
 	},  
 
-	mediaRegistry: {
-		sounds: {
-			'ui-click-1': {}, 
-			'systems_online': {},
-		}, 
-		images: {
-			'doggo': {},
-			'logo_small': {}
-		}
+	sharedModuleRegistry: {
+		ASharedModule: {
+			dir: '/test',
+		},
 	}
-  
+
 }
 
 export default appConfig;

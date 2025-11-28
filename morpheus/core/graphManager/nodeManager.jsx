@@ -1,7 +1,7 @@
 import React, { createContext, useContext, useState, useMemo, useEffect } from 'react';
 import NodeCompiler from '../resourceCompiler/nodeCompiler';
 import MorpheusKernel from '../resourceCompiler/MorpheusKernel';
-import * as Lucide from 'lucide-react';  // ADD THIS LINE
+import * as Lucide from 'lucide-react'; 
 
 import { shouldModuleRerender } from '@morpheus/apis/router';
 
@@ -15,15 +15,16 @@ const ParentKernelContext = createContext(null);
 export default class NodeManager {
 
 
-  constructor( { executionContext, contextConfig, app, onNodeMount, onNodeUnmount, mayCreateNode } ) {
+  constructor( { executionContext, contextConfig, libraryNodeConfig, app, notifyGraphOnNodeMount, notifyGraphOnNodeUnmount, mayCreateNode } ) {
 
-    this.executionContext = executionContext;
-    this.contextConfig    = contextConfig;
-    this.app              = app;
-    this.nodeRegistry     = this.contextConfig.nodeRegistry;
-    this.onNodeMount      = onNodeMount;    
-    this.onNodeUnmount    = onNodeUnmount;
-    this.mayCreateNode    = mayCreateNode;
+    this.executionContext         = executionContext;
+    this.contextConfig            = contextConfig;
+    this.libraryNodeConfig        = libraryNodeConfig;
+    this.app                      = app;
+    this.nodeRegistry             = this.contextConfig.nodeRegistry;
+    this.notifyGraphOnNodeMount   = notifyGraphOnNodeMount;    
+    this.notifyGraphOnNodeUnmount = notifyGraphOnNodeUnmount;
+    this.mayCreateNode            = mayCreateNode;
 
   }
 
@@ -53,10 +54,7 @@ export default class NodeManager {
         loadNode();
       }, []);
 
-
-
       return Node ? <Node {...props} /> : <></>;
-
 
     };
 
@@ -64,7 +62,7 @@ export default class NodeManager {
 
   async createNode( nodeId, instanceId, ...props ) {
 
-    const nodeProps     = props[0] || {};
+    const nodeProps = props[0] || {};
 
     let nodeResources;
 
@@ -85,12 +83,20 @@ export default class NodeManager {
 
       try {
 
-        const compiler = new NodeCompiler( this.nodeRegistry, nodeId, this.executionContext, this.contextConfig, this.nodeRegistry );
+        const compiler = new NodeCompiler({
+          nodeRegistry:       this.nodeRegistry, 
+          nodeId, 
+          executionContext:   this.executionContext, 
+          contextConfig:      this.contextConfig,
+          libraryNodeConfig:  this.libraryNodeConfig,
+          environment:        'client',
+        });
+
         nodeResources  = await compiler.exec();
 
       } catch (error) {
 
-        console.error(`Failed to compile resources for ${nodeId}:`, error);
+        console.error(`Failed to compile resources for node '${nodeId}':`, error);
         throw error;
 
       }
@@ -98,15 +104,14 @@ export default class NodeManager {
     }
 
     const { traits }          = nodeResources;
+
     nodeResources.KernelClass = this.createKernelClass(traits);
+
     const app                 = this.app;
     const kernel              = this.initializeKernel( nodeId, instanceId, nodeProps, nodeResources, app  );
 
-
-    //Sync Mode: Don't run this hook.
     await this.callHook( 'kernelDidInitialize', nodeResources, kernel );
 
-    /// Stays the same in sync and async mode
     const NodeProvider        = this.createNodeProvider( kernel, nodeResources );
     const Module              = this.createModule( kernel, nodeResources.moduleRegistry );
     const NodeComponent       = this.createNodeComponent( nodeResources, NodeProvider, Module, kernel );
@@ -143,6 +148,8 @@ export default class NodeManager {
     kernel.parentId          = nodeProps?.parentId; 
 
     kernel.constants         = constants;
+    
+    
     kernel.metaData          = { ...metaData, ...(instanceData?.metaData || {}) };
     kernel.coreData          = { ...coreData, ...(instanceData?.coreData || {}) };
     kernel.signalClusters    = signalClusters;
@@ -164,9 +171,6 @@ export default class NodeManager {
       return;
     }
     
-    //console.log(`[NodeManager] Cleaning up kernel for ${kernel.nodeId} (${kernel.instanceId})`);
-    
-    // Call onDestroy hook if defined in traits (before clearing references)
     if (typeof kernel.onDestroy === 'function') {
       try {
         kernel.onDestroy();
@@ -175,7 +179,6 @@ export default class NodeManager {
       }
     }
     
-    // Clear all kernel references to allow garbage collection
     kernel.signals           = null;
     kernel.optimisticSignals = null;
     kernel.constants         = null;
@@ -185,8 +188,7 @@ export default class NodeManager {
     kernel.nodeId            = null;
     kernel.instanceId        = null;
     kernel.fullyQualifiedId  = null;
-    
-    //console.log(`[NodeManager] Kernel cleanup complete`);
+  
   }
 
   /* Component Factories
@@ -198,31 +200,29 @@ export default class NodeManager {
     const nodeContext        = createContext();
     this.nodeContext         = nodeContext;
 
-    //If No Signal is defined, create one, so the rest of the code keeps running
     if( !signalClusters ) {
-      console.error(`You need to define at least one signal or signal cluster within node "${kernel.nodeId}"`);
+      console.warn(`No signal or signalCluster provided for node '${kernel.nodeId}'`);
     }
 
     const signalDefinitions = [];
+
+    if( signalClusters ) {
       Object.keys(signalClusters).forEach((signalClusterId) => {
         Object.entries(signalClusters[signalClusterId].signals).forEach(([signalId, signalDef]) => {
           signalDefinitions.push({ signalId, ...signalDef });
         });
-    });
+      });
+    }
 
     const callHook = this.callHook.bind(this); 
     
     return function NodeProvider( { children = null } ) {
-
-      //console.log('NodeProvider Executed');
       
       const [ signalChangeCounter, setSignalChangeCounter ] = useState(0);
       const [ changedSignals, setChangedSignals ]           = useState([]);
       const [signalsInitialized, setSignalsInitialized]     = useState(false);
       
       const signalInstances                                 = {};
-
-      // => Hook in different functionality, like saving signals in indexedDB, remotely, etc.
 
       const [signalValues, setSignalValues] = useState(() => {
         const initial = {};
@@ -247,7 +247,6 @@ export default class NodeManager {
 
       kernel.signals = signalInstances;
 
-      // ✅ Call signalsDidInitialize once
       useEffect(() => {
         if (!signalsInitialized) {
           callHook('signalsDidInitialize', nodeResources, kernel);
@@ -255,7 +254,6 @@ export default class NodeManager {
         }
       }, [signalsInitialized]);
 
-      // ✅ Call signalsDidChange when signals change
       useEffect(() => {
         if (changedSignals.length > 0 && signalsInitialized) {
           callHook('signalsDidChange', nodeResources, kernel, changedSignals);
@@ -285,8 +283,6 @@ export default class NodeManager {
 
     return function Module( { id, proxyId, children = null, ...props } ) {
 
-      //console.log( 'Calculate Module ' + id)
-
       /* General
       /* *** *** *** *** *** *** *** *** *** *** *** *** *** *** */
 
@@ -294,7 +290,7 @@ export default class NodeManager {
       const context             = useContext( nodeContext );
       
       const moduleEntry         = moduleRegistry?.[moduleId];
-
+      
       if( !moduleEntry ) {
         const errorMessage = `Module "${moduleId}" of node "${kernel.nodeId}" not found.`;
         console.warn( errorMessage );
@@ -362,12 +358,9 @@ export default class NodeManager {
         };
       }, []);
 
-
       const memoizedComponent = useMemo(() => {
-
-        //console.log( '✅ Rerendering ' +  moduleId);
-        return Component ? 
-        <Component 
+        
+        return Component ? <Component 
 
           React   = { React }
           R       = { React }
@@ -392,9 +385,11 @@ export default class NodeManager {
           Lucide  = { Lucide }
 
           {...props}>
+
           {children}
 
           </Component> : <h1>{`${`Module "${moduleId}" of node "${kernel.nodeId}" listed in module registry but not found in specified location.`}`}</h1>;
+
       }, [ shouldRerenderDueToSignalChange, shouldRerenderDueToURLChange ] );
   
       return memoizedComponent;
@@ -406,29 +401,27 @@ export default class NodeManager {
 
     const { nodeId, nodeProps } = kernel
 
-    const rootModuleId  = nodeResources.rootModuleId;
-    const onNodeMount   = this.onNodeMount; 
-    const onNodeUnmount = this.onNodeUnmount;
-    const destroyKernel = this.destroyKernel.bind(this);
-    const callHook      = this.callHook.bind(this);  
+    const rootModuleId             = nodeResources.rootModuleId;
+    const notifyGraphOnNodeMount   = this.notifyGraphOnNodeMount;
+    const notifyGraphOnNodeUnmount = this.notifyGraphOnNodeUnmount;
+    const destroyKernel            = this.destroyKernel.bind(this);
+    const callHook                 = this.callHook.bind(this);  
 
     return function NodeComponent( { ...props } ) {
 
     useEffect(() => {
-      // Notify GraphManager
-      onNodeMount(kernel);
+
+      notifyGraphOnNodeMount(kernel);
       
-      // ✅ Call nodeDidMount hook
       (async () => {
         await callHook('nodeDidMount', nodeResources, kernel);
       })();
       
       return () => {
-        // ✅ Call unmount hooks
         (async () => {
           await callHook('nodeWillUnmount', nodeResources, kernel);
           
-          onNodeUnmount(kernel.id);
+          notifyGraphOnNodeUnmount(kernel.id);
           destroyKernel(kernel);
           
           await callHook('nodeDidUnmount', nodeResources, kernel);
@@ -446,8 +439,6 @@ export default class NodeManager {
   }
 
   async callHook(hookName, nodeResources, ...args) {
-
-    //console.log('Calling Hook ' + hookName + ' ' + nodeResources.nodeId );
     
     const hooks = nodeResources?.hooks;
 

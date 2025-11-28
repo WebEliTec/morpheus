@@ -4,8 +4,8 @@ const config = {
   /* *** *** *** *** *** *** *** *** *** *** *** *** *** *** */
 
   base: {
-    moduleRoot: '/',
-    traitRoot: '/'
+    modules: '/',
+    traits: '/'
   },
 
 
@@ -24,9 +24,6 @@ const config = {
       console.log( this.graph.showGraph() );
     },
 
-
-
-
   },
 
   
@@ -38,13 +35,8 @@ const config = {
     SideBar: {
       isRoot: true,
       signals: [],
+      dir: '/',
     },
-
-    /*
-    someModule: {
-      isShared: true, 
-      signals: [],
-    }*/
 
   },
 

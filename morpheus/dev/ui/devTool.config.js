@@ -7,7 +7,9 @@ const devToolConfig = {
   },
   
   nodeRegistry: {
-    Root: {},
+    Root: {
+      //dir: '/comp'
+    },
   },
 
 }

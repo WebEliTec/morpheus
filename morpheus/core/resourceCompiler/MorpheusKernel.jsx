@@ -29,7 +29,7 @@ export default class MorpheusKernel {
   }
 
   getCoreData( coreDataItemId ) {
-    return this.getCoreData( coreDataItemId );
+    return this.getCoreDataItem( coreDataItemId );
   }
 
   getCoreDataItem(coreDataItemId) {

@@ -2,19 +2,16 @@
 
 import { useState, useEffect } from 'react';
 import GraphManager from './core/graphManager/graphManager';
+
 import appConfig from '../morphSrc/app.config';
 import devToolConfig from './dev/ui/devTool.config';
+import libraryNodeConfig from './libraryNode.config';
 
 import MediaManager from './apis/mediaManager';
 import Graph from './apis/graph';
 import Router from './apis/router';
 import Utility from './apis/utility';
 
-/* 
-SSR -> NO Devtools, no matter if dev or prod
-Add GraphAPI to SSR Manager only later
-Creat MorpheusRoot Node for SSR
-*/
 
 export class Morpheus {
   
@@ -69,7 +66,8 @@ export class Morpheus {
       executionContext: 'app',
       app:              this.app, 
       contextConfig:    appConfig,
-      graphChangeListener: this.graphChangeListener.bind( this )
+      libraryNodeConfig,
+      graphChangeListener: this.graphChangeListener.bind( this ),
     }
 
     this.graphManager = new GraphManager( config );
@@ -88,8 +86,9 @@ export class Morpheus {
 
     const config = {
       executionContext: 'dev',
-      app:              this.devToolApp, 
-      contextConfig:    devToolConfig, 
+      app:                this.devToolApp, 
+      contextConfig:      devToolConfig, 
+      libraryNodeConfig,
     }
 
     this.devToolGraphManager  = new GraphManager( config );
