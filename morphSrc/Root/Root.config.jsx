@@ -12,13 +12,13 @@ const config = {
       dir: '/modules'
     },
 
-    kernel: {
-      hello () {
-        console.log('Hi!');
-      }
-    }
-
   },
+
+  kernel: {
+    hello () {
+      console.log('Hi!');
+    }
+  }
   
 }
 

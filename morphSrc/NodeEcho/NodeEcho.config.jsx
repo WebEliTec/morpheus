@@ -57,10 +57,10 @@ const config = {
     },  
   },
 
-  traits: [ 'deltaTrait' ],
+  traits: [ 'someTrait' ],
 
   traitImplementations: {
-    deltaTrait: {
+    someTrait: {
       helloEchoX() {
         console.log('Hi there!');
       }

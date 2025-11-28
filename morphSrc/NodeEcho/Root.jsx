@@ -1,6 +1,7 @@
 export default function Root( { _, Node, Module } ) {
 
-  //console.log( _ );
+  _.helloKernelEcho();
+  _.helloDelta();
 
   return (
     <div>

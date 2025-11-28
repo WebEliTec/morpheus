@@ -108,6 +108,8 @@ export default class NodeCompiler {
       instanceRegistry,
     }
 
+   //console.log( nodeResources );
+
     return nodeResources;
 
   }
