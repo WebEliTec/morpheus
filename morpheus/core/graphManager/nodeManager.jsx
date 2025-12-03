@@ -162,8 +162,9 @@ export default class NodeManager {
 
     kernel.runtimeData       = {};
 
-    const onRuntimeDataChange = () => {
-      this.callHook('onRuntimeDataChange', nodeResources, kernel );
+    // Create a closure that captures nodeResources and tracks changed items
+    const onRuntimeDataChange = (changedRuntimeDataItems) => {
+      this.callHook('onRuntimeDataChange', nodeResources, kernel, changedRuntimeDataItems);
     };
 
     

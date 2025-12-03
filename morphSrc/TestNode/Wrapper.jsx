@@ -11,6 +11,7 @@ export default function Wrapper({ _, Module, Node }) {
     <div className="test-node grid grid-cols-4 gap-4">
       
       <input type="text" onChange={ e => handleChange( e.target.value ) }  className="test-input"/>
+      <Module id="InputValueDisplay" />
       <Module id="Counter" />
       <Module id="Toggler" />
       {/* <Node id="AnotherTestNode" /> */}

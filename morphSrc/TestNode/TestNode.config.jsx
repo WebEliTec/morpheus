@@ -15,20 +15,33 @@ const config = {
     showInnerElement: {
       type: 'primitive', 
       default: false,
+    }, 
+
+    inputValue: {
+      type: 'primitive', 
+      default: false,
     }
 
   }, 
 
   hooks: {
-    onRuntimeDataChange( kernel ) {
-      kernel.yoo();
+    onRuntimeDataChange( kernel, changedRuntimeDataItems ) {
+
+      if( changedRuntimeDataItems.includes('inputValue') ) {
+        kernel.displayInputValueSomeWhere();
+      }
     }
   }, 
 
   kernel: {
 
-    yoo() {
-      console.log('yoo!');
+    displayInputValueSomeWhere() {
+      const value = this.getRuntimeDataItem( 'inputValue' ); 
+
+      if ( value.length > 4 ) {
+        this.setSignalValue( 'inputValue', value );
+      }
+
     },
 
     getCounterValue() {
@@ -76,6 +89,8 @@ const config = {
     },
 
     //TestNode: {},
+
+    InputValueDisplay: {},
 
     InnerElement: {},
 

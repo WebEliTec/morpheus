@@ -77,7 +77,7 @@ export default class MorpheusKernel {
 
   getRuntimeDataItem( runtimeDataItemId ) {
 
-    const runtimeDataItem = this.runtimeData[metaDataItemId];
+    const runtimeDataItem = this.runtimeData[runtimeDataItemId];
 
     if (!runtimeDataItem) {
       console.warn(`[Kernel] Unknown runtime data item id: "${runtimeDataItemId}"`);
@@ -88,10 +88,9 @@ export default class MorpheusKernel {
 
   }
 
-  setRuntimeDataItem( runtimeDataId, value ) {
-    console.log(runtimeDataId, value);
-    this.onRuntimeDataChange();
-    this.runtimeData[runtimeDataId] = value;
+  setRuntimeDataItem( runtimeDataItemId, value ) {
+    this.runtimeData[runtimeDataItemId] = value;
+    this.onRuntimeDataChange([runtimeDataItemId]);
   }
 
 
