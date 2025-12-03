@@ -163,7 +163,6 @@ export default class NodeManager {
     kernel.runtimeData       = {};
 
     const onRuntimeDataChange = () => {
-      console.log('xxxx');
       this.callHook('onRuntimeDataChange', nodeResources, kernel );
     };
 
