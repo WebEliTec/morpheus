@@ -28,6 +28,9 @@ export default class MorpheusKernel {
 
   }
 
+  /* Core Data Management
+  /* *** *** *** *** *** *** *** *** *** *** *** *** *** *** */
+
   getCoreData( coreDataItemId ) {
     return this.getCoreDataItem( coreDataItemId );
   }
@@ -45,8 +48,11 @@ export default class MorpheusKernel {
 
   }
 
-  getMetaData( metaDataItemId ) {
-    return this.getMetaData( metaDataItemId );
+  /* Meta Data Management
+  /* *** *** *** *** *** *** *** *** *** *** *** *** *** *** */
+
+  getMetaData() {
+    return this.metaData;
   }
 
   getMetaDataItem( metaDataItemId ) {
@@ -61,6 +67,14 @@ export default class MorpheusKernel {
     return metaDataItem;
 
   }
+
+  /* Runtime Data Management
+  /* *** *** *** *** *** *** *** *** *** *** *** *** *** *** */
+
+  getRuntimeData( ) {
+    return this.runtimeData( );
+  }
+
 
   /* React Convenience Functions
   /* *** *** *** *** *** *** *** *** *** *** *** *** *** *** */

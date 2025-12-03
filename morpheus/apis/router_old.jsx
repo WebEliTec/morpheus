@@ -4,12 +4,27 @@ export default class Router {
   
   constructor() {
     this.listeners = new Set();
+    this.isServer = typeof window === 'undefined';  // ← Add this
+    
+    // Only add listener on client-side
+    if (!this.isServer) {  // ← Guard this
+      window.addEventListener('popstate', () => {
+        this.notifyListeners();
+      });
+    }
   }
   
-  /* Get URL 
+  /* Get URL and Segments
   /* *** *** *** *** *** *** *** *** *** *** *** *** *** *** */
 
   getUrl() {
+    // Guard against server-side
+    if (this.isServer) {
+      return {
+        url: '/',
+        segments: []
+      };
+    }
     
     const url = window.location.pathname;
     
@@ -24,7 +39,7 @@ export default class Router {
 
   getSegment(index = 1, defaultValue = null) {
     const adjustedIndex = index -1;
-    const { segments }  = this.getUrl();
+    const { segments } = this.getUrl();
     return segments[adjustedIndex] || defaultValue;
   }
 
@@ -87,6 +102,9 @@ export default class Router {
   /* Navigation
   /* *** *** *** *** *** *** *** *** *** *** *** *** *** *** */
   navigate(path) {
+    if (this.isServer) return;
+    
+    // Ensure path starts with '/'
     const absolutePath = path.startsWith('/') ? path : `/${path}`;
     
     window.history.pushState({}, '', absolutePath);
@@ -107,17 +125,6 @@ export default class Router {
 
   parseSegments(url) {
     return url.split('/').filter(segment => segment.length > 0);
-  }
-
-  /* Route Checks
-  /* *** *** *** *** *** *** *** *** *** *** *** *** *** *** */
-  isHome() {
-    const { segments } = this.getUrl();
-    return segments.length === 0;
-  }
-
-  toHome() {
-    this.navigate('/');
   }
 
 }

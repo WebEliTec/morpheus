@@ -1,16 +1,33 @@
 import '../globals.scss';
 
-export default function Root( { _, Node, Module, Router } ) {
+export default function Root( { Kernel, Node, Module, Router } ) {
 
-  _.hello()
+  Kernel.helloWorld1();
+
+  //console.log( Kernel.singularityEngine.getContentClasses() );
+
+  const route = Router.getSegment( 1 );
 
   return (
     <> 
-      <h1 className ="heading-gamma">Root Element XXX</h1>
-      SharedModule: 
-      == <Module id="ASharedModule" />       
-      Inherited Module: 
-      == <Module id="Delta"/>
+    Root
+      <Node id="SideMenu" /> 
+
+
+      <Node id="SideBar" />
+      <Node id="Main" /> 
+      <Node id="TestNode" />
+{/* 
+      <Module id="SomeSharedModule"/> 
+
+      <main>
+        { route === 'home'           && <Module id="Home" /> }
+        { route === 'content-system' && <Module id="ContentSystem" /> }
+        { route === 'users'          && <Module id="Users" /> }
+      </main>
+      
+       */}
+                  
     </>
   )
 }

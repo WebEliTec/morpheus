@@ -160,6 +160,8 @@ export default class NodeManager {
     kernel.utility           = app.utility;
     kernel.graph             = app.graph;
     kernel.router            = app.router;
+
+    kernel.runtimeData       = {};
    
     return kernel;
   }

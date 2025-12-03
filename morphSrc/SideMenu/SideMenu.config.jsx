@@ -1,3 +1,5 @@
+import customData from "./customData";
+
 const config = {
 
   //parentId: 'MenuDelta',
@@ -18,6 +20,8 @@ const config = {
         label: 'Content System',
         route: '/content-system'
       }, 
+
+      data: customData,
 
     }, 
 
@@ -46,6 +50,19 @@ const config = {
     }
 
   },
+
+
+  modules: {
+
+    SideMenu: {
+      isRoot:  true,
+    }
+
+  },
+
+  components: {
+    SomeComponent: {},
+  }, 
 
   /* Kernel
   /* *** *** *** *** *** *** *** *** *** *** *** *** *** *** */
