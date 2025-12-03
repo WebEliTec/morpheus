@@ -3,7 +3,7 @@ import { values } from "lodash"
 export default function Wrapper({ _, Module, Node }) {
 
   function handleChange( value ) {
-    console.log( value );
+    _.setRuntimeDataItem( 'inputValue', value );
   }
 
 

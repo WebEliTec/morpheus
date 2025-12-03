@@ -149,7 +149,6 @@ export default class NodeManager {
 
     kernel.constants         = constants;
     
-    
     kernel.metaData          = { ...metaData, ...(instanceData?.metaData || {}) };
     kernel.coreData          = { ...coreData, ...(instanceData?.coreData || {}) };
     kernel.signalClusters    = signalClusters;
@@ -162,6 +161,15 @@ export default class NodeManager {
     kernel.router            = app.router;
 
     kernel.runtimeData       = {};
+
+    const onRuntimeDataChange = () => {
+      console.log('xxxx');
+      this.callHook('onRuntimeDataChange', nodeResources, kernel );
+    };
+
+    
+
+    kernel.onRuntimeDataChange = onRuntimeDataChange;
    
     return kernel;
   }
@@ -277,11 +285,11 @@ export default class NodeManager {
 
   createModule( kernel, moduleRegistry ) {
 
-    const nodeContext     = this.nodeContext; 
-    const onModuleMount   = this.onModuleMount.bind(this);
-    const onModuleUnmount = this.onModuleUnmount.bind(this);
-    const Node            = this.getNodeLoader();
-    const App             = this.app;
+    const nodeContext         = this.nodeContext; 
+    const onModuleMount       = this.onModuleMount.bind(this);
+    const onModuleUnmount     = this.onModuleUnmount.bind(this);
+    const Node                = this.getNodeLoader();
+    const App                 = this.app;
 
     return function Module( { id, proxyId, children = null, ...props } ) {
 
@@ -486,6 +494,7 @@ export default class NodeManager {
   onModuleUnmount( moduleId ) {
     //console.log( `Unmouting ${moduleId}` );
   }
+
 
   /* Helpers
   /* *** *** *** *** *** *** *** *** *** *** *** *** *** *** */

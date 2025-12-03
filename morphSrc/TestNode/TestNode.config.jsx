@@ -19,7 +19,17 @@ const config = {
 
   }, 
 
+  hooks: {
+    onRuntimeDataChange( kernel ) {
+      kernel.yoo();
+    }
+  }, 
+
   kernel: {
+
+    yoo() {
+      console.log('yoo!');
+    },
 
     getCounterValue() {
       return this.getSignalValue( 'counter' );

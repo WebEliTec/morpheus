@@ -71,8 +71,27 @@ export default class MorpheusKernel {
   /* Runtime Data Management
   /* *** *** *** *** *** *** *** *** *** *** *** *** *** *** */
 
-  getRuntimeData( ) {
-    return this.runtimeData( );
+  getRuntimeData() {
+    return this.runtimeData;
+  }
+
+  getRuntimeDataItem( runtimeDataItemId ) {
+
+    const runtimeDataItem = this.runtimeData[metaDataItemId];
+
+    if (!runtimeDataItem) {
+      console.warn(`[Kernel] Unknown runtime data item id: "${runtimeDataItemId}"`);
+      return () => <div>Missing Meta Data: ${runtimeDataItemId}</div>;
+    }
+
+    return runtimeDataItem;
+
+  }
+
+  setRuntimeDataItem( runtimeDataId, value ) {
+    console.log(runtimeDataId, value);
+    this.onRuntimeDataChange();
+    this.runtimeData[runtimeDataId] = value;
   }
 
 
