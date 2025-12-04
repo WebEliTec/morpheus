@@ -157,24 +157,16 @@ export default class NodeManager {
     kernel.utility           = app.utility;
     kernel.graph             = app.graph;
 
-
-    kernel.router              = app.router;
-
-    const onNavigation         = () => {
-      this.callHook( 'onNavigation', nodeResources, kernel );
-    };
-
+    kernel.router                         = app.router;
+    const onNavigation                    = () => { this.callHook( 'onNavigation', nodeResources, kernel ) };
     kernel.router.triggerOnNavigationHook = onNavigation;
 
     kernel.runtimeData         = {};
-
-    const onRuntimeDataChange  = ( changedRuntimeDataItems ) => {
-      this.callHook( 'onRuntimeDataChange', nodeResources, kernel, changedRuntimeDataItems );
-    };
-
+    const onRuntimeDataChange  = ( changedRuntimeDataItems ) => { this.callHook( 'onRuntimeDataChange', nodeResources, kernel, changedRuntimeDataItems ) };
     kernel.onRuntimeDataChange = onRuntimeDataChange;
    
     return kernel;
+    
   }
 
   destroyKernel( kernel ) {

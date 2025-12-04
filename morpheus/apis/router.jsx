@@ -88,8 +88,8 @@ export default class Router {
   /* *** *** *** *** *** *** *** *** *** *** *** *** *** *** */
   navigate(path) {
     const absolutePath = path.startsWith('/') ? path : `/${path}`;
-    this.triggerOnNavigationHook();
     window.history.pushState({}, '', absolutePath);
+    this.triggerOnNavigationHook();
     this.notifyListeners();
   }
   
