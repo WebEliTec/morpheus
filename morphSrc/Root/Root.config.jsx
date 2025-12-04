@@ -28,6 +28,11 @@ const config = {
   hooks: {
     kernelDidInitialize: async ( kernel ) => {
       kernel.coreData.someValue = 'Test';
+      console.log( 'Root Node did initialize' );
+    },
+
+    onNavigation( kernel ) {
+      console.log( 'navigation detected from Root' );
     }
   },
 

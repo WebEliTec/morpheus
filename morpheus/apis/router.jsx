@@ -4,7 +4,7 @@ export default class Router {
   
   constructor() {
     this.listeners             = new Set();
-    this.nodeOnNavgiationHooks = {}
+    this.nodeOnNavigationHooks = {}
   }
   
   /* Get URL 
@@ -81,8 +81,6 @@ export default class Router {
     return segments.length;
   }
 
-  /* Parse URL into Segments
-  /* *** *** *** *** *** *** *** *** *** *** *** *** *** *** */
 
   
   /* Navigation
@@ -91,6 +89,8 @@ export default class Router {
     const absolutePath = path.startsWith('/') ? path : `/${path}`;
     window.history.pushState({}, '', absolutePath);
     //this.triggerOnNavigationHook();
+
+    this.triggerNodeNavigationHooks();
     this.notifyListeners();
   }
   
@@ -119,6 +119,22 @@ export default class Router {
 
   toHome() {
     this.navigate('/');
+  }
+
+  /* Hook System
+  /* *** *** *** *** *** *** *** *** *** *** *** *** *** *** */
+
+  triggerNodeNavigationHooks() {
+    
+    const currentRoute = this.getUrl().url;
+    
+    Object.values(this.nodeOnNavigationHooks).forEach(hookFn => {
+      try {
+        hookFn(currentRoute);  // Call each node's onNavigation hook
+      } catch (error) {
+        console.error('[Router] Error in node onNavigation hook:', error);
+      }
+    });
   }
 
 }

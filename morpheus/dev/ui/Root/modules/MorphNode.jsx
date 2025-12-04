@@ -13,7 +13,7 @@ export default function MorphNode({ data }) {
       <div className="separator"></div>
       
       <div className="fully-qualified-node-id">
-        {data.fullyQualifiedId}
+        {data.instanceId}
       </div>
       
       {data.mountedAt && (

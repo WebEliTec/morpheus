@@ -34,9 +34,8 @@ const config = {
 
     },
 
-    onNavigation( kernel ) {
-      console.log( kernel );
-      console.log('On Navigation!!!!');
+    onNavigation( kernel, url ) {
+      console.log( 'navigation detected from TestNode' );
     }
 
   }, 

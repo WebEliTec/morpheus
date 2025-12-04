@@ -81,6 +81,7 @@ export class Morpheus {
     this.devToolApp.media     = new MediaManager( devToolConfig );
     this.devToolApp.graph     = new Graph();
     this.devToolApp.utility   = new Utility();
+    this.devToolApp.router    = new Router();
     this.devToolApp.app       = {}; 
     this.devToolApp.app.graph = this.app.graph;
 

@@ -33,7 +33,7 @@ export default class NodeManager {
     return function NodeLoader( { id, instance, children, ...props } ) {
 
       const nodeId                       = id;
-      const instanceId                   = instance ? instance : id;
+      const instanceId                   = instance ?? 'Default';
       const [ Node, setNode ]            = useState( null );
       const parentKernelFullyQualifiedID = useContext( ParentKernelContext );
       
@@ -159,11 +159,10 @@ export default class NodeManager {
     kernel.graph             = app.graph;
 
     kernel.router            = app.router;
-    
-    /*
-    const onNavigation       = () => { this.callHook( 'onNavigation', nodeResources, kernel ) };
-    //Router is an initialized object! You need to assign specficially for this node instance
-    kernel.router.nodeOnNavgiationHooks[fullyQualifiedId] = onNavigation;*/
+
+
+    const onNavigation = (currentRoute) => { this.callHook('onNavigation', nodeResources, kernel, currentRoute) };
+    kernel.router.nodeOnNavigationHooks[fullyQualifiedId] = onNavigation;
 
     kernel.runtimeData         = {};
     const onRuntimeDataChange  = ( changedRuntimeDataItems ) => { this.callHook( 'onRuntimeDataChange', nodeResources, kernel, changedRuntimeDataItems ) };
@@ -178,6 +177,11 @@ export default class NodeManager {
     if (!kernel) {
       console.warn('[NodeManager] Attempted to cleanup null kernel');
       return;
+    }
+
+    // Clean up navigation hook
+    if (kernel.router && kernel.id) {
+      delete kernel.router.nodeOnNavigationHooks[kernel.id];
     }
     
     if (typeof kernel.onDestroy === 'function') {
@@ -537,10 +541,10 @@ export default class NodeManager {
     }
 
     if( !instanceId ) {
-      return `${ nodeId }${ separator }${ nodeId }`
+      return `${ nodeId }${ separator }Default`
     }
 
-    return `${ nodeId }${ separator }${ instanceId }` 
+    return `${ nodeId }${ separator }Default` 
 
   }
 

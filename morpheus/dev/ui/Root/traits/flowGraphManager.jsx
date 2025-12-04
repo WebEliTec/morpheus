@@ -40,6 +40,8 @@ const flowGraphManager = {
     
     const nodes = [];
     const edges = [];
+
+    console.log( 'appGraph.kernel' );
     
     // Add current node
     nodes.push({
