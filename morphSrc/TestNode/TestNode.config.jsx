@@ -25,21 +25,32 @@ const config = {
   }, 
 
   hooks: {
+
     onRuntimeDataChange( kernel, changedRuntimeDataItems ) {
 
       if( changedRuntimeDataItems.includes('inputValue') ) {
         kernel.displayInputValueSomeWhere();
       }
+
+    },
+
+    onNavigation( kernel ) {
+      console.log( kernel );
+      console.log('On Navigation!!!!');
     }
+
   }, 
 
   kernel: {
 
     displayInputValueSomeWhere() {
-      const value = this.getRuntimeDataItem( 'inputValue' ); 
+      
+      const value = this.getRuntimeDataItem( 'inputValue' );
 
       if ( value.length > 4 ) {
         this.setSignalValue( 'inputValue', value );
+      } else {
+        this.setSignalValue( 'inputValue', null );
       }
 
     },
@@ -90,7 +101,9 @@ const config = {
 
     //TestNode: {},
 
-    InputValueDisplay: {},
+    InputValueDisplay: {
+      signals: [ 'inputValue' ]
+    },
 
     InnerElement: {},
 

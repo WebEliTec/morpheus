@@ -51,8 +51,8 @@ export default class MorpheusKernel {
   /* Meta Data Management
   /* *** *** *** *** *** *** *** *** *** *** *** *** *** *** */
 
-  getMetaData() {
-    return this.metaData;
+  getMetaData( metaDataItemId ) {
+    return this.getMetaDataItem( metaDataItemId );
   }
 
   getMetaDataItem( metaDataItemId ) {
@@ -77,7 +77,7 @@ export default class MorpheusKernel {
 
   getRuntimeDataItem( runtimeDataItemId ) {
 
-    const runtimeDataItem = this.runtimeData[runtimeDataItemId];
+    const runtimeDataItem = this?.runtimeData[runtimeDataItemId];
 
     if (!runtimeDataItem) {
       console.warn(`[Kernel] Unknown runtime data item id: "${runtimeDataItemId}"`);

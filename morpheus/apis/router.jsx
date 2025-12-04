@@ -88,7 +88,7 @@ export default class Router {
   /* *** *** *** *** *** *** *** *** *** *** *** *** *** *** */
   navigate(path) {
     const absolutePath = path.startsWith('/') ? path : `/${path}`;
-    
+    this.triggerOnNavigationHook();
     window.history.pushState({}, '', absolutePath);
     this.notifyListeners();
   }
@@ -122,51 +122,3 @@ export default class Router {
 
 }
 
-/* Pattern Matching Helpers
-/* *** *** *** *** *** *** *** *** *** *** *** *** *** *** */
-
-export function shouldModuleRerender(subscription, currentRoute) {
-  if (!subscription || subscription === false) {
-    return false;
-  }
-  
-  if (subscription === true) {
-    return true;
-  }
-  
-  if (typeof subscription === 'string') {
-    return matchPattern(subscription, currentRoute);
-  }
-  
-  if (Array.isArray(subscription)) {
-    return subscription.some(pattern => matchPattern(pattern, currentRoute));
-  }
-  
-  return false;
-}
-
-export function matchPattern(pattern, route) {
-  if (pattern === route) {
-    return true;
-  }
-  
-  if (pattern.includes('*')) {
-    const prefix = pattern.replace('*', '');
-    return route.startsWith(prefix);
-  }
-  
-  if (pattern.includes(':')) {
-    const patternSegments = pattern.split('/').filter(s => s);
-    const routeSegments = route.split('/').filter(s => s);
-    
-    if (patternSegments.length !== routeSegments.length) {
-      return false;
-    }
-    
-    return patternSegments.every((seg, i) => {
-      return seg.startsWith(':') || seg === routeSegments[i];
-    });
-  }
-  
-  return false;
-}

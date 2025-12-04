@@ -10,10 +10,7 @@ export default function Root( { Kernel, Node, Module, Router } ) {
 
   return (
     <> 
-    Root
       <Node id="SideMenu" /> 
-
-
       <Node id="SideBar" />
       <Node id="Main" /> 
       <Node id="TestNode" />

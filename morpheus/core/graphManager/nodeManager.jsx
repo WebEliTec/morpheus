@@ -3,8 +3,6 @@ import NodeCompiler from '../resourceCompiler/nodeCompiler';
 import MorpheusKernel from '../resourceCompiler/MorpheusKernel';
 import * as Lucide from 'lucide-react'; 
 
-import { shouldModuleRerender } from '@morpheus/apis/router';
-
 let ResourceProvider = null;
 if (import.meta.env.PROD)  {
   ResourceProvider = await import('../../../morphBuildSrc/ResourceProvider.js').then(m => m.default);
@@ -158,16 +156,21 @@ export default class NodeManager {
     kernel.media             = app.media;
     kernel.utility           = app.utility;
     kernel.graph             = app.graph;
-    kernel.router            = app.router;
 
-    kernel.runtimeData       = {};
 
-    // Create a closure that captures nodeResources and tracks changed items
-    const onRuntimeDataChange = (changedRuntimeDataItems) => {
-      this.callHook('onRuntimeDataChange', nodeResources, kernel, changedRuntimeDataItems);
+    kernel.router              = app.router;
+
+    const onNavigation         = () => {
+      this.callHook( 'onNavigation', nodeResources, kernel );
     };
 
-    
+    kernel.router.triggerOnNavigationHook = onNavigation;
+
+    kernel.runtimeData         = {};
+
+    const onRuntimeDataChange  = ( changedRuntimeDataItems ) => {
+      this.callHook( 'onRuntimeDataChange', nodeResources, kernel, changedRuntimeDataItems );
+    };
 
     kernel.onRuntimeDataChange = onRuntimeDataChange;
    
@@ -285,11 +288,12 @@ export default class NodeManager {
 
   createModule( kernel, moduleRegistry ) {
 
-    const nodeContext         = this.nodeContext; 
-    const onModuleMount       = this.onModuleMount.bind(this);
-    const onModuleUnmount     = this.onModuleUnmount.bind(this);
-    const Node                = this.getNodeLoader();
-    const App                 = this.app;
+    const nodeContext                      = this.nodeContext; 
+    const onModuleMount                    = this.onModuleMount.bind(this);
+    const onModuleUnmount                  = this.onModuleUnmount.bind(this);
+    const shouldModuleRerenderBasedOnRoute = this.shouldModuleRerenderBasedOnRoute.bind(this);
+    const Node                             = this.getNodeLoader();
+    const App                              = this.app;
 
     return function Module( { id, proxyId, children = null, ...props } ) {
 
@@ -319,7 +323,7 @@ export default class NodeManager {
         if ( !routeSubscription ) return;
         
         return App.router.subscribe((newRoute) => {
-          if (shouldModuleRerender( routeSubscription, newRoute ) ) {
+          if ( shouldModuleRerenderBasedOnRoute ( routeSubscription, newRoute ) ) {
             setRouteChangeCounter(prev => prev + 1);
           }
         });
@@ -543,5 +547,52 @@ export default class NodeManager {
     return `${ nodeId }${ separator }${ instanceId }` 
 
   }
+
+  shouldModuleRerenderBasedOnRoute(subscription, currentRoute) {
+    if (!subscription || subscription === false) {
+      return false;
+    }
+    
+    if (subscription === true) {
+      return true;
+    }
+    
+    if (typeof subscription === 'string') {
+      return this.matchRoutePattern(subscription, currentRoute);
+    }
+    
+    if (Array.isArray(subscription)) {
+      return subscription.some(pattern => this.matchRoutePattern(pattern, currentRoute));
+    }
+    
+    return false;
+  }
+
+  matchRoutePattern(pattern, route) {
+    if (pattern === route) {
+      return true;
+    }
+    
+    if (pattern.includes('*')) {
+      const prefix = pattern.replace('*', '');
+      return route.startsWith(prefix);
+    }
+    
+    if (pattern.includes(':')) {
+      const patternSegments = pattern.split('/').filter(s => s);
+      const routeSegments = route.split('/').filter(s => s);
+      
+      if (patternSegments.length !== routeSegments.length) {
+        return false;
+      }
+      
+      return patternSegments.every((seg, i) => {
+        return seg.startsWith(':') || seg === routeSegments[i];
+      });
+    }
+    
+    return false;
+  }
+  
 
 }
