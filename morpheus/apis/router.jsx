@@ -3,7 +3,8 @@
 export default class Router {
   
   constructor() {
-    this.listeners = new Set();
+    this.listeners             = new Set();
+    this.nodeOnNavgiationHooks = {}
   }
   
   /* Get URL 
@@ -89,7 +90,7 @@ export default class Router {
   navigate(path) {
     const absolutePath = path.startsWith('/') ? path : `/${path}`;
     window.history.pushState({}, '', absolutePath);
-    this.triggerOnNavigationHook();
+    //this.triggerOnNavigationHook();
     this.notifyListeners();
   }
   

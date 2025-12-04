@@ -138,8 +138,9 @@ export default class NodeManager {
 
     const kernel             = new KernelClass();
     const instanceData       = this.getInstanceItemData(nodeResources, instanceId);
+    const fullyQualifiedId   = this.getFullyQualifiedNodeId( nodeId, instanceId );
 
-    kernel.id                = this.getFullyQualifiedNodeId( nodeId, instanceId );
+    kernel.id                = fullyQualifiedId;
     kernel.nodeId            = nodeId;
     kernel.instanceId        = instanceId;
     kernel.props             = nodeProps;
@@ -157,16 +158,19 @@ export default class NodeManager {
     kernel.utility           = app.utility;
     kernel.graph             = app.graph;
 
-    kernel.router                         = app.router;
-    const onNavigation                    = () => { this.callHook( 'onNavigation', nodeResources, kernel ) };
-    kernel.router.triggerOnNavigationHook = onNavigation;
+    kernel.router            = app.router;
+    
+    /*
+    const onNavigation       = () => { this.callHook( 'onNavigation', nodeResources, kernel ) };
+    //Router is an initialized object! You need to assign specficially for this node instance
+    kernel.router.nodeOnNavgiationHooks[fullyQualifiedId] = onNavigation;*/
 
     kernel.runtimeData         = {};
     const onRuntimeDataChange  = ( changedRuntimeDataItems ) => { this.callHook( 'onRuntimeDataChange', nodeResources, kernel, changedRuntimeDataItems ) };
     kernel.onRuntimeDataChange = onRuntimeDataChange;
    
     return kernel;
-    
+
   }
 
   destroyKernel( kernel ) {
@@ -541,6 +545,7 @@ export default class NodeManager {
   }
 
   shouldModuleRerenderBasedOnRoute(subscription, currentRoute) {
+
     if (!subscription || subscription === false) {
       return false;
     }
@@ -558,9 +563,11 @@ export default class NodeManager {
     }
     
     return false;
+    
   }
 
   matchRoutePattern(pattern, route) {
+
     if (pattern === route) {
       return true;
     }
@@ -584,6 +591,7 @@ export default class NodeManager {
     }
     
     return false;
+
   }
   
 
