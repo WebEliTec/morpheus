@@ -22,10 +22,11 @@ const appConfig = {
 		},
 
 
+		/*
 		Main:     {
 			isFile: true,
 			dir: '/nodes',
-		},
+		},*/
 
 		TestNode: {
 		 	dir: '/',

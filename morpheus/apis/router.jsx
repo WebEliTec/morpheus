@@ -27,32 +27,7 @@ export default class Router {
     const adjustedIndex = index -1;
     const { segments }  = this.getUrl();
     return segments[adjustedIndex] || defaultValue;
-  }
-
-  getFirstSegment() {
-    return this.getSegment( 1 );
-  }
-
-  getSecondSegment() {
-    return this.getSegment( 2 );
-  }
-
-  getThirdSegment() {
-    return this.getSegment( 3 );
-  }
-
-  getFourthSegment() {
-    return this.getSegment( 4 );
-  }
-
-  getFifthSegment() {
-    return this.getSegment( 5 );
-  }
-
-  getSixthSegment() {
-    return this.getSegment( 6 );
-  }
-  
+  }  
 
   /* Segment Existence & Comparison
   /* *** *** *** *** *** *** *** *** *** *** *** *** *** *** */

@@ -10,6 +10,7 @@ const config = {
     counter: {
       type: 'primitive', 
       default: 1,
+      group: 'someGroup',
     },
 
     showInnerElement: {
@@ -24,6 +25,15 @@ const config = {
 
   }, 
 
+  navigationHooks: {  
+    willNavigate: {
+      priority: 10, 
+      function: () => {
+        console.log('Will Navigate!');
+      }
+    },
+  }, 
+
   hooks: {
 
     onRuntimeDataChange( kernel, changedRuntimeDataItems ) {
@@ -36,6 +46,24 @@ const config = {
 
     onNavigation( kernel, url ) {
       console.log( 'navigation detected from TestNode' );
+    }, 
+
+    willNavigate: {
+      priority: 10, 
+      callback: function( kernel, url ) {
+        console.log('Will Navigate');
+      },
+    }, 
+
+    didNavigate: {
+      priority: 10, 
+      callback: function( kernel, url ) {
+        console.log('Will Navigate');
+      },
+    }, 
+
+    runtimeDataWillChange () {
+      console.log('runTimedataWillChange')
     }
 
   }, 
@@ -52,6 +80,10 @@ const config = {
         this.setSignalValue( 'inputValue', null );
       }
 
+    },
+
+    travers() {
+      this.graph.getNode( 'MainMenu' ).call( 'navigateTo', [ 'about-us' ] ).getParent().call( 'setSignal', [ 'status', 'updated' ] );
     },
 
     getCounterValue() {

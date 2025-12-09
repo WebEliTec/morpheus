@@ -58,67 +58,75 @@ export default class NodeManager {
 
   }
 
-  async createNode( nodeId, instanceId, ...props ) {
-
-    const nodeProps = props[0] || {};
-
-    let nodeResources;
-
-    if (import.meta.env.PROD) {
-
-      try {
-
-        nodeResources = ResourceProvider.getNodeResources(nodeId);
-
-      } catch (error) {
-
-        console.error(`Failed to load pre-built resources for ${nodeId}:`, error);
-        throw error;
-
-      }
-
-    } else {
-
-      try {
-
-        const compiler = new NodeCompiler({
-          nodeRegistry:       this.nodeRegistry, 
-          nodeId, 
-          executionContext:   this.executionContext, 
-          contextConfig:      this.contextConfig,
-          libraryNodeConfig:  this.libraryNodeConfig,
-          environment:        'client',
-        });
-
-        nodeResources  = await compiler.exec();
-
-      } catch (error) {
-
-        console.error(`Failed to compile resources for node '${nodeId}':`, error);
-        throw error;
-
-      }
-
+async createNode( nodeId, instanceId, ...props ) {
+  const startTime = performance.now();
+  console.log(`[${nodeId}] Starting createNode...`);
+  
+  const nodeProps = props[0] || {};
+  let nodeResources;
+  
+  if (import.meta.env.PROD) {
+    // Production
+    try {
+      nodeResources = ResourceProvider.getNodeResources(nodeId);
+    } catch (error) {
+      console.error(`Failed to load pre-built resources for ${nodeId}:`, error);
+      throw error;
     }
-
-    const { traits }          = nodeResources;
-
-    nodeResources.KernelClass = this.createKernelClass(traits);
-
-    const app                 = this.app;
-    const kernel              = this.initializeKernel( nodeId, instanceId, nodeProps, nodeResources, app  );
-
-    await this.callHook( 'kernelDidInitialize', nodeResources, kernel );
-
-    const NodeProvider        = this.createNodeProvider( kernel, nodeResources );
-    const Module              = this.createModule( kernel, nodeResources.moduleRegistry );
-    const NodeComponent       = this.createNodeComponent( nodeResources, NodeProvider, Module, kernel );
-
-    console.log( Date.now() );
-
-    return NodeComponent;
+  } else {
+    // Development - compile
+    const compileStart = performance.now();
     
+    try {
+      const compiler = new NodeCompiler({
+        nodeRegistry:       this.nodeRegistry, 
+        nodeId, 
+        executionContext:   this.executionContext, 
+        contextConfig:      this.contextConfig,
+        libraryNodeConfig:  this.libraryNodeConfig,
+        environment:        'client',
+      });
+      
+      nodeResources = await compiler.exec();
+      
+    } catch (error) {
+      console.error(`Failed to compile resources for node '${nodeId}':`, error);
+      throw error;
+    }
+    
+    const compileTime = performance.now() - compileStart;
+    console.log(`[${nodeId}] Compilation: ${compileTime.toFixed(2)}ms`);
   }
+  
+  const kernelStart = performance.now();
+  
+  const { traits } = nodeResources;
+  nodeResources.KernelClass = this.createKernelClass(traits);
+  
+  const app = this.app;
+  const kernel = this.initializeKernel(nodeId, instanceId, nodeProps, nodeResources, app);
+  
+  const kernelTime = performance.now() - kernelStart;
+  console.log(`[${nodeId}] Kernel init: ${kernelTime.toFixed(2)}ms`);
+  
+  const hookStart = performance.now();
+  await this.callHook('kernelDidInitialize', nodeResources, kernel);
+  const hookTime = performance.now() - hookStart;
+  console.log(`[${nodeId}] kernelDidInitialize hook: ${hookTime.toFixed(2)}ms`);
+  
+  const factoryStart = performance.now();
+  const NodeProvider = this.createNodeProvider(kernel, nodeResources);
+  const Module = this.createModule(kernel, nodeResources.moduleRegistry);
+  const NodeComponent = this.createNodeComponent(nodeResources, NodeProvider, Module, kernel);
+  const factoryTime = performance.now() - factoryStart;
+  console.log(`[${nodeId}] Component factories: ${factoryTime.toFixed(2)}ms`);
+  
+  const totalTime = performance.now() - startTime;
+  console.log(`[${nodeId}] TOTAL: ${totalTime.toFixed(2)}ms`);
+  console.log('---');
+  
+  return NodeComponent;
+}
 
   createKernelClass(traits) {
     class NodeKernel extends MorpheusKernel {}
@@ -413,20 +421,24 @@ export default class NodeManager {
     };
   }
 
-  createNodeComponent( nodeResources, NodeProvider, Module, kernel ) {
-
-    const { nodeId, nodeProps } = kernel
-
-    const rootModuleId             = nodeResources.rootModuleId;
-    const notifyGraphOnNodeMount   = this.notifyGraphOnNodeMount;
-    const notifyGraphOnNodeUnmount = this.notifyGraphOnNodeUnmount;
-    const destroyKernel            = this.destroyKernel.bind(this);
-    const callHook                 = this.callHook.bind(this);  
-
-    return function NodeComponent( { ...props } ) {
-
+createNodeComponent(nodeResources, NodeProvider, Module, kernel) {
+  const { nodeId, nodeProps } = kernel;
+  const rootModuleId = nodeResources.rootModuleId;
+  const notifyGraphOnNodeMount = this.notifyGraphOnNodeMount;
+  const notifyGraphOnNodeUnmount = this.notifyGraphOnNodeUnmount;
+  const destroyKernel = this.destroyKernel.bind(this);
+  const callHook = this.callHook.bind(this);  
+  
+  return function NodeComponent({ ...props }) {
+    
+    // ← ADD THIS
+    const mountStart = performance.now();
+    console.log(`[${nodeId}] React rendering NodeComponent...`);
+    
     useEffect(() => {
-
+      const mountTime = performance.now() - mountStart;
+      console.log(`[${nodeId}] Full mount time (including React): ${mountTime.toFixed(2)}ms`);
+      
       notifyGraphOnNodeMount(kernel);
       
       (async () => {
@@ -436,23 +448,20 @@ export default class NodeManager {
       return () => {
         (async () => {
           await callHook('nodeWillUnmount', nodeResources, kernel);
-          
           notifyGraphOnNodeUnmount(kernel.id);
           destroyKernel(kernel);
-          
           await callHook('nodeDidUnmount', nodeResources, kernel);
         })();
       };
     }, []);
-
-      return ( 
-        <NodeProvider>
-          <Module id = { rootModuleId } data-node-id = { nodeId } {...nodeProps} {...props } />
-        </NodeProvider>
-      )
-
-    };
-  }
+    
+    return ( 
+      <NodeProvider>
+        <Module id={rootModuleId} data-node-id={nodeId} {...nodeProps} {...props} />
+      </NodeProvider>
+    );
+  };
+}
 
   async callHook(hookName, nodeResources, ...args) {
     

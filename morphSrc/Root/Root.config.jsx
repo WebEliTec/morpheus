@@ -6,6 +6,10 @@ const config = {
 
   /* Root
   /* *** *** *** *** *** *** *** *** *** *** *** *** *** *** */
+  LLMContext: "This is the root node of the application.",
+
+  /* Root
+  /* *** *** *** *** *** *** *** *** *** *** *** *** *** *** */
 
 	defaultPaths: {
 		modules: '/modules',
