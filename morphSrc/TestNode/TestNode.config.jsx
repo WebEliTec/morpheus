@@ -55,8 +55,8 @@ const config = {
       },
     }, 
 
-    runtimeDataWillChange () {
-      console.log('runTimedataWillChange')
+    runtimeDataDidChange () {
+      console.log('runTimedataDidChange')
     }
 
   }, 

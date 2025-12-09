@@ -165,8 +165,8 @@ export default class NodeManager {
     this.registerNavigationHooks( kernel, nodeResources );
 
     kernel.runtimeData         = {};
-    const onRuntimeDataChange  = ( changedRuntimeDataItems ) => { this.callHook( 'onRuntimeDataChange', nodeResources, kernel, changedRuntimeDataItems ) };
-    kernel.onRuntimeDataChange = onRuntimeDataChange;
+    const runtimeDataDidChange  = ( changedRuntimeDataItems ) => { this.callHook( 'runtimeDataDidChange', nodeResources, kernel, changedRuntimeDataItems ) };
+    kernel.runtimeDataDidChange = runtimeDataDidChange;
    
     return kernel;
 
@@ -181,9 +181,6 @@ export default class NodeManager {
 
     // Clean up navigation hooks
     this.unregisterNavigationHooks(kernel);
-    
-    // Call onDestroy hook
-    this.callHook('onDestroy', nodeResources, kernel);
     
     kernel.signals           = null;
     kernel.optimisticSignals = null;

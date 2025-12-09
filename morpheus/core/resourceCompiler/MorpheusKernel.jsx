@@ -90,7 +90,7 @@ export default class MorpheusKernel {
 
   setRuntimeDataItem( runtimeDataItemId, value ) {
     this.runtimeData[runtimeDataItemId] = value;
-    this.onRuntimeDataChange([runtimeDataItemId]);
+    this.runtimeDataDidChange([runtimeDataItemId]);  // renamed
   }
 
 
