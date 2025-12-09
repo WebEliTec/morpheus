@@ -3,8 +3,9 @@
 export default class Router {
   
   constructor() {
-    this.listeners             = new Set();
-    this.nodeOnNavigationHooks = {}
+    this.listeners         = new Set();
+    this.willNavigateHooks = new Map();
+    this.didNavigateHooks  = new Map();
   }
   
   /* Get URL 
@@ -18,6 +19,36 @@ export default class Router {
       url: url,
       segments: this.parseSegments(url)
     };
+  }
+
+  /* Hook Registration
+  /* *** *** *** *** *** *** *** *** *** *** *** *** *** *** */
+  registerNavigationHook(type, kernelId, hookConfig) {
+    const registry = type === 'willNavigate' ? this.willNavigateHooks : this.didNavigateHooks;
+    registry.set(kernelId, hookConfig);
+  }
+  
+  unregisterNavigationHooks(kernelId) {
+    this.willNavigateHooks.delete(kernelId);
+    this.didNavigateHooks.delete(kernelId);
+  }
+
+  /* Hook Execution
+  /* *** *** *** *** *** *** *** *** *** *** *** *** *** *** */
+  executeNavigationHooks(type, previousUrl, newUrl) {
+    const registry = type === 'willNavigate' ? this.willNavigateHooks : this.didNavigateHooks;
+    
+    // Convert to array and sort by priority (lower first)
+    const sortedHooks = Array.from(registry.values())
+      .sort((a, b) => a.priority - b.priority);
+    
+    for (const hookConfig of sortedHooks) {
+      try {
+        hookConfig.callback(hookConfig.kernel, previousUrl, newUrl);
+      } catch (error) {
+        console.error(`[Router] Error in ${type} hook:`, error);
+      }
+    }
   }
   
   /* Segment Retrieval
@@ -60,17 +91,23 @@ export default class Router {
   
   /* Navigation
   /* *** *** *** *** *** *** *** *** *** *** *** *** *** *** */
-  navigate(path) {
-    const absolutePath = path.startsWith('/') ? path : `/${path}`;
-    window.history.pushState({}, '', absolutePath);
-    //this.triggerOnNavigationHook();
 
-    this.triggerNodeNavigationHooks();
+  navigate(path) {
+    const previousUrl  = this.getUrl().url;
+    const absolutePath = path.startsWith('/') ? path : `/${path}`;
+    
+    this.executeNavigationHooks('willNavigate', previousUrl, absolutePath);
+    
+    window.history.pushState({}, '', absolutePath);
+    
+    this.executeNavigationHooks('didNavigate', previousUrl, absolutePath);
+    
     this.notifyListeners();
   }
   
   /* Subscription SYSTEM
   /* *** *** *** *** *** *** *** *** *** *** *** *** *** *** */
+
   subscribe(callback) {
     this.listeners.add(callback);
     return () => this.listeners.delete(callback);
@@ -96,21 +133,6 @@ export default class Router {
     this.navigate('/');
   }
 
-  /* Hook System
-  /* *** *** *** *** *** *** *** *** *** *** *** *** *** *** */
-
-  triggerNodeNavigationHooks() {
-    
-    const currentRoute = this.getUrl().url;
-    
-    Object.values(this.nodeOnNavigationHooks).forEach(hookFn => {
-      try {
-        hookFn(currentRoute);  // Call each node's onNavigation hook
-      } catch (error) {
-        console.error('[Router] Error in node onNavigation hook:', error);
-      }
-    });
-  }
 
 }
 

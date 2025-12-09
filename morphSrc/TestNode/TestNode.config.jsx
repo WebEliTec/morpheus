@@ -44,21 +44,14 @@ const config = {
 
     },
 
-    onNavigation( kernel, url ) {
-      console.log( 'navigation detected from TestNode' );
-    }, 
-
-    willNavigate: {
-      priority: 10, 
-      callback: function( kernel, url ) {
-        console.log('Will Navigate');
-      },
-    }, 
+    willNavigate ( kernel, url ) {
+      console.log('[TestNode]: willNavigate default prio 10');
+    },
 
     didNavigate: {
-      priority: 10, 
+      priority: 20, 
       callback: function( kernel, url ) {
-        console.log('Will Navigate');
+        console.log('[TestNode]: didNavigate prio 20');
       },
     }, 
 

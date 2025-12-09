@@ -35,9 +35,13 @@ const config = {
       console.log( 'Root Node did initialize' );
     },
 
-    onNavigation( kernel ) {
-      console.log( 'navigation detected from Root' );
-    }
+    didNavigate: {
+      priority: 30, 
+      callback: function( kernel, url ) {
+        console.log('[Root]: didNavigate prio 30');
+      },
+    }, 
+
   },
 
   /* Traits

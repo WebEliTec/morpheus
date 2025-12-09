@@ -162,9 +162,7 @@ export default class NodeManager {
 
     kernel.router            = app.router;
 
-
-    const onNavigation = (currentRoute) => { this.callHook('onNavigation', nodeResources, kernel, currentRoute) };
-    kernel.router.nodeOnNavigationHooks[fullyQualifiedId] = onNavigation;
+    this.registerNavigationHooks( kernel, nodeResources );
 
     kernel.runtimeData         = {};
     const onRuntimeDataChange  = ( changedRuntimeDataItems ) => { this.callHook( 'onRuntimeDataChange', nodeResources, kernel, changedRuntimeDataItems ) };
@@ -181,10 +179,8 @@ export default class NodeManager {
       return;
     }
 
-    // Clean up navigation hook
-    if (kernel.router && kernel.id) {
-      delete kernel.router.nodeOnNavigationHooks[kernel.id];
-    }
+    // Clean up navigation hooks
+    this.unregisterNavigationHooks(kernel);
     
     if (typeof kernel.onDestroy === 'function') {
       try {
@@ -499,6 +495,62 @@ export default class NodeManager {
 
   onModuleUnmount( moduleId ) {
     //console.log( `Unmouting ${moduleId}` );
+  }
+
+  /* Navigation Hook Registration
+  /* *** *** *** *** *** *** *** *** *** *** *** *** *** *** */
+  registerNavigationHooks(kernel, nodeResources) {
+    const hooks = nodeResources?.hooks;
+    if (!hooks) return;
+
+    const navigationHookTypes = ['willNavigate', 'didNavigate'];
+
+    for (const hookType of navigationHookTypes) {
+      const hookDef = hooks[hookType];
+      if (!hookDef) continue;
+
+      const normalizedHook = this.normalizeNavigationHook(hookDef, kernel);
+      if (normalizedHook) {
+        kernel.router.registerNavigationHook(hookType, kernel.id, normalizedHook);
+      }
+    }
+  }
+
+  normalizeNavigationHook(hookDef, kernel) {
+    const DEFAULT_PRIORITY = 10;
+
+    // Direct function format
+    if (typeof hookDef === 'function') {
+      return {
+        priority: DEFAULT_PRIORITY,
+        callback: hookDef,
+        kernel,
+      };
+    }
+
+    // Object format with callback
+    if (typeof hookDef === 'object' && hookDef !== null) {
+      const callback = hookDef.callback;
+      if (typeof callback !== 'function') {
+        console.warn(`[NodeManager] Navigation hook for node "${kernel.nodeId}" has object format but no valid callback function`);
+        return null;
+      }
+
+      return {
+        priority: typeof hookDef.priority === 'number' ? hookDef.priority : DEFAULT_PRIORITY,
+        callback,
+        kernel,
+      };
+    }
+
+    console.warn(`[NodeManager] Invalid navigation hook format for node "${kernel.nodeId}"`);
+    return null;
+  }
+
+  unregisterNavigationHooks(kernel) {
+    if (kernel?.router && kernel?.id) {
+      kernel.router.unregisterNavigationHooks(kernel.id);
+    }
   }
 
 
