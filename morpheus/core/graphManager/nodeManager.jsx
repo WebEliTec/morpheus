@@ -172,7 +172,7 @@ export default class NodeManager {
 
   }
 
-  destroyKernel( kernel ) {
+  destroyKernel( kernel, nodeResources ) {
     
     if (!kernel) {
       console.warn('[NodeManager] Attempted to cleanup null kernel');
@@ -182,13 +182,8 @@ export default class NodeManager {
     // Clean up navigation hooks
     this.unregisterNavigationHooks(kernel);
     
-    if (typeof kernel.onDestroy === 'function') {
-      try {
-        kernel.onDestroy();
-      } catch (error) {
-        console.error(`[NodeManager] Error in kernel.onDestroy for ${kernel.nodeId}:`, error);
-      }
-    }
+    // Call onDestroy hook
+    this.callHook('onDestroy', nodeResources, kernel);
     
     kernel.signals           = null;
     kernel.optimisticSignals = null;
@@ -434,7 +429,7 @@ export default class NodeManager {
           await callHook('nodeWillUnmount', nodeResources, kernel);
           
           notifyGraphOnNodeUnmount(kernel.id);
-          destroyKernel(kernel);
+          destroyKernel(kernel, nodeResources);
           
           await callHook('nodeDidUnmount', nodeResources, kernel);
         })();

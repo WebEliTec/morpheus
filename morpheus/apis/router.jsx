@@ -124,10 +124,10 @@ export default class Router {
     this.executeDidNavigateHooks(previousUrl, absolutePath);
     
     // Notify module listeners (existing reactivity system)
-    this.notifyListeners();
+    this.notifyListeningNodes();
     
     return true;
-    
+
   }
   
   /* Subscription System
@@ -137,7 +137,7 @@ export default class Router {
     return () => this.listeners.delete(callback);
   }
   
-  notifyListeners() {
+  notifyListeningNodes() {
     const currentRoute = this.getUrl().url;
     this.listeners.forEach(cb => cb(currentRoute));
   }
