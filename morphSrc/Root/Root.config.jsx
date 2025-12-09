@@ -37,7 +37,10 @@ const config = {
 
     didNavigate: {
       priority: 30, 
-      callback: function( kernel, url ) {
+      callback: function( kernel, oldUrl, newUrl ) {
+        console.log( kernel );
+        console.log( oldUrl );
+        console.log( newUrl );
         console.log('[Root]: didNavigate prio 30');
       },
     }, 
