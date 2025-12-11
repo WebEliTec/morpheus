@@ -106,7 +106,7 @@ export default class MorpheusKernel {
   }
 
   useRef( defaultValue ) {
-    return useEffect( defaultValue );
+    return useRef( defaultValue );
   }
 
   onMount( fn ) {
