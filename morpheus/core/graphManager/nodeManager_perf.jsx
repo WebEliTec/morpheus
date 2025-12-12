@@ -84,7 +84,7 @@ async createNode( nodeId, instanceId, ...props ) {
         executionContext:   this.executionContext, 
         contextConfig:      this.contextConfig,
         libraryNodeConfig:  this.libraryNodeConfig,
-        environment:        'client',
+        runtimeEnvironment: 'client',
       });
       
       nodeResources = await compiler.exec();

@@ -87,7 +87,7 @@ export default class NodeManager {
           executionContext:   this.executionContext, 
           contextConfig:      this.contextConfig,
           libraryNodeConfig:  this.libraryNodeConfig,
-          environment:        'client',
+          runtimeEnvironment: 'client',
         });
 
         nodeResources  = await compiler.exec();

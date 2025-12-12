@@ -4,7 +4,7 @@ import path from 'path';
 
 export default class SingleNodeCompiler {
 
-  constructor( { inheritanceLevel, nodeId, nodeItem, executionContext, contextConfig, environment } ) {
+  constructor( { inheritanceLevel, nodeId, nodeItem, executionContext, contextConfig, runtimeEnvironment } ) {
     
     this.appSrcFolderName           = 'morphSrc';
     this.devSrcFolderName           = 'dev/ui';
@@ -13,7 +13,7 @@ export default class SingleNodeCompiler {
     this.nodeItem                   = nodeItem
     this.executionContext           = executionContext;
     this.executionContextConfig     = contextConfig;
-    this.environment                = environment;
+    this.runtimeEnvironment         = runtimeEnvironment;
     this.executionContextFolderName = this.executionContext == 'app' ? this.appSrcFolderName : this.devSrcFolderName;
     this.inheritanceLevelIds        = [ 'alpha', 'bravo', 'charlie', 'delta' ];
 
@@ -420,7 +420,7 @@ export default class SingleNodeCompiler {
       constructedPath = isShared ? internalPath : `${this.nodeDirPath}/${internalPath}`;
 
 
-      if (this.environment === 'server') {
+      if (this.runtimeEnvironment === 'server') {
 
         // Build time: just validate file exists
         const fs       = await import( /* @vite-ignore */ 'fs');
@@ -493,7 +493,7 @@ export default class SingleNodeCompiler {
         }
 
 
-        if ( isShared  && this.environment == 'server' ) {
+        if ( isShared  && this.runtimeEnvironment == 'server' ) {
           // Build time: just validate file exists
           const fs       = await import( /* @vite-ignore */ 'fs');
           const fullPath = path.resolve(process.cwd(), this.appSrcFolderName, `${internalPath}.jsx`);
@@ -514,7 +514,7 @@ export default class SingleNodeCompiler {
 
         } 
 
-        if( isShared  && this.environment != 'server' ) {
+        if( isShared  && this.runtimeEnvironment != 'server' ) {
 
           const result = await this.loadResource( internalPath );
 
@@ -612,7 +612,7 @@ export default class SingleNodeCompiler {
     
     const serverPath = constructedPath.endsWith('.jsx') || constructedPath.endsWith('.js') ? constructedPath : `${constructedPath}.jsx`;
     
-    if (this.environment === 'server') {
+    if (this.runtimeEnvironment === 'server') {
 
       if (this.executionContext === 'app') {
         const fullPath = path.resolve(process.cwd(), this.appSrcFolderName, serverPath);

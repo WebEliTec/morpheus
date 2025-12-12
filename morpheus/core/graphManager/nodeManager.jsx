@@ -87,7 +87,7 @@ export default class NodeManager {
           executionContext:   this.executionContext, 
           contextConfig:      this.contextConfig,
           libraryNodeConfig:  this.libraryNodeConfig,
-          environment:        'client',
+          runtimeEnvironment: 'client',
         });
 
         nodeResources  = await compiler.exec();
@@ -164,7 +164,7 @@ export default class NodeManager {
 
     this.registerNavigationHooks( kernel, nodeResources );
 
-    kernel.runtimeData         = {};
+    kernel.runtimeData          = {};
     const runtimeDataDidChange  = ( changedRuntimeDataItems ) => { this.callHook( 'runtimeDataDidChange', nodeResources, kernel, changedRuntimeDataItems ) };
     kernel.runtimeDataDidChange = runtimeDataDidChange;
    

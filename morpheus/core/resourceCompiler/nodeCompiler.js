@@ -2,14 +2,14 @@ import SingleNodeCompiler from './singleNodeCompiler';
 
 export default class NodeCompiler {
 
-  constructor( { nodeRegistry, nodeId, executionContext, contextConfig, libraryNodeConfig, environment } ) {
+  constructor( { nodeRegistry, nodeId, executionContext, contextConfig, libraryNodeConfig, runtimeEnvironment } ) {
 
     this.nodeId               = nodeId;
     this.nodeItem             = nodeRegistry[ nodeId ];
     this.executionContext     = executionContext;
     this.contextConfig        = contextConfig;
     this.libraryNodeConfig    = libraryNodeConfig;
-    this.environment          = environment,
+    this.runtimeEnvironment   = runtimeEnvironment,
     this.inheritanceLevelIds  = [ 'alpha', 'bravo', 'charlie', 'delta', 'echo' ];
     
   }
@@ -27,11 +27,11 @@ export default class NodeCompiler {
     for (const inheritanceLevelId of this.inheritanceLevelIds.toReversed()) {
       
       const compilerConfig = {
-        inheritanceLevel: inheritanceLevelId,  
-        nodeId:           nodeId, 
-        executionContext: this.executionContext, 
-        contextConfig:    this.contextConfig, 
-        environment:      this.environment 
+        inheritanceLevel:   inheritanceLevelId,  
+        nodeId:             nodeId, 
+        executionContext:   this.executionContext, 
+        contextConfig:      this.contextConfig, 
+        runtimeEnvironment: this.runtimeEnvironment
       }
       
       if (inheritanceLevelId == 'echo') {
