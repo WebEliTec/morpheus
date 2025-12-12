@@ -24,7 +24,7 @@ dist-ssr
 *.sw?
 
 /dist 
-/morphBuildSrc
+/morphBuild
 package-lock.json
 /node_modules
 /public

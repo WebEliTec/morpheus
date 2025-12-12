@@ -5,7 +5,7 @@ import * as Lucide from 'lucide-react';
 
 let ResourceProvider = null;
 if (import.meta.env.PROD)  {
-  ResourceProvider = await import('../../../morphBuildSrc/ResourceProvider.js').then(m => m.default);
+  ResourceProvider = await import('../../../morphBuild/ResourceProvider.js').then(m => m.default);
 }
 
 const ParentKernelContext = createContext(null);

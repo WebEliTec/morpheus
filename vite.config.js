@@ -9,7 +9,7 @@ export default defineConfig({
     alias: {
       '@morpheus': path.resolve(__dirname, './morpheus'),
       '@morphSrc': path.resolve(__dirname, './morphSrc'),
-      '@morphBuildSrc': path.resolve(__dirname, './morphBuildSrc'),
+      '@morphBuild': path.resolve(__dirname, './morphBuild'),
 
     },
     extensions: ['.js', '.jsx', '.json']  // ADD THIS LINE

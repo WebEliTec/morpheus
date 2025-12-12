@@ -15,25 +15,25 @@ class MorphSrcBuildDirectoryBuilder {
   }
 
   async build() {
-    this.resetMorphBuildSrcDirectory();
+    this.resetmorphBuildDirectory();
     await this.createResourceFiles();
-    this.cleanupMorphBuildSrc();
+    this.cleanupmorphBuild();
     this.createResourceProvider();
   }
 
-  resetMorphBuildSrcDirectory() {
+  resetmorphBuildDirectory() {
 
     try {
-      if (fse.existsSync('morphBuildSrc')) {
-        fse.removeSync('morphBuildSrc');
+      if (fse.existsSync('morphBuild')) {
+        fse.removeSync('morphBuild');
       }
     } catch (error) {
-      console.error('Failed to delete former directory "morphBuildSrc":', error.message);
+      console.error('Failed to delete former directory "morphBuild":', error.message);
       process.exit(1);
     }
     
     try {
-      fse.copySync('morphSrc', 'morphBuildSrc');
+      fse.copySync('morphSrc', 'morphBuild');
     } catch (error) {
       console.error('Failed to create duplicate of directory "morphSrc":', error.message);
       process.exit(1);
@@ -109,9 +109,9 @@ class MorphSrcBuildDirectoryBuilder {
     const resourceFileName          = `${nodeId}.resources.jsx`;
     const resourceFileSourceCode    = `${resourceFileImports}const nodeResources = ${serializedResources};\n\nexport default nodeResources;${componentExportStatements}`;
 
-    const targetPath                = configDirPath ? `morphBuildSrc/${configDirSubPath}/${resourceFileName}` : `morphBuildSrc/${resourceFileName}`;
+    const targetPath                = configDirPath ? `morphBuild/${configDirSubPath}/${resourceFileName}` : `morphBuild/${resourceFileName}`;
 
-    //Create MorphBuildSrc Directory
+    //Create morphBuild Directory
     console.log('Writing to path ' +  targetPath );
     fs.writeFileSync(targetPath, resourceFileSourceCode, 'utf8');
     
@@ -167,7 +167,7 @@ class MorphSrcBuildDirectoryBuilder {
         return;
       } 
   
-      const importPath = `@morphBuildSrc/${moduleSubPath}`;
+      const importPath = `@morphBuild/${moduleSubPath}`;
 
       imports.push(`import ${moduleId} from '${importPath}';`);
 
@@ -260,9 +260,9 @@ class MorphSrcBuildDirectoryBuilder {
     return JSON.stringify(value);
   }
 
-  cleanupMorphBuildSrc() {
+  cleanupmorphBuild() {
 
-    const directoryPath = 'morphBuildSrc';
+    const directoryPath = 'morphBuild';
     
     const filesToDelete = [
       'constants.js',
@@ -335,7 +335,7 @@ class MorphSrcBuildDirectoryBuilder {
       }
       
       const configDirSubPath = this.nodeRegistry[nodeId].configDirSubPath;
-      const importPath       = `@morphBuildSrc/${configDirSubPath}/${nodeId}.resources`;
+      const importPath       = `@morphBuild/${configDirSubPath}/${nodeId}.resources`;
       
       return `import ${nodeId}Resources from '${importPath}';`;
     });
@@ -396,7 +396,7 @@ class ResourceProvider {
 export default new ResourceProvider();
 `;
 
-  const outputPath = 'morphBuildSrc/ResourceProvider.js';
+  const outputPath = 'morphBuild/ResourceProvider.js';
   fs.writeFileSync(outputPath, resourceProviderSourceCode, 'utf8');
 
 
