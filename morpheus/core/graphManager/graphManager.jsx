@@ -4,17 +4,17 @@ export default class GraphManager {
     
   constructor( config ) {
     
-    this.app                 = config.app;
-    this.executionContext    = config.executionContext;
-    this.contextConfig       = config.contextConfig;
-    this.libraryNodeConfig  = config.libraryNodeConfig;
+    this.app                    = config.app;
+    this.executionContext       = config.executionContext;
+    this.executionContextConfig = config.executionContextConfig;
+    this.libraryNodeConfig      = config.libraryNodeConfig;
     
     this.nodeManager  = new NodeManager({
       app:                      this.app,
       notifyGraphOnNodeMount:   this.notifyGraphOnNodeMount.bind(this),  
       notifyGraphOnNodeUnmount: this.notifyGraphOnNodeUnmount.bind(this), 
       mayCreateNode:            this.mayCreateNode.bind(this), 
-      contextConfig:            this.contextConfig,
+      executionContextConfig:   this.executionContextConfig,
       libraryNodeConfig:        this.libraryNodeConfig,
       executionContext:         this.executionContext
     });

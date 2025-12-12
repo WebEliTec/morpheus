@@ -65,12 +65,12 @@ class MorphSrcBuildDirectoryBuilder {
     }
 
     const compiler          = new NodeCompiler({
-      nodeRegistry: this.nodeRegistry,
+      nodeRegistry:           this.nodeRegistry,
       nodeId, 
-      executionContext: 'app', 
-      contextConfig: this.appConfig, 
+      executionContext:       'app', 
+      executionContextConfig: this.appConfig, 
       libraryNodeConfig, 
-      runtimeEnvironment: 'server',
+      runtimeEnvironment:     'server',
     })
 
     const nodeResources     = await compiler.exec();

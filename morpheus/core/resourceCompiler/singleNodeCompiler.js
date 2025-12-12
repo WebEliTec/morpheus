@@ -4,7 +4,7 @@ import path from 'path';
 
 export default class SingleNodeCompiler {
 
-  constructor( { inheritanceLevel, nodeId, nodeItem, executionContext, contextConfig, runtimeEnvironment } ) {
+  constructor( { inheritanceLevel, nodeId, nodeItem, executionContext, executionContextConfig, runtimeEnvironment } ) {
     
     this.appSrcFolderName           = 'morphSrc';
     this.devSrcFolderName           = 'dev/ui';
@@ -12,7 +12,7 @@ export default class SingleNodeCompiler {
     this.nodeId                     = nodeId;
     this.nodeItem                   = nodeItem
     this.executionContext           = executionContext;
-    this.executionContextConfig     = contextConfig;
+    this.executionContextConfig     = executionContextConfig;
     this.runtimeEnvironment         = runtimeEnvironment;
     this.executionContextFolderName = this.executionContext == 'app' ? this.appSrcFolderName : this.devSrcFolderName;
     this.inheritanceLevelIds        = [ 'alpha', 'bravo', 'charlie', 'delta' ];

@@ -13,13 +13,13 @@ const ParentKernelContext = createContext(null);
 export default class NodeManager {
 
 
-  constructor( { executionContext, contextConfig, libraryNodeConfig, app, notifyGraphOnNodeMount, notifyGraphOnNodeUnmount, mayCreateNode } ) {
+  constructor( { executionContext, executionContextConfig, libraryNodeConfig, app, notifyGraphOnNodeMount, notifyGraphOnNodeUnmount, mayCreateNode } ) {
 
     this.executionContext         = executionContext;
-    this.contextConfig            = contextConfig;
+    this.executionContextConfig   = executionContextConfig;
     this.libraryNodeConfig        = libraryNodeConfig;
     this.app                      = app;
-    this.nodeRegistry             = this.contextConfig.nodeRegistry;
+    this.nodeRegistry             = this.executionContextConfig.nodeRegistry;
     this.notifyGraphOnNodeMount   = notifyGraphOnNodeMount;    
     this.notifyGraphOnNodeUnmount = notifyGraphOnNodeUnmount;
     this.mayCreateNode            = mayCreateNode;
@@ -82,11 +82,11 @@ export default class NodeManager {
       try {
 
         const compiler = new NodeCompiler({
-          nodeRegistry:       this.nodeRegistry, 
+          nodeRegistry:           this.nodeRegistry, 
           nodeId, 
-          executionContext:   this.executionContext, 
-          contextConfig:      this.contextConfig,
-          libraryNodeConfig:  this.libraryNodeConfig,
+          executionContext:       this.executionContext, 
+          executionContextConfig: this.executionContextConfig,
+          libraryNodeConfig:      this.libraryNodeConfig,
           runtimeEnvironment: 'client',
         });
 

@@ -64,8 +64,8 @@ export class Morpheus {
 
     const config = {
       executionContext: 'app',
-      app:              this.app, 
-      contextConfig:    appConfig,
+      app:                    this.app, 
+      executionContextConfig: appConfig,
       libraryNodeConfig,
       graphChangeListener: this.graphChangeListener.bind( this ),
     }
@@ -86,9 +86,9 @@ export class Morpheus {
     this.devToolApp.app.graph = this.app.graph;
 
     const config = {
-      executionContext: 'dev',
-      app:                this.devToolApp, 
-      contextConfig:      devToolConfig, 
+      executionContext:       'dev',
+      app:                    this.devToolApp, 
+      executionContextConfig: devToolConfig, 
       libraryNodeConfig,
     }
 

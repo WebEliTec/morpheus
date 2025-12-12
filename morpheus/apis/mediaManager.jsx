@@ -1,8 +1,8 @@
 export default class MediaManager {
   
-  constructor( contextConfig ) {
+  constructor( executionContextConfig ) {
 
-    this.mediaRegistry    = contextConfig.mediaRegistry;
+    this.mediaRegistry    = executionContextConfig.mediaRegistry;
     this.sounds           = new Map(); // Cache loaded sounds
     this.currentlyPlaying = new Map(); // Track playing sounds
     this.initializeSounds();
