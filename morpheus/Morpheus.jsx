@@ -56,15 +56,15 @@ export class Morpheus {
   /* *** *** *** *** *** *** *** *** *** *** *** *** *** *** */
 
   initializeApp() {
-    this.app          = {};
-    this.app.media    = new MediaManager( appConfig );
-    this.app.graph    = new Graph();
-    this.app.router   = new Router();
-    this.app.utility  = new Utility();
+    this.apis          = {};
+    this.apis.media    = new MediaManager( appConfig );
+    this.apis.graph    = new Graph();
+    this.apis.router   = new Router();
+    this.apis.utility  = new Utility();
 
     const config = {
-      executionContext: 'app',
-      app:                    this.app, 
+      executionContext:       'app',
+      apis:                   this.apis, 
       executionContextConfig: appConfig,
       libraryNodeConfig,
       graphChangeListener: this.graphChangeListener.bind( this ),
@@ -77,17 +77,17 @@ export class Morpheus {
   /* *** *** *** *** *** *** *** *** *** *** *** *** *** *** */
 
   initializeDevTools() {
-    this.devToolApp           = {};
-    this.devToolApp.media     = new MediaManager( devToolConfig );
-    this.devToolApp.graph     = new Graph();
-    this.devToolApp.utility   = new Utility();
-    this.devToolApp.router    = new Router();
-    this.devToolApp.app       = {}; 
-    this.devToolApp.app.graph = this.app.graph;
+    this.devToolApp            = {};
+    this.devToolApp.media      = new MediaManager( devToolConfig );
+    this.devToolApp.graph      = new Graph();
+    this.devToolApp.utility    = new Utility();
+    this.devToolApp.router     = new Router();
+    this.devToolApp.apis       = {}; 
+    this.devToolApp.apis.graph = this.apis.graph;
 
     const config = {
       executionContext:       'dev',
-      app:                    this.devToolApp, 
+      apis:                    this.devToolApp, 
       executionContextConfig: devToolConfig, 
       libraryNodeConfig,
     }

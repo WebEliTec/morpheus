@@ -67,7 +67,7 @@ const config = {
     }, 
 
     doSomethingWithTheApp() {
-      this.app.mdea.playSound("click");
+      this.apis.media.playSound("click");
     }
 
   },

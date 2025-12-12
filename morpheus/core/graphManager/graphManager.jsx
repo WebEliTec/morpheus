@@ -4,13 +4,13 @@ export default class GraphManager {
     
   constructor( config ) {
     
-    this.app                    = config.app;
+    this.apis                   = config.apis;
     this.executionContext       = config.executionContext;
     this.executionContextConfig = config.executionContextConfig;
     this.libraryNodeConfig      = config.libraryNodeConfig;
     
     this.nodeManager  = new NodeManager({
-      app:                      this.app,
+      apis:                     this.apis,
       notifyGraphOnNodeMount:   this.notifyGraphOnNodeMount.bind(this),  
       notifyGraphOnNodeUnmount: this.notifyGraphOnNodeUnmount.bind(this), 
       mayCreateNode:            this.mayCreateNode.bind(this), 
@@ -25,7 +25,7 @@ export default class GraphManager {
       nodeHierarchy: null
     };
     
-    this.app.graph._setGraphData(this.graphData);
+    this.apis.graph._setGraphData(this.graphData);
   }
   
   mayCreateNode(nodeId, instanceId = null) {

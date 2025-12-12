@@ -13,12 +13,12 @@ const ParentKernelContext = createContext(null);
 export default class NodeManager {
 
 
-  constructor( { executionContext, executionContextConfig, libraryNodeConfig, app, notifyGraphOnNodeMount, notifyGraphOnNodeUnmount, mayCreateNode } ) {
+  constructor( { executionContext, executionContextConfig, libraryNodeConfig, apis, notifyGraphOnNodeMount, notifyGraphOnNodeUnmount, mayCreateNode } ) {
 
     this.executionContext         = executionContext;
     this.executionContextConfig   = executionContextConfig;
     this.libraryNodeConfig        = libraryNodeConfig;
-    this.app                      = app;
+    this.apis                     = apis;
     this.nodeRegistry             = this.executionContextConfig.nodeRegistry;
     this.notifyGraphOnNodeMount   = notifyGraphOnNodeMount;    
     this.notifyGraphOnNodeUnmount = notifyGraphOnNodeUnmount;
@@ -105,8 +105,8 @@ export default class NodeManager {
 
     nodeResources.KernelClass = this.createKernelClass(traits);
 
-    const app                 = this.app;
-    const kernel              = this.initializeKernel( nodeId, instanceId, nodeProps, nodeResources, app  );
+    const apis                = this.apis;
+    const kernel              = this.initializeKernel( nodeId, instanceId, nodeProps, nodeResources, apis  );
 
     await this.callHook( 'kernelDidInitialize', nodeResources, kernel );
 
@@ -134,7 +134,7 @@ export default class NodeManager {
     return NodeKernel;
   }
 
-  initializeKernel( nodeId, instanceId, nodeProps, nodeResources, app ) {
+  initializeKernel( nodeId, instanceId, nodeProps, nodeResources, apis ) {
       
     const { KernelClass, constants, metaData, coreData, signalClusters } = nodeResources;
 
@@ -155,12 +155,12 @@ export default class NodeManager {
     kernel.signalClusters    = signalClusters;
     kernel.optimisticSignals = {};
 
-    kernel.app               = app;
-    kernel.media             = app.media;
-    kernel.utility           = app.utility;
-    kernel.graph             = app.graph;
+    kernel.apis              = apis;
+    kernel.media             = apis.media;
+    kernel.utility           = apis.utility;
+    kernel.graph             = apis.graph;
 
-    kernel.router            = app.router;
+    kernel.router            = apis.router;
 
     this.registerNavigationHooks( kernel, nodeResources );
 
@@ -283,7 +283,7 @@ export default class NodeManager {
     const onModuleUnmount                  = this.onModuleUnmount.bind(this);
     const shouldModuleRerenderBasedOnRoute = this.shouldModuleRerenderBasedOnRoute.bind(this);
     const Node                             = this.getNodeLoader();
-    const App                              = this.app;
+    const Apis                             = this.apis;
 
     return function Module( { id, proxyId, children = null, ...props } ) {
 
@@ -312,7 +312,7 @@ export default class NodeManager {
       useEffect(() => {
         if ( !routeSubscription ) return;
         
-        return App.router.subscribe((newRoute) => {
+        return Apis.router.subscribe((newRoute) => {
           if ( shouldModuleRerenderBasedOnRoute ( routeSubscription, newRoute ) ) {
             setRouteChangeCounter(prev => prev + 1);
           }
@@ -369,7 +369,7 @@ export default class NodeManager {
           React   = { React }
           R       = { React }
 
-          Graph   = { App.graph }
+          Graph   = { Apis.graph }
 
           Node    = { Node }
           N       = { Node }
@@ -381,10 +381,10 @@ export default class NodeManager {
           K       = { kernel } 
           _       = { kernel } 
 
-          App     = { App }
-          Media   = { App.media }
-          Utility = { App.utility }
-          Router  = { App?.router }
+          Apis    = { Apis }
+          Media   = { Apis.media }
+          Utility = { Apis.utility }
+          Router  = { Apis?.router }
 
           Lucide  = { Lucide }
 
