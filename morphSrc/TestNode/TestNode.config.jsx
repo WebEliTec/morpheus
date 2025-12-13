@@ -39,6 +39,7 @@ const config = {
     onRuntimeDataChange( kernel, changedRuntimeDataItems ) {
 
       if( changedRuntimeDataItems.includes('inputValue') ) {
+        console.log('huhuh!');
         kernel.displayInputValueSomeWhere();
       }
 
@@ -57,6 +58,30 @@ const config = {
 
     runtimeDataDidChange () {
       console.log('runTimedataDidChange')
+    },
+
+    async kernelDidInitialize ( kernel ) {
+      try {
+        const res = await fetch(
+          "https://n8n.srv1194794.hstgr.cloud/webhook/24eb5680-e280-4fde-9350-47c5b037a2b1"
+        );
+
+        if (!res.ok) {
+          console.error('Fetch failed:', res.status, res.statusText);
+          return;
+        }
+
+        const data = await res.json(); // ✅ Parse the JSON
+        //console.log('RSS Data:', data); // ✅ Log the actual data
+        
+        kernel.coreData.articles = data;
+
+        //console.log( data );
+
+
+      } catch (error) {
+        console.error('Error fetching RSS:', error);
+      }
     }
 
   }, 

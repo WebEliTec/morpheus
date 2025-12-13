@@ -114,8 +114,6 @@ export default class NodeManager {
     const Module              = this.createModule( kernel, nodeResources.moduleRegistry );
     const NodeComponent       = this.createNodeComponent( nodeResources, NodeProvider, Module, kernel );
 
-    console.log( Date.now() );
-
     return NodeComponent;
     
   }
