@@ -52,7 +52,7 @@ export default class NodeManager {
         loadNode();
       }, []);
 
-      return Node ? <Node {...props} /> : <></>;
+      return Node ? <Node {...props} /> : <>Loading...</>;
 
     };
 

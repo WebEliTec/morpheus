@@ -6,7 +6,7 @@ export default class SingularityEngine {
     }
     
     SingularityEngine.instance = this;
-    this.cccApiUrl = "http://127.0.0.1:8000/api/";
+    this.cccApiUrl             = "http://127.0.0.1:8000/api/";
     this.contentClasses = null;
     
     // Store the promise so consumers can await it
