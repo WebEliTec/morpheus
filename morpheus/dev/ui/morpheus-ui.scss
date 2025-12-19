@@ -176,6 +176,7 @@ $bg-transparent: #000c159f;
         border: 1px solid $secondary-beta;
         border-radius: .25rem;
         width: 225px;
+        box-shadow: inset 0 8px 21px -14px #0f6f9e;
     }
 
     .react-flow__handle  {
@@ -227,6 +228,18 @@ $bg-transparent: #000c159f;
     line-height: 1.3;
     margin-bottom: 1rem;
     color: #a3a3a3;
+}
+
+.morpheus-error-box {
+    padding: 1rem;
+    border: 2px solid #991b1b;;
+    border-radius: .5rem;
+    color: #991b1b;
+    box-shadow: inset 0 8px 37px -14px #991b1b;
+    margin: 1rem;
+    background-image: url( '/grid.png' );
+    background-size: 35%;
+    background-position: 50%;
 }
 
 

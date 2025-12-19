@@ -61,6 +61,23 @@ export default class NodeManager {
 
   async createNode( nodeId, instanceId, ...props ) {
 
+    console.log( nodeId );
+    console.log( this.nodeRegistry );
+
+    const isNodeRegistered = this.nodeRegistry.hasOwnProperty(nodeId);
+    
+    if (!isNodeRegistered) {
+      console.error(`[Morpheus] Node '${nodeId}' is not registered in app.config.js → nodes.`);
+      
+      return function UnregisteredNodeError() {
+        return (
+          <div className="morpheus-error-box">
+            <strong>Morpheus Error:</strong> Node '{nodeId}' is not registered in app.config.js → nodes.
+          </div>
+        );
+      };
+    }
+
     const nodeProps = props[0] || {};
 
     let nodeResources;

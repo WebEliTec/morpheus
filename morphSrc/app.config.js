@@ -29,7 +29,7 @@ const appConfig = {
 		},
 
 
-		SideMenu: {},
+		//SideMenu: {},
 
 		SideBar:  {
 			dir: '/lol',
