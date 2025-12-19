@@ -267,7 +267,93 @@ export default class SingleNodeCompiler {
   /* Traits
   /* *** *** *** *** *** *** *** *** *** *** *** *** *** *** */
 
-  async loadTraits( availableResources, configObject ) {
+  async loadTraits(availableResources, configObject) {
+
+
+    const config               = configObject;
+    const traitImplementations = {};
+    
+    // 1. Get inline traits from config (these have highest priority)
+    const configTraitImplementations = config?.traits || {};
+    
+    // 2. Get file-based trait IDs
+    const fileBasedTraitIds          = config?.traitIds || [];
+    
+    // 3. If no traits at all (neither inline nor file-based), just handle kernel
+    if (Object.keys(configTraitImplementations).length === 0 && fileBasedTraitIds.length === 0) {
+      const kernel = config?.kernel ?? availableResources?.kernel;
+      if (kernel) {
+        traitImplementations.kernel = kernel;
+      }
+      return traitImplementations;
+    }
+    
+    // 4. Determine trait directory path for file-based traits
+    const defaultTraitDirPath = this.removeTrailingSlash(this.executionContextConfig?.defaultPaths?.traits);
+    const nodeSpecificTraitDirPath = this.removeTrailingSlash(config?.defaultPaths?.traits);
+    
+    let traitDirPath;
+    if (nodeSpecificTraitDirPath == '/') {
+      traitDirPath = this.nodeDirPath;
+    } else if (nodeSpecificTraitDirPath != '/' && nodeSpecificTraitDirPath) {
+      traitDirPath = `${this.nodeDirPath}/${nodeSpecificTraitDirPath}`;
+    } else if (defaultTraitDirPath == '/') {
+      traitDirPath = this.nodeDirPath;
+    } else if (defaultTraitDirPath != '/' && defaultTraitDirPath) {
+      traitDirPath = `${this.nodeDirPath}/${defaultTraitDirPath}`;
+    } else {
+      traitDirPath = this.nodeId;
+    }
+    
+    // 5. Load file-based traits (only if not overridden by inline implementation)
+    for (const traitId of fileBasedTraitIds) {
+      // Skip 'kernel' - it's reserved
+      if (traitId === 'kernel') {
+        console.warn(`A trait '${traitId}' has been declared in traitIds of node '${this.nodeId}'. It is ignored because 'kernel' is reserved.`);
+        continue;
+      }
+      
+      // Skip if inline implementation exists (inline has priority)
+      if (configTraitImplementations[traitId]) {
+        continue;
+      }
+      
+      // Load from file
+      const constructedPath = `${traitDirPath}/${traitId}`;
+      const result = await this.loadResource(constructedPath);
+      
+      if (!result) {
+        console.warn(`Trait '${traitId}' of node '${this.nodeId}' not found in '${this.getAbsPath(constructedPath)}'`);
+        continue;
+      }
+      
+      traitImplementations[traitId] = result;
+    }
+    
+    // 6. Add all inline trait implementations (these override any file-based ones)
+    for (const [traitId, traitImpl] of Object.entries(configTraitImplementations)) {
+      // Skip 'kernel' - it's reserved
+      if (traitId === 'kernel') {
+        console.warn(`A trait with id 'kernel' has been declared in traits of node '${this.nodeId}'. It is ignored because 'kernel' is reserved. Use the 'kernel' property instead.`);
+        continue;
+      }
+      
+      traitImplementations[traitId] = traitImpl;
+    }
+    
+    // 7. Handle kernel (always added last as special trait)
+    const kernel = config?.kernel ?? availableResources?.kernel;
+    if (kernel) {
+      if (this.inheritanceLevel !== 'echo') {
+        console.warn(`Resource type 'kernel' found within node '${this.nodeId}'. Note that it is not recommended using kernels within library nodes.`);
+      }
+      traitImplementations.kernel = kernel;
+    }
+    
+    return traitImplementations;
+  }
+
+  async loadTraits_old( availableResources, configObject ) {
 
     const config = configObject;
 

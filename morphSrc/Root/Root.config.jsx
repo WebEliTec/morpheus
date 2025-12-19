@@ -50,7 +50,15 @@ const config = {
   /* Traits
   /* *** *** *** *** *** *** *** *** *** *** *** *** *** *** */
 
-  traits: ['someTrait'],
+  traitIds: ['someTrait', 'helloInline' ],
+
+  traits: {
+    inlineTrait: {
+      helloInline() {
+        console.log( 'Hello Inline from Config' );
+      }
+    },
+  },
 
 
   /* Kernel

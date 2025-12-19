@@ -3,14 +3,14 @@ import fse from 'fs-extra';
 import SingleNodeCompiler from '../morpheus/core/resourceCompiler/singleNodeCompiler.js';
 import NodeCompiler from '../morpheus/core/resourceCompiler/nodeCompiler.js';
 import appConfig from '../morphSrc/app.config.js';
-import libraryNodeConfig from '../morpheus/libraryNode.config';
+import libraryNodeConfig from '../morpheus/core/configs/libraryNode.config';
 import chalk from 'chalk';
 
 class MorphSrcBuildDirectoryBuilder {
 
   constructor() {
     this.appConfig    = appConfig;
-    this.nodeRegistry = this.appConfig.nodeRegistry;
+    this.nodeRegistry = this.appConfig.nodes;
     this.nodeIds      = Object.keys( this.nodeRegistry );
   }
 

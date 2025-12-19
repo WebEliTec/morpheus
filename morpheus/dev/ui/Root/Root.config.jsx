@@ -20,7 +20,7 @@ const config = {
 
   },
 
-  traits: [ 'flowGraphManager' ],
+  traitIds: [ 'flowGraphManager' ],
 
   hooks: {
     kernelDidInitialize: ( kernel ) => {
