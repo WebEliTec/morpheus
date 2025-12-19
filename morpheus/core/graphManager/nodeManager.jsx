@@ -183,6 +183,7 @@ export default class NodeManager {
     // Clean up navigation hooks
     this.unregisterNavigationHooks(kernel);
     
+    kernel.services          = null;
     kernel.signals           = null;
     kernel.optimisticSignals = null;
     kernel.constants         = null;

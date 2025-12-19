@@ -1,15 +1,8 @@
 import '../globals.scss';
 
-export default function Root( { Kernel, Node, Module, Router, Services } ) {
+export default function Root( { Kernel, Node, Module, Router } ) {
 
   Kernel.helloWorld1();
-
-  console.log( 'Services.sayHi();' );
-  Services.sayHi();
-
-  //console.log( Kernel.singularityEngine.getContentClasses() );
-
-  const route = Router.getSegment( 1 );
 
   return (
     <>

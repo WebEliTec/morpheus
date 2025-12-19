@@ -36,9 +36,6 @@ const appConfig = {
 		 	dir: '/',
 		},
 
-		TodoList: {
-			dir: '/',
-		},
 
 	},  
 

@@ -6,7 +6,6 @@ export default function Wrapper({ _, Module, Node }) {
   }
   
   const articles = _.getCoreData( 'articles' );
-  //console.log( articles );
   
   return (
     <div className="test-node p-6 bg-gray-900 min-h-screen">

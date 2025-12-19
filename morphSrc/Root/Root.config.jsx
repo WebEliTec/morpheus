@@ -32,7 +32,6 @@ const config = {
   hooks: {
     kernelDidInitialize: async ( kernel ) => {
       kernel.coreData.someValue = 'Test';
-      kernel.services.sayHi();
       //console.log( 'Root Node did initialize' );
     },
 

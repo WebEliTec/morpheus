@@ -204,6 +204,7 @@ class MorphSrcBuildDirectoryBuilder {
       const serialized = entries.map(([key, val]) => {
       
       // Handle functions with method shorthand syntax
+      /*
       if (typeof val === 'function') {
         
         const funcStr = val.toString();
@@ -242,7 +243,55 @@ class MorphSrcBuildDirectoryBuilder {
           
           return `${spaces}  ${indentedLines.join('\n')}`;
         }
-      }
+      }*/
+        if (typeof val === 'function') {
+          const funcStr = val.toString();
+          
+          // Check for async functions first
+          const isAsync = funcStr.startsWith('async ');
+          const asyncPrefix = isAsync ? 'async ' : '';
+          
+          // Remove 'async ' prefix for further processing
+          const normalizedFuncStr = isAsync ? funcStr.replace(/^async\s+/, '') : funcStr;
+          
+          if (normalizedFuncStr.startsWith('function')) {
+            // Convert: function name() { ... } → name() { ... }
+            const methodStr = normalizedFuncStr.replace(/^function\s+/, '');
+            
+            // Fix indentation of function body
+            const lines = methodStr.split('\n');
+            const indentedLines = lines.map((line, index) => {
+              if (index === 0) return line;
+              if (index === lines.length - 1) return `${spaces}  ${line.trim()}`;
+              return `${spaces}    ${line.trim()}`;
+            });
+            
+            // Prepend async if needed
+            return `${spaces}  ${asyncPrefix}${indentedLines.join('\n')}`;
+            
+          } else if (normalizedFuncStr.includes('=>')) {
+            // Arrow function
+            const lines = funcStr.split('\n'); // Use original funcStr to preserve async
+            const indentedLines = lines.map((line, index) => {
+              if (index === 0) return line.trim();
+              if (index === lines.length - 1) return `${spaces}  ${line.trim()}`;
+              return `${spaces}    ${line.trim()}`;
+            });
+            
+            return `${spaces}  ${key}: ${indentedLines.join('\n')}`;
+            
+          } else {
+            // Method shorthand (e.g., methodName() { ... })
+            const lines = normalizedFuncStr.split('\n');
+            const indentedLines = lines.map((line, index) => {
+              if (index === 0) return `${asyncPrefix}${key}${line.substring(normalizedFuncStr.indexOf('('))}`;
+              if (index === lines.length - 1) return `${spaces}  ${line.trim()}`;
+              return `${spaces}    ${line.trim()}`;
+            });
+            
+            return `${spaces}  ${indentedLines.join('\n')}`;
+          }
+        }
         
         // Handle all other values recursively
 
