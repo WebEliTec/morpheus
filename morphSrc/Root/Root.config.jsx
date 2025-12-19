@@ -32,15 +32,16 @@ const config = {
   hooks: {
     kernelDidInitialize: async ( kernel ) => {
       kernel.coreData.someValue = 'Test';
-      console.log( 'Root Node did initialize' );
+      kernel.services.sayHi();
+      //console.log( 'Root Node did initialize' );
     },
 
     didNavigate: {
       priority: 30, 
       callback: function( kernel, oldUrl, newUrl ) {
-        console.log( kernel );
-        console.log( oldUrl );
-        console.log( newUrl );
+        //console.log( kernel );
+        //console.log( oldUrl );
+        //console.log( newUrl );
         console.log('[Root]: didNavigate prio 30');
       },
     }, 

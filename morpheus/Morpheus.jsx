@@ -62,15 +62,21 @@ export class Morpheus {
     this.apis.router   = new Router();
     this.apis.utility  = new Utility();
 
+    if ( appConfig.ServiceClass ) {
+      this.services = new appConfig.ServiceClass( this.apis );
+    }
+
     const config = {
       executionContext:       'app',
       apis:                   this.apis, 
+      services:               this.services,
       executionContextConfig: appConfig,
       libraryNodeConfig,
       graphChangeListener: this.graphChangeListener.bind( this ),
     }
 
     this.graphManager = new GraphManager( config );
+
   }
 
   /* Initialize Dev Tools

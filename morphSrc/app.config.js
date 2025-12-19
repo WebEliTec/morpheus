@@ -1,4 +1,8 @@
+import ServiceClass from './services/ServiceClass';
+
 const appConfig = {
+
+	ServiceClass,
 
 	defaultPaths: {
 		//nodes:   '/nodes',
@@ -32,9 +36,11 @@ const appConfig = {
 		 	dir: '/',
 		},
 
-	},  
+		TodoList: {
+			dir: '/',
+		},
 
-	
+	},  
 
 	sharedModuleRegistry: {
 

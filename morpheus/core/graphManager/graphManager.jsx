@@ -4,12 +4,14 @@ export default class GraphManager {
     
   constructor( config ) {
     
+    this.services               = config.services || null;
     this.apis                   = config.apis;
     this.executionContext       = config.executionContext;
     this.executionContextConfig = config.executionContextConfig;
     this.libraryNodeConfig      = config.libraryNodeConfig;
     
     this.nodeManager  = new NodeManager({
+      services:                 this.services,
       apis:                     this.apis,
       notifyGraphOnNodeMount:   this.notifyGraphOnNodeMount.bind(this),  
       notifyGraphOnNodeUnmount: this.notifyGraphOnNodeUnmount.bind(this), 

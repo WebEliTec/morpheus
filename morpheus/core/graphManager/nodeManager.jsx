@@ -13,8 +13,9 @@ const ParentKernelContext = createContext(null);
 export default class NodeManager {
 
 
-  constructor( { executionContext, executionContextConfig, libraryNodeConfig, apis, notifyGraphOnNodeMount, notifyGraphOnNodeUnmount, mayCreateNode } ) {
+  constructor( { executionContext, executionContextConfig, libraryNodeConfig, services, apis, notifyGraphOnNodeMount, notifyGraphOnNodeUnmount, mayCreateNode } ) {
 
+    this.services                 = services || null; 
     this.executionContext         = executionContext;
     this.executionContextConfig   = executionContextConfig;
     this.libraryNodeConfig        = libraryNodeConfig;
@@ -105,8 +106,9 @@ export default class NodeManager {
 
     nodeResources.KernelClass = this.createKernelClass(traits);
 
+    const services            = this.services;
     const apis                = this.apis;
-    const kernel              = this.initializeKernel( nodeId, instanceId, nodeProps, nodeResources, apis  );
+    const kernel              = this.initializeKernel( nodeId, instanceId, nodeProps, nodeResources, apis, services  );
 
     await this.callHook( 'kernelDidInitialize', nodeResources, kernel );
 
@@ -132,7 +134,7 @@ export default class NodeManager {
     return NodeKernel;
   }
 
-  initializeKernel( nodeId, instanceId, nodeProps, nodeResources, apis ) {
+  initializeKernel( nodeId, instanceId, nodeProps, nodeResources, apis, services ) {
       
     const { KernelClass, constants, metaData, coreData, signalClusters } = nodeResources;
 
@@ -153,6 +155,7 @@ export default class NodeManager {
     kernel.signalClusters    = signalClusters;
     kernel.optimisticSignals = {};
 
+    kernel.services          = services;
     kernel.apis              = apis;
     kernel.media             = apis.media;
     kernel.utility           = apis.utility;
@@ -221,11 +224,11 @@ export default class NodeManager {
       
       const [ signalChangeCounter, setSignalChangeCounter ] = useState(0);
       const [ changedSignals, setChangedSignals ]           = useState([]);
-      const [signalsInitialized, setSignalsInitialized]     = useState(false);
+      const [ signalsInitialized, setSignalsInitialized ]   = useState(false);
       
       const signalInstances                                 = {};
 
-      const [signalValues, setSignalValues] = useState(() => {
+      const [ signalValues, setSignalValues ] = useState(() => {
         const initial = {};
         signalDefinitions.forEach(({ signalId, default: defaultValue }) => {
           initial[signalId] = defaultValue;
@@ -364,25 +367,27 @@ export default class NodeManager {
         
         return Component ? <Component 
 
-          React   = { React }
-          R       = { React }
+          React    = { React }
+          R        = { React }
 
-          Graph   = { Apis.graph }
+          Graph    = { Apis.graph }
 
-          Node    = { Node }
-          N       = { Node }
+          Node     = { Node }
+          N        = { Node }
 
-          Module  = { Module }
-          M       = { Module } 
+          Module   = { Module }
+          M        = { Module } 
 
-          Kernel  = { kernel } 
-          K       = { kernel } 
-          _       = { kernel } 
+          Kernel   = { kernel } 
+          K        = { kernel } 
+          _        = { kernel } 
 
-          Apis    = { Apis }
-          Media   = { Apis.media }
-          Utility = { Apis.utility }
-          Router  = { Apis?.router }
+          Services = { kernel.services }
+
+          Apis     = { Apis }
+          Media    = { Apis.media }
+          Utility  = { Apis.utility }
+          Router   = { Apis?.router }
 
           Lucide  = { Lucide }
 

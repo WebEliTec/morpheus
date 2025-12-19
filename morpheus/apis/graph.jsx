@@ -2,11 +2,11 @@
 export default class Graph {
   
   constructor() {
-    this.graphData = null;  // ✅ Will hold reference to GraphManager's object
+    this.graphData = null; 
   }
 
   _setGraphData(graphData) {
-    this.graphData = graphData;  // ✅ Store the reference
+    this.graphData = graphData;  
   }
 
   get nodeHierarchy() {
@@ -18,6 +18,6 @@ export default class Graph {
   }
 
   showGraph() {
-    console.log(this.nodeHierarchy);  // ✅ Always current!
+    console.log(this.nodeHierarchy); 
   }
 }
