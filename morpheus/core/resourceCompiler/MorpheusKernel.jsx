@@ -71,8 +71,8 @@ export default class MorpheusKernel {
   /* Runtime Data Management
   /* *** *** *** *** *** *** *** *** *** *** *** *** *** *** */
 
-  getRuntimeData() {
-    return this.runtimeData;
+  getRuntimeData( runtimeDataItemId ) {
+    return this.getRuntimeDataItem( runtimeDataItemId );
   }
 
   getRuntimeDataItem( runtimeDataItemId ) {

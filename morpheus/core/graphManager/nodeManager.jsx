@@ -212,8 +212,8 @@ export default class NodeManager {
     const signalDefinitions = [];
 
     if( signalClusters ) {
-      Object.keys(signalClusters).forEach((signalClusterId) => {
-        Object.entries(signalClusters[signalClusterId].signals).forEach(([signalId, signalDef]) => {
+      Object.keys(signalClusters).forEach((signalClusterItemId) => {
+        Object.entries(signalClusters[signalClusterItemId].signals).forEach(([signalId, signalDef]) => {
           signalDefinitions.push({ signalId, ...signalDef });
         });
       });
