@@ -1,7 +1,7 @@
-import { createContext, useContext, useState, useEffect } from 'react';
+import React, { createContext, useContext, useState, useMemo, useEffect } from 'react';
 import NodeCompiler from '../resourceCompiler/nodeCompiler';
 import MorpheusKernel from '../resourceCompiler/MorpheusKernel';
-import ModuleManager from './moduleManager';
+import * as Lucide from 'lucide-react'; 
 
 let ResourceProvider = null;
 if (import.meta.env.PROD)  {
@@ -127,11 +127,7 @@ export default class NodeManager {
     await this.callHook( 'kernelDidInitialize', nodeResources, kernel );
 
     const NodeProvider        = this.createNodeProvider( kernel, nodeResources );
-    const moduleManager       = new ModuleManager( { kernel, nodeResources, apis: this.apis, nodeContext: this.nodeContext, nodeLoader: this.getNodeLoader() } );
-
-    kernel.moduleManager      = moduleManager;
-    const Module              = moduleManager.createModule();
-
+    const Module              = this.createModule( kernel, nodeResources.modules );
     const NodeComponent       = this.createNodeComponent( nodeResources, NodeProvider, Module, kernel );
 
     console.log( nodeId );
@@ -199,11 +195,6 @@ export default class NodeManager {
     if (!kernel) {
       console.warn('[NodeManager] Attempted to cleanup null kernel');
       return;
-    }
-
-    if (kernel.moduleManager) {
-      kernel.moduleManager.destroy();
-      kernel.moduleManager = null;
     }
 
     // Clean up navigation hooks
@@ -304,6 +295,132 @@ export default class NodeManager {
     };
   }
 
+  createModule( kernel, moduleRegistry ) {
+
+    const nodeContext                      = this.nodeContext; 
+    const onModuleMount                    = this.onModuleMount.bind(this);
+    const onModuleUnmount                  = this.onModuleUnmount.bind(this);
+    const shouldModuleRerenderBasedOnRoute = this.shouldModuleRerenderBasedOnRoute.bind(this);
+    const Node                             = this.getNodeLoader();
+    const Apis                             = this.apis;
+
+    return function Module( { id, proxyId, children = null, ...props } ) {
+
+      /* General
+      /* *** *** *** *** *** *** *** *** *** *** *** *** *** *** */
+
+      const moduleId            = proxyId ?? id;
+      const context             = useContext( nodeContext );
+      
+      const moduleRegistryItem  = moduleRegistry?.[moduleId];
+      
+      if( !moduleRegistryItem ) {
+        const errorMessage = `Module "${moduleId}" of node "${kernel.nodeId}" not found.`;
+        console.warn( errorMessage );
+        return <h1>{errorMessage }</h1>;
+      }
+
+      const Component           = moduleRegistryItem?.component;
+
+      /* Routing Reactivity
+      /* *** *** *** *** *** *** *** *** *** *** *** *** *** *** */
+
+      const routeSubscription   = moduleRegistryItem.routes ?? false;  // ← NEW
+      const [ routeChangeCounter, setRouteChangeCounter ] = useState(0);
+
+      useEffect(() => {
+        if ( !routeSubscription ) return;
+        
+        return Apis.router.subscribe((newRoute) => {
+          if ( shouldModuleRerenderBasedOnRoute ( routeSubscription, newRoute ) ) {
+            setRouteChangeCounter(prev => prev + 1);
+          }
+        });
+      }, [ routeSubscription ]);
+
+      const shouldRerenderDueToURLChange = useMemo(() => {
+        return routeChangeCounter;
+      }, [routeChangeCounter]);
+
+
+      /* Signal Reactivity
+      /* *** *** *** *** *** *** *** *** *** *** *** *** *** *** */
+
+      const signalChangeCounter = context.signalChangeCounter;
+      const changedSignals      = context.changedSignals;
+      const subscribedSignals   = moduleRegistryItem.signals || null;
+
+      const shouldRerenderDueToSignalChange = useMemo( () => {
+
+        if ( !subscribedSignals ) {
+          return signalChangeCounter;
+        }
+        
+        if ( subscribedSignals.length === 0 ) {
+          return 0;
+        }
+        
+        const hasRelevantChange = subscribedSignals.some( signalId => changedSignals.includes(signalId) );
+        
+        if ( hasRelevantChange ) {
+          return signalChangeCounter;
+        } else {
+          return 0;
+        }
+        
+      }, [ signalChangeCounter, subscribedSignals, changedSignals ] );
+
+
+      /* Module Life Cycle Methods
+      /* *** *** *** *** *** *** *** *** *** *** *** *** *** *** */
+
+      useEffect(() => {
+        onModuleMount( moduleId )
+        return () => {
+          onModuleUnmount( moduleId );
+        };
+      }, []);
+
+      const memoizedComponent = useMemo(() => {
+        
+        return Component ? <Component 
+
+          React    = { React }
+          R        = { React }
+
+          Graph    = { Apis.graph }
+
+          Node     = { Node }
+          N        = { Node }
+
+          Module   = { Module }
+          M        = { Module } 
+
+          Kernel   = { kernel } 
+          K        = { kernel } 
+          _        = { kernel } 
+
+          Services = { kernel.services }
+
+          Apis     = { Apis }
+          Media    = { Apis.media }
+          Utility  = { Apis.utility }
+          Router   = { Apis?.router }
+
+          Lucide  = { Lucide }
+
+          {...props}>
+
+          {children}
+
+          </Component> : <div className="morpheus-error-box"> <strong>Morpheus Error:</strong> {`${`Module '${moduleId}' of node '${kernel.nodeId}' listed in ${kernel.nodeId}.config.jsx → modules but not found in specified location.`}`}</div>;
+
+      }, [ shouldRerenderDueToSignalChange, shouldRerenderDueToURLChange ] );
+  
+      return memoizedComponent;
+
+    };
+  }
 
   createNodeComponent( nodeResources, NodeProvider, Module, kernel ) {
 
@@ -380,6 +497,17 @@ export default class NodeManager {
         }
       }
     }
+  }
+
+  /* Module Lifecycle Hooks
+  /* *** *** *** *** *** *** *** *** *** *** *** *** *** *** */
+
+  onModuleMount( moduleId ) {
+    //console.log( `Mounting ${moduleId}` );
+  }
+
+  onModuleUnmount( moduleId ) {
+    //console.log( `Unmouting ${moduleId}` );
   }
 
   /* Navigation Hook Registration
@@ -485,6 +613,57 @@ export default class NodeManager {
 
     return `${ nodeId }${ separator }Default` 
 
-  }  
+  }
+
+  shouldModuleRerenderBasedOnRoute(subscription, currentRoute) {
+
+    if (!subscription || subscription === false) {
+      return false;
+    }
+    
+    if (subscription === true) {
+      return true;
+    }
+    
+    if (typeof subscription === 'string') {
+      return this.matchRoutePattern(subscription, currentRoute);
+    }
+    
+    if (Array.isArray(subscription)) {
+      return subscription.some(pattern => this.matchRoutePattern(pattern, currentRoute));
+    }
+    
+    return false;
+    
+  }
+
+  matchRoutePattern(pattern, route) {
+
+    if (pattern === route) {
+      return true;
+    }
+    
+    if (pattern.includes('*')) {
+      const prefix = pattern.replace('*', '');
+      return route.startsWith(prefix);
+    }
+    
+    if (pattern.includes(':')) {
+      const patternSegments = pattern.split('/').filter(s => s);
+      const routeSegments = route.split('/').filter(s => s);
+      
+      if (patternSegments.length !== routeSegments.length) {
+        return false;
+      }
+      
+      return patternSegments.every((seg, i) => {
+        return seg.startsWith(':') || seg === routeSegments[i];
+      });
+    }
+    
+    return false;
+
+  }
+  
 
 }

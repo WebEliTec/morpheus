@@ -52,13 +52,14 @@ const config = {
   },
 
 
+  /*
   modules: {
 
     SideMenu: {
       isRoot:  true,
     }
 
-  },
+  },*/
 
   components: {
     SomeComponent: {},
