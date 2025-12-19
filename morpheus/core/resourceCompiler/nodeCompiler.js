@@ -85,7 +85,7 @@ export default class NodeCompiler {
     const metaData          = this.resolveResourceType( nodeInheritanceLineStack, 'metaData' );
     const coreData          = this.resolveResourceType( nodeInheritanceLineStack, 'coreData' );
 
-    const signalClusters    = this.resolveResourceType( nodeInheritanceLineStack, 'signalClusters' );
+    const signalGroups      = this.resolveResourceType( nodeInheritanceLineStack, 'signalGroups' );
     const traits            = this.resolveResourceType( nodeInheritanceLineStack, 'traits' );
 
     const modules           = this.resolveResourceType( nodeInheritanceLineStack, 'modules' );
@@ -101,7 +101,7 @@ export default class NodeCompiler {
       metaData,
       coreData, 
       rootModuleId,
-      signalClusters, 
+      signalGroups, 
       traits, 
       modules, 
       hooks, 

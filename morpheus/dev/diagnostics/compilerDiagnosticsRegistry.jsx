@@ -384,7 +384,7 @@ const compilerDiagnosticsRegistry = {
       },
     },
 
-    resolveSignalClusters: {
+    resolveSignalGroups: {
       
       meta: {
         process: 'signalClusters',

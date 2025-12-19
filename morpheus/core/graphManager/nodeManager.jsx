@@ -136,7 +136,7 @@ export default class NodeManager {
 
   initializeKernel( nodeId, instanceId, nodeProps, nodeResources, apis, services ) {
       
-    const { KernelClass, constants, metaData, coreData, signalClusters } = nodeResources;
+    const { KernelClass, constants, metaData, coreData, signalGroups } = nodeResources;
 
     const kernel               = new KernelClass();
     const instanceRegistryItem = this.getInstanceItemData(nodeResources, instanceId);
@@ -152,7 +152,7 @@ export default class NodeManager {
     
     kernel.metaData            = { ...metaData, ...(instanceRegistryItem?.metaData || {}) };
     kernel.coreData            = { ...coreData, ...(instanceRegistryItem?.coreData || {}) };
-    kernel.signalClusters      = signalClusters;
+    kernel.signalGroups        = signalGroups;
     kernel.optimisticSignals   = {};
 
     kernel.services            = services;
@@ -189,7 +189,7 @@ export default class NodeManager {
     kernel.constants         = null;
     kernel.metaData          = null;
     kernel.coreData          = null;
-    kernel.signalClusters    = null;
+    kernel.signalGroups      = null;
     kernel.nodeId            = null;
     kernel.instanceId        = null;
     kernel.fullyQualifiedId  = null;
@@ -201,19 +201,19 @@ export default class NodeManager {
 
   createNodeProvider( kernel, nodeResources ) {
     
-    const { signalClusters } = nodeResources;
+    const { signalGroups } = nodeResources;
     const nodeContext        = createContext();
     this.nodeContext         = nodeContext;
 
-    if( !signalClusters ) {
+    if( !signalGroups ) {
       console.warn(`No signal or signalCluster provided for node '${kernel.nodeId}'`);
     }
 
     const signalDefinitions = [];
 
-    if( signalClusters ) {
-      Object.keys(signalClusters).forEach((signalClusterItemId) => {
-        Object.entries(signalClusters[signalClusterItemId].signals).forEach(([signalId, signalDef]) => {
+    if( signalGroups ) {
+      Object.keys(signalGroups).forEach((signalClusterItemId) => {
+        Object.entries(signalGroups[signalClusterItemId].signals).forEach(([signalId, signalDef]) => {
           signalDefinitions.push({ signalId, ...signalDef });
         });
       });

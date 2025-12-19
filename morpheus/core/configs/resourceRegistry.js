@@ -12,7 +12,7 @@ const resourceRegistry = {
 
       coreData:         'coreData.jsx',
 
-      signalClusters:   'signalClusters.jsx',
+      signalGroups:     'signalGroups.jsx',
 
       signals:          'signals.jsx',
 
@@ -40,7 +40,7 @@ const resourceRegistry = {
 
       coreDataSchemas:  'coreDataSchemas.jsx',
 
-      signalClusters:   'signalClusters.jsx',
+      signalGroups:     'signalGroups.jsx',
 
       signals:          'signals.jsx',
 

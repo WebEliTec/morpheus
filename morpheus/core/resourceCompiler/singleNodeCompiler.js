@@ -152,7 +152,7 @@ export default class SingleNodeCompiler {
     nodeResources.parentId         = configObject?.parentId ?? null
     nodeResources.rootModuleId     = rootModuleId ?? null
     nodeResources.constants        = selectedResources?.constants ?? null
-    nodeResources.signalClusters   = selectedResources?.signalClusters ?? null
+    nodeResources.signalGroups     = selectedResources?.signalGroups ?? null
     nodeResources.modules          = moduleRegistry ?? null
     nodeResources.hooks            = selectedResources?.hooks ?? null
     nodeResources.traits           = traits;
@@ -230,7 +230,7 @@ export default class SingleNodeCompiler {
       const payload                     = configResourcePayload ?? filePayload;
 
       /**
-       * signalClusters are loaded first, because of the order 
+       * signalGroups are loaded first, because of the order 
        * within resourceRegistry.
        */
 
@@ -240,7 +240,7 @@ export default class SingleNodeCompiler {
        * 'signals'.
        */
 
-      if ( resourceName === 'signalClusters' && payload?.signals ) {
+      if ( resourceName === 'signalGroups' && payload?.signals ) {
         console.warn( `signalClusterItem with id 'signals' detected within node '${this.nodeId}' and is therefore excluded. Note that this is a protected keyword, because it is used for the independent resource type 'signals'.` )
         delete payload.signals;
       }
@@ -253,9 +253,9 @@ export default class SingleNodeCompiler {
        */
       if ( resourceName === 'signals' && payload ) {
         console.warn( `A 'signal' resource type has been found within node '${this.nodeId}' and is now being transformed to a signalClusterItem with id 'signals'. Execution context: '${this.executionContext}'.` );
-        selectedResources.signalClusters               ??= {};
-        selectedResources.signalClusters.signals         = {};
-        selectedResources.signalClusters.signals.signals = payload;
+        selectedResources.signalGroups               ??= {};
+        selectedResources.signalGroups.signals         = {};
+        selectedResources.signalGroups.signals.signals = payload;
       }
 
     }
@@ -539,11 +539,11 @@ export default class SingleNodeCompiler {
 
     }
 
-    let resolvedSignalClusters = config.signalClusters;
+    let resolvedSignalGroups = config.signalGroups;
     
     if (config.signals) {
-      resolvedSignalClusters = {
-        ...resolvedSignalClusters,
+      resolvedSignalGroups = {
+        ...resolvedSignalGroups,
         signals: {
           signals: config.signals
         }
@@ -571,7 +571,7 @@ export default class SingleNodeCompiler {
       coreData:         config.coreData ?? null,
 
 
-      signalClusters:   resolvedSignalClusters ?? null,
+      signalGroups:     resolvedSignalGroups ?? null,
       moduleRegistry:   initializedModuleRegistry ?? null,
       instances:        config.instances ?? null, 
       hooks:            config.hook ?? null,
