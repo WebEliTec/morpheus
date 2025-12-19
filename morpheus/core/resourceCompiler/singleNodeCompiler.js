@@ -372,6 +372,7 @@ export default class SingleNodeCompiler {
 
       initializedModuleRegistry[ moduleId ]         = moduleRegistryItem;
 
+      const initializedModuleRegistryItem           = initializedModuleRegistry[ moduleId ];
       const sharedModuleRegistry                    = this.executionContextConfig?.sharedModuleRegistry;
       const sharedModuleRegistryItem                = this.executionContextConfig?.sharedModuleRegistry?.[moduleId];
 
@@ -431,7 +432,7 @@ export default class SingleNodeCompiler {
         }
 
         // Don't import, just store metadata
-        initializedModuleRegistry[moduleId].component = null;
+        initializedModuleRegistryItem.component = null;
 
       } else {
 
@@ -442,16 +443,16 @@ export default class SingleNodeCompiler {
           continue;
         }
 
-        initializedModuleRegistry[moduleId].component = result;
+        initializedModuleRegistryItem.component = result;
 
 
       }
 
-      initializedModuleRegistry[moduleId].subPath         = constructedPath;
+      initializedModuleRegistryItem.subPath         = constructedPath;
 
       //Used for sharedModules
       //initializedModuleRegistry[moduleId].internalPath     = internalPath;
-      initializedModuleRegistry[moduleId].inheritanceLevel = this.inheritanceLevel;
+      initializedModuleRegistryItem.inheritanceLevel = this.inheritanceLevel;
 
     }
 
