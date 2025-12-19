@@ -172,7 +172,7 @@ export default class SingleNodeCompiler {
     if( this.inheritanceLevel == 'echo' ) {
       nodeResources.metaData         = selectedResources?.metaData ?? null
       nodeResources.coreData         = selectedResources?.coreData ?? null
-      nodeResources.instanceRegistry = selectedResources?.instanceRegistry ?? null 
+      nodeResources.instances        = selectedResources?.instances ?? null 
     } else {
       nodeResources.metaDataSchemas  = selectedResources?.metaDataSchemas ?? null
       nodeResources.coreDataSchemas  = selectedResources?.coreDataSchemas ?? null
@@ -573,7 +573,7 @@ export default class SingleNodeCompiler {
 
       signalClusters:   resolvedSignalClusters ?? null,
       moduleRegistry:   initializedModuleRegistry ?? null,
-      instanceRegistry: config.instanceRegistry ?? null, 
+      instances:        config.instances ?? null, 
       hooks:            config.hook ?? null,
       traits:           traits ?? null,
 

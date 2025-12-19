@@ -555,7 +555,7 @@ export default class NodeManager {
 
   getInstanceItemData(nodeResources, instanceId) {
 
-    const instanceRegistry = nodeResources?.instanceRegistry;
+    const instanceRegistry = nodeResources?.instances;
     
     if (!instanceRegistry) {
       // No instance registry defined - that's OK for anonymous instances

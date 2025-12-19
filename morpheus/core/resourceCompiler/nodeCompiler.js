@@ -91,7 +91,7 @@ export default class NodeCompiler {
     const modules           = this.resolveResourceType( nodeInheritanceLineStack, 'modules' );
 
     const hooks             = this.resolveResourceType( nodeInheritanceLineStack, 'hooks' );
-    const instanceRegistry  = this.resolveResourceType( nodeInheritanceLineStack, 'instanceRegistry' );
+    const instances         = this.resolveResourceType( nodeInheritanceLineStack, 'instances' );
 
     const nodeResources = {
       nodeId,
@@ -105,7 +105,7 @@ export default class NodeCompiler {
       traits, 
       modules, 
       hooks, 
-      instanceRegistry,
+      instances,
     }
 
    //console.log( nodeResources );

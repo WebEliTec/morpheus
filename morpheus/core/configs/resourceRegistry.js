@@ -18,7 +18,7 @@ const resourceRegistry = {
 
       modules:          'modules.jsx',
 
-      instanceRegistry: 'instanceRegistry.jsx',
+      instances:        'instances.jsx',
 
       kernel:           'kernel.jsx',
 
