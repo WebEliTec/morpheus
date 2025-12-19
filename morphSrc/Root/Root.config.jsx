@@ -93,7 +93,7 @@ const config = {
     },
 
     Test: {
-      rootDir: '/feature',
+      rootDir: '/features',
     }, 
 
     Home: {

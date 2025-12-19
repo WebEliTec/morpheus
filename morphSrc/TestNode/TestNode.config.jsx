@@ -156,7 +156,9 @@ const config = {
       signals: [ 'inputValue' ]
     },
 
-    InnerElement: {},
+    InnerElement: {
+      signals: ['showInnerElement']
+    },
 
   }, 
 

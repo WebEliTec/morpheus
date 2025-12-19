@@ -5,18 +5,22 @@ import * as Lucide from 'lucide-react';
 export default class ModuleManager {
 
   constructor({ kernel, nodeResources, apis, nodeContext, nodeLoader }) {
-    this.kernel         = kernel;
-    this.nodeResources  = nodeResources;
-    this.moduleRegistry = nodeResources.modules;
-    this.apis           = apis;
-    this.nodeContext    = nodeContext;
-    this.nodeLoader     = nodeLoader;
+
+    this.kernel                = kernel;
+    this.nodeResources         = nodeResources;
+    this.moduleRegistry        = nodeResources.modules;
+    this.apis                  = apis;
+    this.nodeContext           = nodeContext;
+    this.nodeLoader            = nodeLoader;
+    this.moduleInstanceCounter = 0;
+
   }
 
   /* Module Component Factory
   /* *** *** *** *** *** *** *** *** *** *** *** *** *** *** */
 
   createModule() {
+
     const moduleManager  = this;
     const kernel         = this.kernel;
     const moduleRegistry = this.moduleRegistry;
@@ -24,12 +28,21 @@ export default class ModuleManager {
     const Apis           = this.apis;
     const Node           = this.nodeLoader;
 
-    return function Module({ id, proxyId, children = null, ...props }) {
+    return function Module({ id, proxyId, instanceKey: propsInstanceKey, children = null, ...props }) {
 
       const moduleId           = proxyId ?? id;
       const context            = useContext(nodeContext);
       const moduleRegistryItem = moduleRegistry?.[moduleId];
+      
       const hasMountedRef      = useRef(false);
+      const instanceKeyRef     = useRef(null);
+      
+      if (instanceKeyRef.current === null) {
+        instanceKeyRef.current = propsInstanceKey ?? moduleManager.generateModuleKey(moduleId);
+      }
+      
+      const instanceKey = instanceKeyRef.current;
+
 
       if (!moduleRegistryItem) {
         const errorMessage = `Module "${moduleId}" of node "${kernel.nodeId}" not found.`;
@@ -114,23 +127,37 @@ export default class ModuleManager {
       const memoizedComponent = useMemo(() => {
 
         return Component ? (
+
           <Component
-            React    = { React }
-            R        = { React }
-            Graph    = { Apis.graph }
-            Node     = { Node }
-            N        = { Node }
-            Module   = { Module }
-            M        = { Module }
-            Kernel   = { kernel }
-            K        = { kernel }
-            _        = { kernel }
-            Services = { kernel.services }
-            Apis     = { Apis }
-            Media    = { Apis.media }
-            Utility  = { Apis.utility }
-            Router   = { Apis?.router }
-            Lucide   = { Lucide }
+
+            key         = { instanceKey }
+
+            React       = { React }
+            R           = { React }
+
+            Graph       = { Apis.graph }
+
+            Node        = { Node }
+            N           = { Node }
+
+            Module      = { Module }
+            M           = { Module }
+
+            Kernel      = { kernel }
+            K           = { kernel }
+
+            _           = { kernel }
+
+            Services    = { kernel.services }
+
+            Apis        = { Apis }
+            Media       = { Apis.media }
+            Utility     = { Apis.utility }
+            Router      = { Apis?.router }
+            Lucide      = { Lucide }
+
+            instanceKey = { instanceKey }
+
             {...props}
           >
             {children}
@@ -175,7 +202,7 @@ export default class ModuleManager {
         }
       }
     }
-    
+
   }
 
   /* Route Matching
@@ -231,11 +258,20 @@ export default class ModuleManager {
   /* *** *** *** *** *** *** *** *** *** *** *** *** *** *** */
 
   destroy() {
-    this.kernel         = null;
-    this.nodeResources  = null;
-    this.moduleRegistry = null;
-    this.apis           = null;
-    this.nodeContext    = null;
-    this.nodeLoader     = null;
+
+    this.kernel                = null;
+    this.nodeResources         = null;
+    this.moduleRegistry        = null;
+    this.apis                  = null;
+    this.nodeContext           = null;
+    this.nodeLoader            = null;
+    this.moduleInstanceCounter = 0;
+
   }
+
+  generateModuleKey(moduleId) {
+    this.moduleInstanceCounter++;
+    return `${moduleId}_${this.moduleInstanceCounter}`;
+  }
+
 }
