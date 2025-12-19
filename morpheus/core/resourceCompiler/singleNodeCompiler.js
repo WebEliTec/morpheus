@@ -235,13 +235,13 @@ export default class SingleNodeCompiler {
        */
 
       /**
-       * We check, whether a signalCluster contains an item called 'signals'.
+       * We check, whether a signalGroup contains an item called 'signals'.
        * If so, we delete it, because it is reserved for the independent resource 
        * 'signals'.
        */
 
       if ( resourceName === 'signalGroups' && payload?.signals ) {
-        console.warn( `signalClusterItem with id 'signals' detected within node '${this.nodeId}' and is therefore excluded. Note that this is a protected keyword, because it is used for the independent resource type 'signals'.` )
+        console.warn( `signalGroupItem with id 'signals' detected within node '${this.nodeId}' and is therefore excluded. Note that this is a protected keyword, because it is used for the independent resource type 'signals'.` )
         delete payload.signals;
       }
 
@@ -252,7 +252,7 @@ export default class SingleNodeCompiler {
        * If a node has a 'signals' resource, it is transformed to a singalClusterItem with id 'signal'.
        */
       if ( resourceName === 'signals' && payload ) {
-        console.warn( `A 'signal' resource type has been found within node '${this.nodeId}' and is now being transformed to a signalClusterItem with id 'signals'. Execution context: '${this.executionContext}'.` );
+        console.warn( `A 'signal' resource type has been found within node '${this.nodeId}' and is now being transformed to a signalGroupItem with id 'signals'. Execution context: '${this.executionContext}'.` );
         selectedResources.signalGroups               ??= {};
         selectedResources.signalGroups.signals         = {};
         selectedResources.signalGroups.signals.signals = payload;

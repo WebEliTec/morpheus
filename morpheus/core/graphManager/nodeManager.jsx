@@ -206,14 +206,14 @@ export default class NodeManager {
     this.nodeContext         = nodeContext;
 
     if( !signalGroups ) {
-      console.warn(`No signal or signalCluster provided for node '${kernel.nodeId}'`);
+      console.warn(`No signal or signalGroups provided for node '${kernel.nodeId}'`);
     }
 
     const signalDefinitions = [];
 
     if( signalGroups ) {
-      Object.keys(signalGroups).forEach((signalClusterItemId) => {
-        Object.entries(signalGroups[signalClusterItemId].signals).forEach(([signalId, signalDef]) => {
+      Object.keys(signalGroups).forEach((signalGroupItemId) => {
+        Object.entries(signalGroups[signalGroupItemId].signals).forEach(([signalId, signalDef]) => {
           signalDefinitions.push({ signalId, ...signalDef });
         });
       });
