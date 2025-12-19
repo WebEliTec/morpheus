@@ -88,7 +88,7 @@ export default class NodeCompiler {
     const signalClusters    = this.resolveResourceType( nodeInheritanceLineStack, 'signalClusters' );
     const traits            = this.resolveResourceType( nodeInheritanceLineStack, 'traits' );
 
-    const moduleRegistry    = this.resolveResourceType( nodeInheritanceLineStack, 'moduleRegistry' );
+    const modules           = this.resolveResourceType( nodeInheritanceLineStack, 'modules' );
 
     const hooks             = this.resolveResourceType( nodeInheritanceLineStack, 'hooks' );
     const instanceRegistry  = this.resolveResourceType( nodeInheritanceLineStack, 'instanceRegistry' );
@@ -103,7 +103,7 @@ export default class NodeCompiler {
       rootModuleId,
       signalClusters, 
       traits, 
-      moduleRegistry, 
+      modules, 
       hooks, 
       instanceRegistry,
     }
@@ -141,7 +141,7 @@ export default class NodeCompiler {
 
     });
 
-    if( resourceTypeId == 'moduleRegistry' ) {
+    if( resourceTypeId == 'modules' ) {
       this.removeMultipleRootModulesDeclarations( resources )
     }
 

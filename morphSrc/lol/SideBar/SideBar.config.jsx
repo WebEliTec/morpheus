@@ -30,7 +30,7 @@ const config = {
   /* Modules
   /* *** *** *** *** *** *** *** *** *** *** *** *** *** *** */
 
-  moduleRegistry: {
+  modules: {
 
     SideBar: {
       isRoot: true,

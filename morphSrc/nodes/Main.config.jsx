@@ -4,7 +4,7 @@ const config = {
 
   rootModuleId: 'Wrapper',
 
-  moduleRegistry: {
+  modules: {
     Wrapper: {
       isRoot: true,
     },

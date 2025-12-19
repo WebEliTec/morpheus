@@ -113,7 +113,7 @@ export default class NodeManager {
     await this.callHook( 'kernelDidInitialize', nodeResources, kernel );
 
     const NodeProvider        = this.createNodeProvider( kernel, nodeResources );
-    const Module              = this.createModule( kernel, nodeResources.moduleRegistry );
+    const Module              = this.createModule( kernel, nodeResources.modules );
     const NodeComponent       = this.createNodeComponent( nodeResources, NodeProvider, Module, kernel );
 
     return NodeComponent;

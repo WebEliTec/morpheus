@@ -14,7 +14,7 @@ const config = {
     } 
   },
 
-  moduleRegistry: {
+  modules: {
     
     Wrapper: {
       isRoot: true,

@@ -31,7 +31,7 @@ const config = {
   },
 
 
-  moduleRegistry: {
+  modules: {
 
     Wrapper: {
       signals: ['showUI', 'appGraph'],

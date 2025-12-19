@@ -16,7 +16,7 @@ const resourceRegistry = {
 
       signals:          'signals.jsx',
 
-      moduleRegistry:   'moduleRegistry.jsx',
+      modules:          'modules.jsx',
 
       instanceRegistry: 'instanceRegistry.jsx',
 
@@ -44,7 +44,7 @@ const resourceRegistry = {
 
       signals:          'signals.jsx',
 
-      moduleRegistry:   'moduleRegistry.jsx',
+      modules:          'modules.jsx',
 
       kernel:           'kernel.jsx',
 

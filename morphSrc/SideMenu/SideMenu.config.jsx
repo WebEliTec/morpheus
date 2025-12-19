@@ -40,7 +40,7 @@ const config = {
   /* Module Registry
   /* *** *** *** *** *** *** *** *** *** *** *** *** *** *** */
 
-  moduleRegistry: {
+  modules: {
 
     SideMenu: {
       isRoot:  true,

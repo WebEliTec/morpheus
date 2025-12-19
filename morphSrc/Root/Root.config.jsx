@@ -76,7 +76,7 @@ const config = {
   /* Modules
   /* *** *** *** *** *** *** *** *** *** *** *** *** *** *** */
 
-  moduleRegistry: {
+  modules: {
 
     Root:          {
       routes:  [ '/home', '/content-system', '/users' ],

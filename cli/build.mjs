@@ -89,7 +89,7 @@ class MorphSrcBuildDirectoryBuilder {
     const sourceCode          = this.extractSourceCode( configFilePath );
     const importStatements    = this.extractImportStatements( sourceCode );
     const componentExports    = this.extractComponentExports( sourceCode, isSingleFile );
-    const moduleRegistry      = nodeResources?.moduleRegistry; 
+    const moduleRegistry      = nodeResources?.modules; 
 
     const imports             = [...importStatements]; 
 

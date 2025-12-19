@@ -137,7 +137,7 @@ export default class SingleNodeCompiler {
     const availableResources = await this.loadAvailableResources( configObject );
     const selectedResources  = this.selectResources( availableResources, configObject );
     const traits             = await this.loadTraits( availableResources, configObject );
-    const moduleRegistry     = await this.loadModules( selectedResources?.moduleRegistry, configObject );
+    const moduleRegistry     = await this.loadModules( selectedResources?.modules, configObject );
     
     if( !moduleRegistry ) {
       console.warn( `moduleRegistry is empty for node '${this.nodeId}'` );
@@ -153,7 +153,7 @@ export default class SingleNodeCompiler {
     nodeResources.rootModuleId     = rootModuleId ?? null
     nodeResources.constants        = selectedResources?.constants ?? null
     nodeResources.signalClusters   = selectedResources?.signalClusters ?? null
-    nodeResources.moduleRegistry   = moduleRegistry ?? null
+    nodeResources.modules          = moduleRegistry ?? null
     nodeResources.hooks            = selectedResources?.hooks ?? null
     nodeResources.traits           = traits;
 
