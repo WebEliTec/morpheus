@@ -42,7 +42,7 @@ const appConfig = {
 
 	},  
 
-	sharedModuleRegistry: {
+	sharedModules: {
 
 		SomeSharedModule: {
 			dir: '/test'

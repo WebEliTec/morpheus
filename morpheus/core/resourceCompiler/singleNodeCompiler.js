@@ -373,8 +373,8 @@ export default class SingleNodeCompiler {
       initializedModuleRegistry[ moduleId ]         = moduleRegistryItem;
 
       const initializedModuleRegistryItem           = initializedModuleRegistry[ moduleId ];
-      const sharedModuleRegistry                    = this.executionContextConfig?.sharedModuleRegistry;
-      const sharedModuleRegistryItem                = this.executionContextConfig?.sharedModuleRegistry?.[moduleId];
+      const sharedModuleRegistry                    = this.executionContextConfig?.sharedModules;
+      const sharedModuleRegistryItem                = this.executionContextConfig?.sharedModules?.[moduleId];
 
       const isShared                                = moduleRegistryItem?.isShared && ( this.inheritanceLevel == 'echo' );
       const sharedModuleDirectoryDefaultPath        = 'sharedModules';
@@ -474,7 +474,7 @@ export default class SingleNodeCompiler {
 
       for (const [moduleId, moduleRegistryItem] of Object.entries(config.moduleRegistry)) {
 
-        const sharedModuleRegistryItem                = this.executionContextConfig?.sharedModuleRegistry?.[moduleId];
+        const sharedModuleRegistryItem                = this.executionContextConfig?.sharedModules?.[moduleId];
 
         const isShared                                = moduleRegistryItem?.isShared;
 
