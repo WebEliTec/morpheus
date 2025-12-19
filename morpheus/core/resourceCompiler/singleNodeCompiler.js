@@ -1,4 +1,4 @@
-import resourceRegistry from './resourceRegistry.js';
+import resourceRegistry from '../configs/resourceRegistry.js';
 import path from 'path';
 
 

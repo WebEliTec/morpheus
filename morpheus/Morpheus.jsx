@@ -5,7 +5,7 @@ import GraphManager from './core/graphManager/graphManager';
 
 import appConfig from '../morphSrc/app.config';
 import devToolConfig from './dev/ui/devTool.config';
-import libraryNodeConfig from './libraryNode.config';
+import libraryNodeConfig from './core/configs/libraryNode.config';
 
 import MediaManager from './apis/mediaManager';
 import Graph from './apis/graph';
