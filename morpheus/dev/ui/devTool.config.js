@@ -6,7 +6,7 @@ const devToolConfig = {
     traits:  '/traits',   
   },
   
-  nodeRegistry: {
+  nodes: {
     Root: {
       //dir: '/comp'
     },

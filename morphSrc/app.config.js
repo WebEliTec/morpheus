@@ -22,7 +22,7 @@ const appConfig = {
 		//traits:  '/traits',
 	},
 
-	nodeRegistry: {
+	nodes: {
 
 		Root:     {
 			dir: '/',

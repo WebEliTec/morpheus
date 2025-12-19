@@ -20,7 +20,7 @@ export default class NodeManager {
     this.executionContextConfig   = executionContextConfig;
     this.libraryNodeConfig        = libraryNodeConfig;
     this.apis                     = apis;
-    this.nodeRegistry             = this.executionContextConfig.nodeRegistry;
+    this.nodeRegistry             = this.executionContextConfig.nodes;
     this.notifyGraphOnNodeMount   = notifyGraphOnNodeMount;    
     this.notifyGraphOnNodeUnmount = notifyGraphOnNodeUnmount;
     this.mayCreateNode            = mayCreateNode;
