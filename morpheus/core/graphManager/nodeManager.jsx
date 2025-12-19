@@ -61,9 +61,6 @@ export default class NodeManager {
 
   async createNode( nodeId, instanceId, ...props ) {
 
-    console.log( nodeId );
-    console.log( this.nodeRegistry );
-
     const isNodeRegistered = this.nodeRegistry.hasOwnProperty(nodeId);
     
     if (!isNodeRegistered) {
@@ -413,7 +410,7 @@ export default class NodeManager {
 
           {children}
 
-          </Component> : <h1>{`${`Module "${moduleId}" of node "${kernel.nodeId}" listed in module registry but not found in specified location.`}`}</h1>;
+          </Component> : <div className="morpheus-error-box"> <strong>Morpheus Error:</strong> {`${`Module '${moduleId}' of node '${kernel.nodeId}' listed in ${kernel.nodeId}.config.jsx → modules but not found in specified location.`}`}</div>;
 
       }, [ shouldRerenderDueToSignalChange, shouldRerenderDueToURLChange ] );
   

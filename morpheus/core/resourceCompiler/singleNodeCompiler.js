@@ -460,6 +460,137 @@ export default class SingleNodeCompiler {
     for (const [ moduleId, moduleRegistryItem ] of Object.entries( moduleRegistry ) ) {
 
       initializedModuleRegistry[ moduleId ]         = moduleRegistryItem;
+      const initializedModuleRegistryItem           = initializedModuleRegistry[ moduleId ];
+
+      const isShared                                = moduleRegistryItem?.isShared && ( this.inheritanceLevel == 'echo' );
+
+      const rootDir                                 = moduleRegistryItem?.rootDir !== undefined ? this.removeTrailingSlash(moduleRegistryItem?.rootDir) : null;
+      const isRootDirOnRootLevel                    = rootDir == '/';
+      const hasRootDir                              = rootDir != null;
+
+      const individualModulePath                    = this.removeTrailingSlash( moduleRegistryItem?.dir, false );
+      const hasIndividualModulePath                 = individualModulePath && individualModulePath != '/';
+      const isIndividualModulePathOnRootLevel       = individualModulePath == '/';
+
+      // Validate mutual exclusivity
+      const pathOptionsSet = [isShared, hasRootDir, hasIndividualModulePath || isIndividualModulePathOnRootLevel].filter(Boolean).length;
+      if (pathOptionsSet > 1) {
+        console.error(
+          `[Morpheus] Module '${moduleId}' in node '${this.nodeId}' has multiple path options set. ` +
+          `Only one of 'isShared', 'rootDir', or 'dir' can be used. Skipping module.`
+        );
+        continue;
+      }
+
+
+      const sharedModuleRegistry                    = this.executionContextConfig?.sharedModules;
+      const sharedModuleRegistryItem                = this.executionContextConfig?.sharedModules?.[moduleId];
+      const sharedModuleDirectoryDefaultPath        = 'sharedModules';
+      const sharedModuleDirectorySubPath            = this.removeTrailingSlash( sharedModuleRegistryItem?.dir );
+      const hasIndividualSharedModulePath           = sharedModuleDirectorySubPath && sharedModuleDirectorySubPath != '/';
+      const isIndividualSharedModulePathOnRootLevel = sharedModuleDirectorySubPath == '/';
+
+      let constructedPath;
+      let internalPath;
+
+      if( isShared && !sharedModuleRegistryItem ) {
+        console.warn( 'Shared module requested, but there has been no corresponding item found in sharedModuleRegistry' );
+        if( !sharedModuleRegistry ) {
+          console.warn(`There is no "sharedModuleRegistry" defined in config file of executionContex "${this.executionContext}".`);
+        }
+        continue;
+      }
+
+      if ( isShared && isIndividualSharedModulePathOnRootLevel ) {
+        internalPath = `${sharedModuleDirectoryDefaultPath}/${moduleId}`; 
+      } else if( isShared && hasIndividualSharedModulePath ) {
+        internalPath = `${sharedModuleDirectoryDefaultPath}/${sharedModuleDirectorySubPath}/${moduleId}`; 
+      } else if( isShared && !hasIndividualSharedModulePath ) {
+        internalPath = `${sharedModuleDirectoryDefaultPath}/${moduleId}`;
+      } else if ( hasRootDir && isRootDirOnRootLevel ) {
+        internalPath = `${moduleId}`;
+      } else if ( hasRootDir && !isRootDirOnRootLevel ) {
+        internalPath = `${rootDir}/${moduleId}`;
+      } else if( hasIndividualModulePath ) {
+        internalPath = `${individualModulePath}/${moduleId}`; 
+      } else if( isIndividualModulePathOnRootLevel ) {
+        internalPath = `${moduleId}`;
+      } else if( hasNodeSpecificDefaultModuleDirPath ) {
+        internalPath = `${nodeSpecificDefaultModuleDirPath}/${moduleId}`;
+      } else if( isNodeSpecificDefaultModuleDirPathOnRootLevel ) {
+        internalPath = `${moduleId}`;
+      } else if( hasDefaultModuleDirPath ) {
+        internalPath = `${defaultModuleDirPath}/${moduleId}`;
+      } else {
+        internalPath = `${moduleId}`;
+      }
+
+      if (isShared || hasRootDir) {
+        constructedPath = internalPath;
+      } else {
+        constructedPath = `${this.nodeDirPath}/${internalPath}`;
+      }
+
+
+      if (this.runtimeEnvironment === 'server') {
+
+        // Build time: just validate file exists
+        const fs       = await import( /* @vite-ignore */ 'fs');
+        const fullPath = path.resolve(process.cwd(), this.appSrcFolderName, `${constructedPath}.jsx`);
+
+        if (!fs.existsSync(fullPath)) {
+          throw new Error(`Module ${moduleId} not found at ${fullPath}`);
+        }
+
+        // Don't import, just store metadata
+        initializedModuleRegistryItem.component = null;
+
+      } else {
+
+        const result = await this.loadResource( constructedPath );
+
+        if( !result ) {
+          console.warn(`Module '${moduleId}' of node '${this.nodeId}' not found in '${ this.getAbsPath( constructedPath ) }'. This will cause an error at morpheus buildtime.`);
+          continue;
+        }
+
+        initializedModuleRegistryItem.component = result;
+
+
+      }
+
+      initializedModuleRegistryItem.subPath         = constructedPath;
+
+      //Used for sharedModules
+      //initializedModuleRegistry[moduleId].internalPath     = internalPath;
+      initializedModuleRegistryItem.inheritanceLevel = this.inheritanceLevel;
+
+    }
+
+    return initializedModuleRegistry;
+
+  }
+
+  async loadModules__( moduleRegistry, configObject ) {
+
+    if( !moduleRegistry ) {
+      console.warn( `No moduleRegistry passed to singleNodeCompiler.loadModules() while compiling node '${this.nodeId}'` )
+      return;
+    }
+
+    const initializedModuleRegistry                     = {};
+
+    const defaultModuleDirPath                          = this.removeTrailingSlash( this.executionContextConfig?.defaultPaths?.modules );
+    const hasDefaultModuleDirPath                       = defaultModuleDirPath && defaultModuleDirPath != '/';
+
+    const nodeSpecificDefaultModuleDirPath              = this.removeTrailingSlash( configObject?.defaultPaths?.modules );
+    const hasNodeSpecificDefaultModuleDirPath           = nodeSpecificDefaultModuleDirPath && nodeSpecificDefaultModuleDirPath != '/';
+    const isNodeSpecificDefaultModuleDirPathOnRootLevel = nodeSpecificDefaultModuleDirPath == '/';
+    
+
+    for (const [ moduleId, moduleRegistryItem ] of Object.entries( moduleRegistry ) ) {
+
+      initializedModuleRegistry[ moduleId ]         = moduleRegistryItem;
 
       const initializedModuleRegistryItem           = initializedModuleRegistry[ moduleId ];
       const sharedModuleRegistry                    = this.executionContextConfig?.sharedModules;

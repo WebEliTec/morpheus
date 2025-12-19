@@ -92,6 +92,10 @@ const config = {
       dir: '/'
     },
 
+    Test: {
+      rootDir: '/feature',
+    }, 
+
     Home:          {
 
       hooks: {

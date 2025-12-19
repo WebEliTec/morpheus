@@ -7,6 +7,7 @@ export default function Root( { Kernel, Node, Module, Router } ) {
 
   return (
     <>
+      <Module id="Test" />
       <Node id="SideMenu" />
       <Node id="SideBar" />
       <Node id="Main" />
