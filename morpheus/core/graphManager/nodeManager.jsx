@@ -23,7 +23,7 @@ export default class NodeManager {
     this.nodeRegistry             = this.executionContextConfig.nodes;
     this.notifyGraphOnNodeMount   = notifyGraphOnNodeMount;    
     this.notifyGraphOnNodeUnmount = notifyGraphOnNodeUnmount;
-    this.mayCreateNode            = mayCreateNode;
+    this.mayCreateNode             = mayCreateNode;
 
   }
 
