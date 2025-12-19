@@ -4,13 +4,13 @@ import path from 'path';
 
 export default class SingleNodeCompiler {
 
-  constructor( { inheritanceLevel, nodeId, nodeItem, executionContext, executionContextConfig, runtimeEnvironment } ) {
+  constructor( { inheritanceLevel, nodeId, nodeRegistryItem, executionContext, executionContextConfig, runtimeEnvironment } ) {
     
     this.appSrcFolderName           = 'morphSrc';
     this.devSrcFolderName           = 'dev/ui';
     this.inheritanceLevel           = inheritanceLevel;
     this.nodeId                     = nodeId;
-    this.nodeItem                   = nodeItem
+    this.nodeRegistryItem           = nodeRegistryItem;
     this.executionContext           = executionContext;
     this.executionContextConfig     = executionContextConfig;
     this.runtimeEnvironment         = runtimeEnvironment;
@@ -38,9 +38,9 @@ export default class SingleNodeCompiler {
     if ( this.inheritanceLevel == 'echo' ) {
 
       this.defaultNodeDirPath   = this.removeTrailingSlash( this.executionContextConfig?.defaultPaths?.nodes ) ?? null;
-      this.customNodeDirPath    = this.nodeItem?.dir ?? null;
+      this.customNodeDirPath    = this.nodeRegistryItem?.dir ?? null;
       this.hasCustomNodeDirPath = this.customNodeDirPath != null && this.customNodeDirPath != '/';
-      const isFile              = this.nodeItem?.isFile;
+      const isFile              = this.nodeRegistryItem?.isFile;
 
       if( isFile && this.customNodeDirPath && this.customNodeDirPath == '/' ) {
         this.nodeDirPath = '';
@@ -91,7 +91,7 @@ export default class SingleNodeCompiler {
       return null;
     }
 
-    const isFile                   = this.inheritanceLevel == 'echo' ? this.nodeItem?.isFile : configFileContent.default?.isFile;
+    const isFile                   = this.inheritanceLevel == 'echo' ? this.nodeRegistryItem.isFile : configFileContent.default?.isFile;
 
     if( isFile ) {
       console.warn( `Node '${this.nodeId}' is a single file. Single file compilation is currently not supported at morpheus buildtime and will be ignored.` );

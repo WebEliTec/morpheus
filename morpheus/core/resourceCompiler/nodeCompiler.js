@@ -5,7 +5,7 @@ export default class NodeCompiler {
   constructor( { nodeRegistry, nodeId, executionContext, executionContextConfig, libraryNodeConfig, runtimeEnvironment } ) {
 
     this.nodeId                 = nodeId;
-    this.nodeItem               = nodeRegistry[ nodeId ];
+    this.nodeRegistryItem       = nodeRegistry[ nodeId ];
     this.executionContext       = executionContext;
     this.executionContextConfig = executionContextConfig;
     this.libraryNodeConfig      = libraryNodeConfig;
@@ -35,7 +35,7 @@ export default class NodeCompiler {
       }
       
       if (inheritanceLevelId == 'echo') {
-        compilerConfig.nodeItem = this.nodeItem;
+        compilerConfig.nodeRegistryItem = this.nodeRegistryItem;
       }
       
       const singleNodeCompiler                     = new SingleNodeCompiler(compilerConfig);

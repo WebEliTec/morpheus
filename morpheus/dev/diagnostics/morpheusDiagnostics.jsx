@@ -79,9 +79,9 @@ export default class MorpheusDiagnostics {
 
     const developmentItems = {};
 
-    for (const [ nodeId, nodeItem ] of Object.entries( this.nodeRegistry )) {
-      if( nodeItem.inDevelopment && nodeItem.type === 'library' ) {
-        const [ frameworkId, appId, instanceId ] = nodeItem.identity;
+    for (const [ nodeId, nodeRegistryItem ] of Object.entries( this.nodeRegistry )) {
+      if( nodeRegistryItem.inDevelopment && nodeRegistryItem.type === 'library' ) {
+        const [ frameworkId, appId, instanceId ] = nodeRegistryItem.identity;
         const identityKey = `${frameworkId}.${appId}.${instanceId}`;
         developmentItems[identityKey] = { frameworkId, appId, instanceId };
       }

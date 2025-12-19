@@ -138,30 +138,30 @@ export default class NodeManager {
       
     const { KernelClass, constants, metaData, coreData, signalClusters } = nodeResources;
 
-    const kernel             = new KernelClass();
-    const instanceData       = this.getInstanceItemData(nodeResources, instanceId);
-    const fullyQualifiedId   = this.getFullyQualifiedNodeId( nodeId, instanceId );
+    const kernel               = new KernelClass();
+    const instanceRegistryItem = this.getInstanceItemData(nodeResources, instanceId);
+    const fullyQualifiedId     = this.getFullyQualifiedNodeId( nodeId, instanceId );
 
-    kernel.id                = fullyQualifiedId;
-    kernel.nodeId            = nodeId;
-    kernel.instanceId        = instanceId;
-    kernel.props             = nodeProps;
-    kernel.parentId          = nodeProps?.parentId; 
+    kernel.id                  = fullyQualifiedId;
+    kernel.nodeId              = nodeId;
+    kernel.instanceId          = instanceId;
+    kernel.props               = nodeProps;
+    kernel.parentId            = nodeProps?.parentId; 
 
-    kernel.constants         = constants;
+    kernel.constants           = constants;
     
-    kernel.metaData          = { ...metaData, ...(instanceData?.metaData || {}) };
-    kernel.coreData          = { ...coreData, ...(instanceData?.coreData || {}) };
-    kernel.signalClusters    = signalClusters;
-    kernel.optimisticSignals = {};
+    kernel.metaData            = { ...metaData, ...(instanceRegistryItem?.metaData || {}) };
+    kernel.coreData            = { ...coreData, ...(instanceRegistryItem?.coreData || {}) };
+    kernel.signalClusters      = signalClusters;
+    kernel.optimisticSignals   = {};
 
-    kernel.services          = services;
-    kernel.apis              = apis;
-    kernel.media             = apis.media;
-    kernel.utility           = apis.utility;
-    kernel.graph             = apis.graph;
+    kernel.services            = services;
+    kernel.apis                = apis;
+    kernel.media               = apis.media;
+    kernel.utility             = apis.utility;
+    kernel.graph               = apis.graph;
 
-    kernel.router            = apis.router;
+    kernel.router              = apis.router;
 
     this.registerNavigationHooks( kernel, nodeResources );
 
@@ -295,20 +295,20 @@ export default class NodeManager {
       const moduleId            = proxyId ?? id;
       const context             = useContext( nodeContext );
       
-      const moduleEntry         = moduleRegistry?.[moduleId];
+      const moduleRegistryItem  = moduleRegistry?.[moduleId];
       
-      if( !moduleEntry ) {
+      if( !moduleRegistryItem ) {
         const errorMessage = `Module "${moduleId}" of node "${kernel.nodeId}" not found.`;
         console.warn( errorMessage );
         return <h1>{errorMessage }</h1>;
       }
 
-      const Component           = moduleEntry?.component;
+      const Component           = moduleRegistryItem?.component;
 
       /* Routing Reactivity
       /* *** *** *** *** *** *** *** *** *** *** *** *** *** *** */
 
-      const routeSubscription   = moduleEntry.routes ?? false;  // ← NEW
+      const routeSubscription   = moduleRegistryItem.routes ?? false;  // ← NEW
       const [ routeChangeCounter, setRouteChangeCounter ] = useState(0);
 
       useEffect(() => {
@@ -331,7 +331,7 @@ export default class NodeManager {
 
       const signalChangeCounter = context.signalChangeCounter;
       const changedSignals      = context.changedSignals;
-      const subscribedSignals   = moduleEntry.signals || null;
+      const subscribedSignals   = moduleRegistryItem.signals || null;
 
       const shouldRerenderDueToSignalChange = useMemo( () => {
 
@@ -571,15 +571,15 @@ export default class NodeManager {
     }
     
     // Named instance - must exist in registry
-    const instanceData = instanceRegistry[instanceId];
+    const instanceRegistryItem = instanceRegistry[instanceId];
     
-    if (!instanceData) {
+    if (!instanceRegistryItem) {
       throw new Error(
         `[Morpheus] Instance "${instanceId}" not found in instanceRegistry for node "${nodeResources.config.nodeId || 'unknown'}"`
       );
     }
     
-    return instanceData;
+    return instanceRegistryItem;
   }
 
   getFullyQualifiedNodeId( nodeId, instanceId = null ) {

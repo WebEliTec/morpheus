@@ -6,7 +6,7 @@ const appConfig = {
 
 	hooks: {
 		appWillInitialize() {
-			console.log('App will initialize   lloooollxxxx');
+			console.log('App will initialize');
 		}, 
 		graphWillInitialize() {
 			console.log('Graph will initialize');
