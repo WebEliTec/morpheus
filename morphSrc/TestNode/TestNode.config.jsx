@@ -117,6 +117,24 @@ const config = {
     Wrapper: {
       isRoot: true,
       signals: [],
+      hooks: {
+        willMount(kernel, moduleId) {
+          console.log(`[${moduleId}] About to mount`);
+        },
+        didMount(kernel, moduleId) {
+          console.log(`[${moduleId}] Mounted`);
+          kernel.setSignal('homeLoaded', true);
+        },
+        willUnmount(kernel, moduleId) {
+          console.log(`[${moduleId}] About to unmount`);
+        },
+        didUnmount(kernel, moduleId) {
+          console.log(`[${moduleId}] Unmounted`);
+        },
+        onError(kernel, moduleId, error, context) {
+          console.error(`[${moduleId}] Error in ${context.hookName}:`, error);
+        }
+      }
     }, 
 
     Counter: {

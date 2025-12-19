@@ -89,32 +89,19 @@ const config = {
     Root:          {
       routes:  [ '/home', '/content-system', '/users' ],
       signals: [],
-      dir: '/'
+      dir: '/',
     },
 
     Test: {
       rootDir: '/feature',
     }, 
 
-    Home:          {
-
-      hooks: {
-
-        willMount( kernel ) {
-          console.log('App Root Module will Mount');
-        }, 
-
-        didMount ( kernel ) {
-          console.log('App Root Module will Mount');
-        }, 
-
-      }
-
-    }, 
+    Home: {
+      signals: ['userData'],
+    },
 
     ContentSystem: {},
 
-    
     SomeSharedModule: {
       isShared: true,
     }, 

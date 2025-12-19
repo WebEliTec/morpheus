@@ -1,4 +1,5 @@
 // morpheus/core/graphManager/moduleManager.js
+
 import React, { useContext, useState, useEffect, useMemo, useRef } from 'react';
 import * as Lucide from 'lucide-react';
 
@@ -17,6 +18,7 @@ export default class ModuleManager {
   /* *** *** *** *** *** *** *** *** *** *** *** *** *** *** */
 
   createModule() {
+
     const moduleManager  = this;
     const kernel         = this.kernel;
     const moduleRegistry = this.moduleRegistry;
@@ -87,24 +89,10 @@ export default class ModuleManager {
       /* Module Lifecycle
       /* *** *** *** *** *** *** *** *** *** *** *** *** *** *** */
 
-      // willMount - runs before first render (via ref check)
-      if (!hasMountedRef.current) {
-        moduleManager.callModuleHook(moduleId, moduleRegistryItem, 'willMount');
-      }
-
       useEffect(() => {
-        // didMount - runs after first render
-        hasMountedRef.current = true;
-        moduleManager.callModuleHook(moduleId, moduleRegistryItem, 'didMount');
-
+        moduleManager.onModuleMount(moduleId);
         return () => {
-          // willUnmount - runs before cleanup
-          moduleManager.callModuleHook(moduleId, moduleRegistryItem, 'willUnmount');
-          
-          // didUnmount - runs after cleanup (via microtask)
-          queueMicrotask(() => {
-            moduleManager.callModuleHook(moduleId, moduleRegistryItem, 'didUnmount');
-          });
+          moduleManager.onModuleUnmount(moduleId);
         };
       }, []);
 
@@ -113,42 +101,59 @@ export default class ModuleManager {
 
       const memoizedComponent = useMemo(() => {
 
-        return Component ? (
-          <Component
-            React    = { React }
-            R        = { React }
-            Graph    = { Apis.graph }
-            Node     = { Node }
-            N        = { Node }
-            Module   = { Module }
-            M        = { Module }
-            Kernel   = { kernel }
-            K        = { kernel }
-            _        = { kernel }
-            Services = { kernel.services }
-            Apis     = { Apis }
-            Media    = { Apis.media }
-            Utility  = { Apis.utility }
-            Router   = { Apis?.router }
-            Lucide   = { Lucide }
-            {...props}
-          >
-            {children}
-          </Component>
-        ) : (
-          <div className="morpheus-error-box"><strong>Morpheus Error:</strong> Module '{moduleId}' of node '{kernel.nodeId}' listed in {kernel.nodeId}.config.jsx → modules but not found in specified location.</div>
-        );
+        return Component ? <Component 
+
+          React    = { React }
+          R        = { React }
+
+          Graph    = { Apis.graph }
+
+          Node     = { Node }
+          N        = { Node }
+
+          Module   = { Module }
+          M        = { Module } 
+
+          Kernel   = { kernel } 
+          K        = { kernel } 
+          _        = { kernel } 
+
+          Services = { kernel.services }
+
+          Apis     = { Apis }
+          Media    = { Apis.media }
+          Utility  = { Apis.utility }
+          Router   = { Apis?.router }
+
+          Lucide  = { Lucide }
+
+          {...props}>
+
+          {children}
+
+          </Component> : <div className="morpheus-error-box"> <strong>Morpheus Error:</strong> {`${`Module '${moduleId}' of node '${kernel.nodeId}' listed in ${kernel.nodeId}.config.jsx → modules but not found in specified location.`}`}</div>;
+
       }, [shouldRerenderDueToSignalChange, shouldRerenderDueToURLChange]);
 
       return memoizedComponent;
     };
   }
 
+  /* Module Lifecycle (placeholder for future implementation)
+  /* *** *** *** *** *** *** *** *** *** *** *** *** *** *** */
+
+  onModuleMount(moduleId) {
+    // Future: lifecycle hooks
+  }
+
+  onModuleUnmount(moduleId) {
+    // Future: lifecycle hooks
+  }
+
   /* Module Lifecycle Hooks
   /* *** *** *** *** *** *** *** *** *** *** *** *** *** *** */
 
   async callModuleHook(moduleId, moduleRegistryItem, hookName) {
-    
     const hooks = moduleRegistryItem?.hooks;
 
     if (!hooks) {
@@ -175,7 +180,6 @@ export default class ModuleManager {
         }
       }
     }
-    
   }
 
   /* Route Matching
@@ -202,16 +206,18 @@ export default class ModuleManager {
   }
 
   matchRoutePattern(pattern, route) {
+
     if (pattern === route) {
       return true;
     }
 
-    if (pattern.includes('*')) {
+    if ( pattern.includes('*') ) {
       const prefix = pattern.replace('*', '');
       return route.startsWith(prefix);
     }
 
     if (pattern.includes(':')) {
+
       const patternSegments = pattern.split('/').filter(s => s);
       const routeSegments   = route.split('/').filter(s => s);
 
