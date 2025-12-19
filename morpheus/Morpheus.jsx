@@ -56,15 +56,22 @@ export class Morpheus {
   /* *** *** *** *** *** *** *** *** *** *** *** *** *** *** */
 
   initializeApp() {
+
+    this.executeAppHook('appWillInitialize');
+
     this.apis          = {};
     this.apis.media    = new MediaManager( appConfig );
     this.apis.graph    = new Graph();
     this.apis.router   = new Router();
     this.apis.utility  = new Utility();
 
+    this.executeAppHook('apisDidInitialize', this.apis );
+
     if ( appConfig.ServiceClass ) {
       this.services = new appConfig.ServiceClass( this.apis );
+      this.executeAppHook('servicesDidInitialize', this.apis, this.services );
     }
+
 
     const config = {
       executionContext:       'app',
@@ -74,8 +81,12 @@ export class Morpheus {
       libraryNodeConfig,
       graphChangeListener: this.graphChangeListener.bind( this ),
     }
+    
+    this.executeAppHook('graphWillInitialize', config );
 
     this.graphManager = new GraphManager( config );
+
+    this.executeAppHook('appDidInitialize', this.apis, this.services, this.graphManager);
 
   }
 
@@ -134,6 +145,24 @@ export class Morpheus {
         </>
       );
     };
+  }
+
+  /* Hook
+  /* *** *** *** *** *** *** *** *** *** *** *** *** *** *** */
+
+  executeAppHook(hookName, ...args) {
+    const hook = appConfig.hooks?.[hookName];
+    if (!hook) return;
+    
+    const callback = typeof hook === 'function' ? hook : hook.callback;
+    
+    if (typeof callback === 'function') {
+      try {
+        callback(...args);
+      } catch (error) {
+        console.error(`[Morpheus] Error in ${hookName} hook:`, error);
+      }
+    }
   }
 
 }

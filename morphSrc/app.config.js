@@ -4,6 +4,18 @@ const appConfig = {
 
 	ServiceClass,
 
+	hooks: {
+		appWillInitialize() {
+			console.log('App will initialize');
+		}, 
+		graphWillInitialize() {
+			console.log('Graph will initialize');
+		}, 
+		appDidInitialize() {
+			console.log('App did initialize');
+		}, 
+	}, 
+
 	defaultPaths: {
 		//nodes:   '/nodes',
 		//modules: '/modules',
@@ -17,20 +29,11 @@ const appConfig = {
 		},
 
 
-		SideMenu: {
-			//dir: '/',
-		},
+		SideMenu: {},
 
 		SideBar:  {
 			dir: '/lol',
 		},
-
-
-		/*
-		Main:     {
-			isFile: true,
-			dir: '/nodes',
-		},*/
 
 		TestNode: {
 		 	dir: '/',
