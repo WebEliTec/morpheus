@@ -160,7 +160,7 @@ export class Morpheus {
       try {
         callback(...args);
       } catch (error) {
-        console.error(`[Morpheus] Error in ${hookName} hook:`, error);
+        console.error(`[Morpheus] Error in ${hookName} hook:`, error) ;
       }
     }
   }
