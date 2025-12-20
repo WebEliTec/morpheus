@@ -14,7 +14,47 @@ export default class ModuleManager {
     this.nodeLoader            = nodeLoader;
     this.moduleInstanceCounter = 0;
 
+    // ####################CHANGE - START##################
+    this.componentRegistry     = nodeResources.components;
+    // ####################CHANGE - END####################
+
   }
+
+  // ####################CHANGE - START##################
+  /* Component Loader Factory
+  /* *** *** *** *** *** *** *** *** *** *** *** *** *** *** */
+  getComponentLoader() {
+    const componentRegistry = this.componentRegistry;
+    const kernel            = this.kernel;
+    
+    return function ComponentLoader({ id, children, ...props }) {
+      const componentId           = id;
+      const componentRegistryItem = componentRegistry?.[componentId];
+      
+      if (!componentRegistryItem) {
+        const errorMessage = `Component "${componentId}" of node "${kernel.nodeId}" not found in components registry.`;
+        console.warn(errorMessage);
+        return (
+          <div className="morpheus-error-box">
+            <strong>Morpheus Error:</strong> {errorMessage}
+          </div>
+        );
+      }
+      
+      const Component = componentRegistryItem?.component;
+      
+      if (!Component) {
+        return (
+          <div className="morpheus-error-box">
+            <strong>Morpheus Error:</strong> Component '{componentId}' of node '{kernel.nodeId}' listed in components but component file not found.
+          </div>
+        );
+      }
+      
+      return <Component {...props}>{children}</Component>;
+    };
+  }
+  // ####################CHANGE - END####################
 
   /* Module Component Factory
   /* *** *** *** *** *** *** *** *** *** *** *** *** *** *** */
@@ -27,6 +67,10 @@ export default class ModuleManager {
     const nodeContext    = this.nodeContext;
     const Apis           = this.apis;
     const Node           = this.nodeLoader;
+
+    // ####################CHANGE - START##################
+    const Component      = this.getComponentLoader();
+    // ####################CHANGE - END####################
 
     return function Module({ id, proxyId, instanceKey: propsInstanceKey, children = null, ...props }) {
 
@@ -158,6 +202,11 @@ export default class ModuleManager {
 
             instanceKey = { instanceKey }
 
+            // ####################CHANGE - START##################
+            Component   = { Component }
+            C           = { Component }
+            // ####################CHANGE - END####################
+
             {...props}
           >
             {children}
@@ -266,6 +315,10 @@ export default class ModuleManager {
     this.nodeContext           = null;
     this.nodeLoader            = null;
     this.moduleInstanceCounter = 0;
+
+        // ####################CHANGE - START##################
+    this.componentRegistry     = null;
+    // ####################CHANGE - END####################
 
   }
 

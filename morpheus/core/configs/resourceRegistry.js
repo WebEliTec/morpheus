@@ -22,7 +22,11 @@ const resourceRegistry = {
 
       kernel:           'kernel.jsx',
 
-      hooks:            'hooks.jsx'
+      hooks:            'hooks.jsx',
+
+      // ####################CHANGE - START##################
+      components:       'components.jsx',
+      // ####################CHANGE - END####################
       
     }, 
 
@@ -48,7 +52,11 @@ const resourceRegistry = {
 
       kernel:           'kernel.jsx',
 
-      hooks:            'hooks.jsx'
+      hooks:            'hooks.jsx',
+
+      // ####################CHANGE - START##################
+      components:       'components.jsx',
+      // ####################CHANGE - END####################
       
     }, 
 

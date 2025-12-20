@@ -138,9 +138,17 @@ export default class SingleNodeCompiler {
     const selectedResources  = this.selectResources( availableResources, configObject );
     const traits             = await this.loadTraits( availableResources, configObject );
     const moduleRegistry     = await this.loadModules( selectedResources?.modules, configObject );
+
+    // ####################CHANGE - START##################
+    const componentRegistry  = await this.loadComponents( selectedResources?.components, configObject );
+    // ####################CHANGE - END####################
     
     if( !moduleRegistry ) {
       console.warn( `moduleRegistry is empty for node '${this.nodeId}'` );
+    }
+
+    if( !componentRegistry) {
+      console.warn( `componentRegistry is empty for node '${this.nodeId}'` );
     }
 
     const rootModuleId             = this.getRootModuleId( configObject, moduleRegistry );
@@ -168,6 +176,10 @@ export default class SingleNodeCompiler {
      * - Type Safety 
      * - Specifying if a core data item is required or not
      */
+
+    // ####################CHANGE - START##################
+    nodeResources.components       = componentRegistry ?? null;
+    // ####################CHANGE - END####################
 
     if( this.inheritanceLevel == 'echo' ) {
       nodeResources.metaData         = selectedResources?.metaData ?? null
@@ -355,7 +367,6 @@ export default class SingleNodeCompiler {
     return traitImplementations;
   }
 
-
   /* Module Loading
   /* *** *** *** *** *** *** *** *** *** *** *** *** *** *** */
 
@@ -490,6 +501,115 @@ export default class SingleNodeCompiler {
 
   }
 
+  // ####################CHANGE - START##################
+  /* Component Loading
+  /* *** *** *** *** *** *** *** *** *** *** *** *** *** *** */
+  async loadComponents( componentRegistry, configObject ) {
+    if( !componentRegistry ) {
+      // Components are optional, so no warning needed
+      return null;
+    }
+
+    const initializedComponentRegistry                     = {};
+    const defaultComponentDirPath                          = this.removeTrailingSlash( this.executionContextConfig?.defaultPaths?.components );
+    const hasDefaultComponentDirPath                       = defaultComponentDirPath && defaultComponentDirPath != '/';
+    const nodeSpecificDefaultComponentDirPath              = this.removeTrailingSlash( configObject?.defaultPaths?.components );
+    const hasNodeSpecificDefaultComponentDirPath           = nodeSpecificDefaultComponentDirPath && nodeSpecificDefaultComponentDirPath != '/';
+    const isNodeSpecificDefaultComponentDirPathOnRootLevel = nodeSpecificDefaultComponentDirPath == '/';
+    
+    for (const [ componentId, componentRegistryItem ] of Object.entries( componentRegistry ) ) {
+      initializedComponentRegistry[ componentId ]       = { ...componentRegistryItem };
+      const initializedComponentRegistryItem            = initializedComponentRegistry[ componentId ];
+      const isShared                                    = componentRegistryItem?.isShared && ( this.inheritanceLevel == 'echo' );
+      const rootDir                                     = componentRegistryItem?.rootDir !== undefined ? this.removeTrailingSlash(componentRegistryItem?.rootDir) : null;
+      const isRootDirOnRootLevel                        = rootDir == '/';
+      const hasRootDir                                  = rootDir != null;
+      const individualComponentPath                     = this.removeTrailingSlash( componentRegistryItem?.dir, false );
+      const hasIndividualComponentPath                  = individualComponentPath && individualComponentPath != '/';
+      const isIndividualComponentPathOnRootLevel        = individualComponentPath == '/';
+
+      // Validate mutual exclusivity
+      const pathOptionsSet = [isShared, hasRootDir, hasIndividualComponentPath || isIndividualComponentPathOnRootLevel].filter(Boolean).length;
+      if (pathOptionsSet > 1) {
+        console.error(
+          `[Morpheus] Component '${componentId}' in node '${this.nodeId}' has multiple path options set. ` +
+          `Only one of 'isShared', 'rootDir', or 'dir' can be used. Skipping component.`
+        );
+        continue;
+      }
+
+      const sharedComponentRegistry                     = this.executionContextConfig?.sharedComponents;
+      const sharedComponentRegistryItem                 = this.executionContextConfig?.sharedComponents?.[componentId];
+      const sharedComponentDirectoryDefaultPath         = 'sharedComponents';
+      const sharedComponentDirectorySubPath             = this.removeTrailingSlash( sharedComponentRegistryItem?.dir );
+      const hasIndividualSharedComponentPath            = sharedComponentDirectorySubPath && sharedComponentDirectorySubPath != '/';
+      const isIndividualSharedComponentPathOnRootLevel  = sharedComponentDirectorySubPath == '/';
+
+      let constructedPath;
+      let internalPath;
+
+      if( isShared && !sharedComponentRegistryItem ) {
+        console.warn( `Shared component '${componentId}' requested, but there has been no corresponding item found in sharedComponents registry` );
+        if( !sharedComponentRegistry ) {
+          console.warn(`There is no "sharedComponents" defined in config file of executionContext "${this.executionContext}".`);
+        }
+        continue;
+      }
+
+      if ( isShared && isIndividualSharedComponentPathOnRootLevel ) {
+        internalPath = `${sharedComponentDirectoryDefaultPath}/${componentId}`; 
+      } else if( isShared && hasIndividualSharedComponentPath ) {
+        internalPath = `${sharedComponentDirectoryDefaultPath}/${sharedComponentDirectorySubPath}/${componentId}`; 
+      } else if( isShared && !hasIndividualSharedComponentPath ) {
+        internalPath = `${sharedComponentDirectoryDefaultPath}/${componentId}`;
+      } else if ( hasRootDir && isRootDirOnRootLevel ) {
+        internalPath = `${componentId}`;
+      } else if ( hasRootDir && !isRootDirOnRootLevel ) {
+        internalPath = `${rootDir}/${componentId}`;
+      } else if( hasIndividualComponentPath ) {
+        internalPath = `${individualComponentPath}/${componentId}`; 
+      } else if( isIndividualComponentPathOnRootLevel ) {
+        internalPath = `${componentId}`;
+      } else if( hasNodeSpecificDefaultComponentDirPath ) {
+        internalPath = `${nodeSpecificDefaultComponentDirPath}/${componentId}`;
+      } else if( isNodeSpecificDefaultComponentDirPathOnRootLevel ) {
+        internalPath = `${componentId}`;
+      } else if( hasDefaultComponentDirPath ) {
+        internalPath = `${defaultComponentDirPath}/${componentId}`;
+      } else {
+        internalPath = `${componentId}`;
+      }
+
+      if (isShared || hasRootDir) {
+        constructedPath = internalPath;
+      } else {
+        constructedPath = `${this.nodeDirPath}/${internalPath}`;
+      }
+
+      if (this.runtimeEnvironment === 'server') {
+        const fs       = await import( /* @vite-ignore */ 'fs');
+        const fullPath = path.resolve(process.cwd(), this.appSrcFolderName, `${constructedPath}.jsx`);
+        if (!fs.existsSync(fullPath)) {
+          throw new Error(`Component ${componentId} not found at ${fullPath}`);
+        }
+        initializedComponentRegistryItem.component = null;
+      } else {
+        const result = await this.loadResource( constructedPath );
+        if( !result ) {
+          console.warn(`Component '${componentId}' of node '${this.nodeId}' not found in '${ this.getAbsPath( constructedPath ) }'. This will cause an error at morpheus buildtime.`);
+          continue;
+        }
+        initializedComponentRegistryItem.component = result;
+      }
+
+      initializedComponentRegistryItem.subPath          = constructedPath;
+      initializedComponentRegistryItem.inheritanceLevel = this.inheritanceLevel;
+    }
+
+    return initializedComponentRegistry;
+  }
+  // ####################CHANGE - END####################
+
   /* Single File Loading
   /* *** *** *** *** *** *** *** *** *** *** *** *** *** *** */
 
@@ -588,6 +708,63 @@ export default class SingleNodeCompiler {
       Object.assign(traits, config.traitImplementations);
     }
 
+    // ####################CHANGE - START##################
+    // Handle components in single file mode
+    const initializedComponentRegistry = {};
+    
+    if ( config?.components ) {
+      for (const [componentId, componentRegistryItem] of Object.entries(config.components)) {
+        const sharedComponentRegistryItem                 = this.executionContextConfig?.sharedComponents?.[componentId];
+        const isShared                                    = componentRegistryItem?.isShared;
+        const sharedComponentDirectoryDefaultPath         = 'sharedComponents';
+        const sharedComponentDirectorySubPath             = this.removeTrailingSlash( sharedComponentRegistryItem?.dir );
+        const hasIndividualSharedComponentPath            = sharedComponentDirectorySubPath && sharedComponentDirectorySubPath != '/';
+        const isIndividualSharedComponentPathOnRootLevel  = sharedComponentDirectorySubPath == '/';
+
+        let internalPath;
+
+        if ( isShared && isIndividualSharedComponentPathOnRootLevel ) {
+          internalPath = `${sharedComponentDirectoryDefaultPath}/${componentId}`; 
+        } else if ( isShared && hasIndividualSharedComponentPath ) {
+          internalPath = `${sharedComponentDirectoryDefaultPath}/${sharedComponentDirectorySubPath}/${componentId}`; 
+        } else if ( isShared && !hasIndividualSharedComponentPath ) {
+          internalPath = `${sharedComponentDirectoryDefaultPath}/${componentId}`;
+        }
+
+        if ( isShared && this.runtimeEnvironment == 'server' ) {
+          const fs       = await import( /* @vite-ignore */ 'fs');
+          const fullPath = path.resolve(process.cwd(), this.appSrcFolderName, `${internalPath}.jsx`);
+          if (!fs.existsSync(fullPath)) {
+            throw new Error(`Component ${componentId} not found at ${fullPath}`);
+          }
+          initializedComponentRegistry[componentId] = {
+            ...componentRegistryItem,
+            component: null,
+            path: internalPath,
+            internalPath,
+          };
+        } 
+
+        if( isShared && this.runtimeEnvironment != 'server' ) {
+          const result = await this.loadResource( internalPath );
+          if( result ) {
+            initializedComponentRegistry[componentId] = {
+              ...componentRegistryItem,
+              component: result,
+            };
+          }
+        }
+
+        if( !isShared ) {
+          initializedComponentRegistry[componentId] = {
+            ...componentRegistryItem,
+            component: configFileContent[componentId]
+          };
+        }
+      }
+    }
+    // ####################CHANGE - END####################
+
     const nodeResources = {
 
       nodeId:           this.nodeId,
@@ -605,6 +782,10 @@ export default class SingleNodeCompiler {
       instances:        config.instances ?? null, 
       hooks:            config.hook ?? null,
       traits:           traits ?? null,
+
+      // ####################CHANGE - START##################
+      components:       Object.keys(initializedComponentRegistry).length > 0 ? initializedComponentRegistry : null,
+      // ####################CHANGE - END####################
 
     };
 
