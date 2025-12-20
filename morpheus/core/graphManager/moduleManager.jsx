@@ -13,11 +13,7 @@ export default class ModuleManager {
     this.nodeContext           = nodeContext;
     this.nodeLoader            = nodeLoader;
     this.moduleInstanceCounter = 0;
-
-    // ####################CHANGE - START##################
     this.componentRegistry     = nodeResources.components;
-    // ####################CHANGE - END####################
-
   }
 
   // ####################CHANGE - START##################

@@ -235,6 +235,7 @@ export default class MorpheusKernel {
   }
 
   toggleSignal(signalId, key = null) {
+    console.log( signalId );
     this.toggleSignalValue(signalId, key = null);
   }
 
