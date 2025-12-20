@@ -3,7 +3,12 @@ const config = {
   defaultPaths: {
     traits: '/',
     modules: '/',
+    components: '/components'
   },
+
+  components: {
+    TestComponent: {},
+  }, 
 
   signals: {
     

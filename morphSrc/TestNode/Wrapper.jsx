@@ -1,6 +1,6 @@
 import { values } from "lodash"
 
-export default function Wrapper({ _, Module, Node }) {
+export default function Wrapper({ _, Module, Node, Component }) {
   function handleChange( value ) {
     _.setRuntimeDataItem( 'inputValue', value );
   }
@@ -12,13 +12,14 @@ export default function Wrapper({ _, Module, Node }) {
       
       {/* Top Controls */}
       <div className="grid grid-cols-4 gap-4 mb-8">
-        <input 
+        <Component id="TestComponent" />
+        {/* <input 
           type="text" 
           onChange={ e => handleChange( e.target.value ) }  
           className="test-input px-4 py-2 bg-gray-800 border border-gray-700 rounded-lg focus:outline-none focus:ring-2 focus:ring-cyan-500 text-gray-100 placeholder-gray-500"
           placeholder="Search or filter..."
         />
-        <Module id="InputValueDisplay" />
+        <Module id="InputValueDisplay" /> */}
         <Module id="Counter" />
         <Module id="Toggler" />
         <Module id="AnotherModule" />

@@ -94,10 +94,7 @@ export default class ModuleManager {
         return <h1>{errorMessage}</h1>;
       }
 
-      // ####################CHANGE - START##################
-      // RENAMED: Was "Component" which shadowed the ComponentLoader
-      const ModuleComponent = moduleRegistryItem?.component;
-      // ####################CHANGE - END####################
+      const Component = moduleRegistryItem?.component;
 
       /* Routing Reactivity
       /* *** *** *** *** *** *** *** *** *** *** *** *** *** *** */
@@ -172,11 +169,10 @@ export default class ModuleManager {
       /* *** *** *** *** *** *** *** *** *** *** *** *** *** *** */
 
       const memoizedComponent = useMemo(() => {
-      // ####################CHANGE - START##################
-      // RENAMED: Using ModuleComponent instead of Component
-      return ModuleComponent ? (
-        <ModuleComponent
-      // ####################CHANGE - END####################
+
+        return Component ? (
+
+          <Component
 
             key         = { instanceKey }
 
@@ -214,7 +210,7 @@ export default class ModuleManager {
             {...props}
           >
             {children}
-          </ModuleComponent>
+          </Component>
         ) : (
           <div className="morpheus-error-box"><strong>Morpheus Error:</strong> Module '{moduleId}' of node '{kernel.nodeId}' listed in {kernel.nodeId}.config.jsx → modules but not found in specified location.</div>
         );
