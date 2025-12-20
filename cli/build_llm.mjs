@@ -7,13 +7,11 @@ import libraryNodeConfig from '../morpheus/core/configs/libraryNode.config';
 import chalk from 'chalk';
 
 class MorphSrcBuildDirectoryBuilder {
-
   constructor() {
-    this.appConfig     = appConfig;
-    this.nodeRegistry  = this.appConfig.nodes;
-    this.nodeIds       = Object.keys( this.nodeRegistry );
-    this.lazyLoadNodes = this.appConfig.lazyLoadNodes ?? false;
-
+    this.appConfig             = appConfig;
+    this.nodeRegistry          = this.appConfig.nodes;
+    this.nodeIds               = Object.keys( this.nodeRegistry );
+    this.lazyLoadNodeResources = this.appConfig.lazyLoadNodes ?? false;
   }
 
   async build() {
@@ -24,7 +22,6 @@ class MorphSrcBuildDirectoryBuilder {
   }
 
   resetmorphBuildDirectory() {
-
     try {
       if (fse.existsSync('morphBuild')) {
         fse.removeSync('morphBuild');
@@ -40,26 +37,23 @@ class MorphSrcBuildDirectoryBuilder {
       console.error('Failed to create duplicate of directory "morphSrc":', error.message);
       process.exit(1);
     }
-
   }
 
   async createResourceFiles() {
-
     for (const nodeId of this.nodeIds) {
       try {
-          console.log( `Processing ${nodeId}...` );
-          await this.createResourceFile( nodeId );
+        console.log( `Processing ${nodeId}...` );
+        await this.createResourceFile( nodeId );
       } catch(e) {
-          console.log(`Falied to compile resource file of node '${nodeId}'`);
+        console.log(chalk.red(`Failed to compile resource file of node '${nodeId}'`));
+        console.log(chalk.red(`  Error: ${e.message}`));
       }
     }
-
   }
 
   async createResourceFile( nodeId ) {
-
-    const nodeItem          = this.nodeRegistry[nodeId]; 
-    const isSingleFile      = nodeItem?.isFile;
+    const nodeItem     = this.nodeRegistry[nodeId]; 
+    const isSingleFile = nodeItem?.isFile;
 
     // ####################CHANGE - START##################
     // Handle single file nodes separately
@@ -69,41 +63,34 @@ class MorphSrcBuildDirectoryBuilder {
     }
     // ####################CHANGE - END####################
 
-    if ( isSingleFile ) {
-      cconsole.log(chalk.dim(`  Skipping: Node '${nodeId}' is a single file (not yet supported)`));
-      return;
-    }
-
-    const compiler          = new NodeCompiler({
+    const compiler = new NodeCompiler({
       nodeRegistry:           this.nodeRegistry,
       nodeId, 
       executionContext:       'app', 
       executionContextConfig: this.appConfig, 
       libraryNodeConfig, 
       runtimeEnvironment:     'server',
-    })
+    });
 
-    const nodeResources     = await compiler.exec();
+    const nodeResources    = await compiler.exec();
     
-    const configDirSubPath  = nodeResources?.configDirSubPath;
-    const configDirPath     = `morphSrc/${configDirSubPath}`;
-    const configFileName    = `${nodeId}.config.jsx`;
-    const configFilePath    = `${configDirPath}/${configFileName}`;
-    const configFileExists  = fs.existsSync(configFilePath);
+    const configDirSubPath = nodeResources?.configDirSubPath;
+    const configDirPath    = `morphSrc/${configDirSubPath}`;
+    const configFileName   = `${nodeId}.config.jsx`;
+    const configFilePath   = `${configDirPath}/${configFileName}`;
+    const configFileExists = fs.existsSync(configFilePath);
 
     if( !configFileExists ) {
       console.warn(chalk.yellow(`  ⚠️  Configuration file '${configFileName}' not found in '${configFilePath}'`));
       return null;
     }
   
-    const sourceCode          = this.extractSourceCode( configFilePath );
-    const importStatements    = this.extractImportStatements( sourceCode );
+    const sourceCode           = this.extractSourceCode( configFilePath );
+    const importStatements     = this.extractImportStatements( sourceCode );
     const componentExports     = this.extractComponentExports( sourceCode, isSingleFile );
     const moduleRegistry       = nodeResources?.modules; 
     const componentRegistry    = nodeResources?.components;
-
     const imports              = [...importStatements]; 
-
     const moduleIdentifiers    = {};
     const componentIdentifiers = {};
 
@@ -112,28 +99,20 @@ class MorphSrcBuildDirectoryBuilder {
 
     const resourceFileImports = imports.length > 0 ? imports.join('\n') + '\n\n' : '';
 
-    //Purpose of these two lines is unclear
     this.nodeRegistry[nodeId].configDirSubPath = nodeResources.configDirSubPath;
     delete nodeResources.configDirSubPath;
     
     const allIdentifiers            = { ...moduleIdentifiers, ...componentIdentifiers };
     const serializedResources       = this.serializeValue( nodeResources, 0, allIdentifiers );
-
-
-    const componentExportStatements = componentExports.length > 0 ? '\n\n' + componentExports.join('\n\n'): '';
+    const componentExportStatements = componentExports.length > 0 ? '\n\n' + componentExports.join('\n\n') : '';
     
-    const resourceFileName          = `${nodeId}.resources.jsx`;
-    const resourceFileSourceCode    = `${resourceFileImports}const nodeResources = ${serializedResources};\n\nexport default nodeResources;${componentExportStatements}`;
+    const resourceFileName       = `${nodeId}.resources.jsx`;
+    const resourceFileSourceCode = `${resourceFileImports}const nodeResources = ${serializedResources};\n\nexport default nodeResources;${componentExportStatements}`;
+    const targetPath             = configDirPath ? `morphBuild/${configDirSubPath}/${resourceFileName}` : `morphBuild/${resourceFileName}`;
 
-    const targetPath                = configDirPath ? `morphBuild/${configDirSubPath}/${resourceFileName}` : `morphBuild/${resourceFileName}`;
-
-    //Create morphBuild Directory
-    console.log('Writing to path ' +  targetPath );
+    console.log('  Writing to path: ' + targetPath);
     fs.writeFileSync(targetPath, resourceFileSourceCode, 'utf8');
-    
   }
-
-
 
   // ####################CHANGE - START##################
   /* Single File Node Compilation
@@ -427,60 +406,47 @@ class MorphSrcBuildDirectoryBuilder {
 
   /* Directory Handling
   /* *** *** *** *** *** *** *** *** *** *** *** *** *** *** */
-
   extractSourceCode( configFilePath ) {
     const sourceCode = fs.readFileSync(configFilePath, 'utf8');
     return sourceCode;
   }
 
   extractImportStatements( sourceCode ) {
-
     const importRegex               = /^import\s+.*?from\s+['"].*?['"];?\s*$/gm;
     const importStatements          = sourceCode.match(importRegex) || [];
     const validatedImportStatements = importStatements.filter( statement => statement.startsWith('import ') );
     return validatedImportStatements;
-
   }
 
   extractComponentExports( sourceCode, isSingleFile ) {
-
     if( !isSingleFile ) {
-      return []
+      return [];
     }
-
     const exportRegex      = /export\s+function\s+\w+\s*\([^)]*\)\s*\{(?:[^{}]|\{(?:[^{}]|\{[^{}]*\})*\})*\}/g;
     const componentExports = sourceCode.match(exportRegex) || [];
     return componentExports;
-  
   }
 
-  processModuleRegistry( nodeId, moduleRegistry, imports, isSingleFile, configDirSubPath, moduleIdentifiers )  {
-
+  processModuleRegistry( nodeId, moduleRegistry, imports, isSingleFile, configDirSubPath, moduleIdentifiers ) {
     if( !moduleRegistry ) {
       return null;
     }
 
     Object.entries( moduleRegistry ).forEach( ( [ moduleId, moduleRegistryItem ] ) => {
-
-      const isShared               = moduleRegistryItem?.isShared;
-      const moduleSubPath          = moduleRegistryItem.subPath;
-
+      const isShared      = moduleRegistryItem?.isShared;
+      const moduleSubPath = moduleRegistryItem.subPath;
       
       moduleIdentifiers[moduleId]  = moduleId;
-
       moduleRegistryItem.component = `__IDENTIFIER__${moduleId}`;
       delete moduleRegistryItem.inheritanceLevel;
 
       if ( isSingleFile && !isShared ) {
         return;
       } 
-  
+
       const importPath = `@morphBuild/${moduleSubPath}`;
-
       imports.push(`import ${moduleId} from '${importPath}';`);
-
     });
-
   }
 
   processComponentRegistry( nodeId, componentRegistry, imports, isSingleFile, configDirSubPath, componentIdentifiers ) {
@@ -489,10 +455,9 @@ class MorphSrcBuildDirectoryBuilder {
     }
 
     Object.entries( componentRegistry ).forEach( ( [ componentId, componentRegistryItem ] ) => {
-      const isShared                  = componentRegistryItem?.isShared;
-      const componentSubPath          = componentRegistryItem.subPath;
+      const isShared         = componentRegistryItem?.isShared;
+      const componentSubPath = componentRegistryItem.subPath;
       
-      // Create a unique identifier to avoid naming conflicts with modules
       const componentImportId               = `Component_${componentId}`;
       componentIdentifiers[componentId]     = componentImportId;
       componentRegistryItem.component       = `__IDENTIFIER__${componentImportId}`;
@@ -501,37 +466,30 @@ class MorphSrcBuildDirectoryBuilder {
       if ( isSingleFile && !isShared ) {
         return;
       } 
-  
+
       const importPath = `@morphBuild/${componentSubPath}`;
       imports.push(`import ${componentImportId} from '${importPath}';`);
     });
   }
 
-
   serializeValue(value, indent = 2, moduleIdentifiers = {}) {
   
     const spaces = ' '.repeat(indent);
     
-    // Handle component identifier placeholders (for imports)
     if (typeof value === 'string' && value.startsWith('__IDENTIFIER__')) {
       return value.replace('__IDENTIFIER__', '');
     }
     
-    // Handle arrays
     if (Array.isArray(value)) {
       return JSON.stringify(value);
     }
     
-    // Handle null/undefined
     if (value === null || value === undefined) {
       return String(value);
     }
   
-    // Handle objects (recursive)
     if (typeof value === 'object') {
-
       const entries = Object.entries(value);
-
       if (entries.length === 0) return '{}';
       
       const serialized = entries.map(([key, val]) => {
@@ -539,18 +497,14 @@ class MorphSrcBuildDirectoryBuilder {
         if (typeof val === 'function') {
           const funcStr = val.toString();
           
-          // Check for async functions first
           const isAsync = funcStr.startsWith('async ');
           const asyncPrefix = isAsync ? 'async ' : '';
           
-          // Remove 'async ' prefix for further processing
           const normalizedFuncStr = isAsync ? funcStr.replace(/^async\s+/, '') : funcStr;
           
           if (normalizedFuncStr.startsWith('function')) {
-            // Convert: function name() { ... } → name() { ... }
             const methodStr = normalizedFuncStr.replace(/^function\s+/, '');
             
-            // Fix indentation of function body
             const lines = methodStr.split('\n');
             const indentedLines = lines.map((line, index) => {
               if (index === 0) return line;
@@ -558,12 +512,10 @@ class MorphSrcBuildDirectoryBuilder {
               return `${spaces}    ${line.trim()}`;
             });
             
-            // Prepend async if needed
             return `${spaces}  ${asyncPrefix}${indentedLines.join('\n')}`;
             
           } else if (normalizedFuncStr.includes('=>')) {
-            // Arrow function
-            const lines = funcStr.split('\n'); // Use original funcStr to preserve async
+            const lines = funcStr.split('\n');
             const indentedLines = lines.map((line, index) => {
               if (index === 0) return line.trim();
               if (index === lines.length - 1) return `${spaces}  ${line.trim()}`;
@@ -573,7 +525,6 @@ class MorphSrcBuildDirectoryBuilder {
             return `${spaces}  ${key}: ${indentedLines.join('\n')}`;
             
           } else {
-            // Method shorthand (e.g., methodName() { ... })
             const lines = normalizedFuncStr.split('\n');
             const indentedLines = lines.map((line, index) => {
               if (index === 0) return `${asyncPrefix}${key}${line.substring(normalizedFuncStr.indexOf('('))}`;
@@ -585,24 +536,17 @@ class MorphSrcBuildDirectoryBuilder {
           }
         }
         
-        // Handle all other values recursively
-
         const serializedVal = this.serializeValue(val, indent + 2, moduleIdentifiers);
-
         return `${spaces}  ${key}: ${serializedVal}`;
-
       }).join(',\n');
       
       return `{\n${serialized}\n${spaces}}`;
-      
     }
   
-    // Fallback for primitives (strings, numbers, booleans)
     return JSON.stringify(value);
   }
 
   cleanupmorphBuild() {
-
     const directoryPath = 'morphBuild';
     
     const filesToDelete = [
@@ -625,13 +569,15 @@ class MorphSrcBuildDirectoryBuilder {
       'components.js',
       'components.jsx',
     ];
-
+    
     // ####################CHANGE - START##################
     // Track single file node config files to preserve (but modify)
     const singleFileConfigs = this.nodeIds
       .filter(nodeId => this.nodeRegistry[nodeId]?.isFile)
       .map(nodeId => `${nodeId}.config.jsx`);
     // ####################CHANGE - END####################
+    
+    const self = this;
     
     function deleteFilesRecursively(dir) {
       if (!fs.existsSync(dir)) {
@@ -641,14 +587,12 @@ class MorphSrcBuildDirectoryBuilder {
       const items = fs.readdirSync(dir);
       
       for (const item of items) {
-  
         const fullPath = `${dir}/${item}`;
         const stat     = fs.statSync(fullPath);
         
         if (stat.isDirectory()) {
           deleteFilesRecursively(fullPath);
         } else if (stat.isFile()) {
-          
           // ####################CHANGE - START##################
           // Preserve single file node config files but remove default export
           if (singleFileConfigs.includes(item)) {
@@ -670,16 +614,12 @@ class MorphSrcBuildDirectoryBuilder {
     }
     
     deleteFilesRecursively(directoryPath);
-
   }
 
   /* Resource Provider Creation
   /* *** *** *** *** *** *** *** *** *** *** *** *** *** *** */
-
-  /* Resource Provider Creation
-  /* *** *** *** *** *** *** *** *** *** *** *** *** *** *** */
   createNodeResourceProvider() {
-    if (!this.lazyLoadNodes) {
+    if (!this.lazyLoadNodeResources) {
       this.createEagerNodeResourceProvider();
     } else {
       this.createLazyNodeResourceProvider();
@@ -768,10 +708,10 @@ export default new NodeResourceProvider();
     return filteredItems.join(',\n      ');
   }
 
-    createLazyNodeResourceProvider() {
-      const loaderItems = this.createLazyLoaderItems();
-    
-      const nodeResourceProviderSourceCode = 
+  createLazyNodeResourceProvider() {
+    const loaderItems = this.createLazyLoaderItems();
+  
+    const nodeResourceProviderSourceCode = 
 `class NodeResourceProvider {
   constructor() {
     this.loaders = {
@@ -855,9 +795,7 @@ export default new NodeResourceProvider();
     const filteredItems = loaderItemsArray.filter(item => item !== null);
     return filteredItems.join(',\n      ');
   }
-
 }
 
 const morphsSrcBuildDirectoryBuilder = new MorphSrcBuildDirectoryBuilder();
-
 morphsSrcBuildDirectoryBuilder.build();

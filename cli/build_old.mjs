@@ -61,14 +61,6 @@ class MorphSrcBuildDirectoryBuilder {
     const nodeItem          = this.nodeRegistry[nodeId]; 
     const isSingleFile      = nodeItem?.isFile;
 
-    // ####################CHANGE - START##################
-    // Handle single file nodes separately
-    if ( isSingleFile ) {
-      await this.createSingleFileResourceFile( nodeId );
-      return;
-    }
-    // ####################CHANGE - END####################
-
     if ( isSingleFile ) {
       cconsole.log(chalk.dim(`  Skipping: Node '${nodeId}' is a single file (not yet supported)`));
       return;
@@ -132,298 +124,6 @@ class MorphSrcBuildDirectoryBuilder {
     fs.writeFileSync(targetPath, resourceFileSourceCode, 'utf8');
     
   }
-
-
-
-  // ####################CHANGE - START##################
-  /* Single File Node Compilation
-  /* *** *** *** *** *** *** *** *** *** *** *** *** *** *** */
-  async createSingleFileResourceFile( nodeId ) {
-    const nodeItem = this.nodeRegistry[nodeId];
-    
-    // Compile node resources (handles inheritance from delta level)
-    const compiler = new NodeCompiler({
-      nodeRegistry:           this.nodeRegistry,
-      nodeId,
-      executionContext:       'app',
-      executionContextConfig: this.appConfig,
-      libraryNodeConfig,
-      runtimeEnvironment:     'server',
-    });
-    
-    const nodeResources = await compiler.exec();
-    
-    // Determine file path based on dir config
-    const customDir   = nodeItem?.dir;
-    const isRootLevel = customDir === '/' || !customDir;
-    
-    let configDirSubPath;
-    let configFilePath;
-    
-    if (isRootLevel) {
-      configDirSubPath = '';
-      configFilePath   = `morphSrc/${nodeId}.config.jsx`;
-    } else {
-      configDirSubPath = customDir.startsWith('/') ? customDir.slice(1) : customDir;
-      configFilePath   = `morphSrc/${configDirSubPath}/${nodeId}.config.jsx`;
-    }
-    
-    if (!fs.existsSync(configFilePath)) {
-      console.warn(chalk.yellow(`  ⚠️  Single file node '${nodeId}' not found at '${configFilePath}'`));
-      return null;
-    }
-    
-    // Extract source code and imports
-    const sourceCode       = this.extractSourceCode(configFilePath);
-    const importStatements = this.extractImportStatements(sourceCode);
-    
-    // Extract named export names (to verify they exist)
-    const namedExports = this.extractNamedExports(sourceCode);
-    
-    const imports              = [...importStatements];
-    const moduleIdentifiers    = {};
-    const componentIdentifiers = {};
-    const moduleRegistry       = nodeResources?.modules;
-    const componentRegistry    = nodeResources?.components;
-    
-    // Track which inline exports we need to import from config file
-    const inlineModules    = [];
-    const inlineComponents = [];
-    
-    // Process modules
-    if (moduleRegistry) {
-      for (const [moduleId, moduleRegistryItem] of Object.entries(moduleRegistry)) {
-        const isShared = moduleRegistryItem?.isShared;
-        
-        if (isShared) {
-          // Shared modules - import from sharedModules/
-          const moduleSubPath = moduleRegistryItem.subPath;
-          imports.push(`import ${moduleId} from '@morphBuild/${moduleSubPath}';`);
-        } else {
-          // Inline modules - will be imported from config file
-          if (namedExports.includes(moduleId)) {
-            inlineModules.push(moduleId);
-          } else {
-            console.warn(chalk.yellow(`  ⚠️  Module '${moduleId}' declared in config but not exported from '${configFilePath}'`));
-          }
-        }
-        
-        moduleIdentifiers[moduleId]      = moduleId;
-        moduleRegistryItem.component     = `__IDENTIFIER__${moduleId}`;
-        delete moduleRegistryItem.inheritanceLevel;
-      }
-    }
-    
-    // Process components
-    if (componentRegistry) {
-      for (const [componentId, componentRegistryItem] of Object.entries(componentRegistry)) {
-        const isShared = componentRegistryItem?.isShared;
-        
-        if (isShared) {
-          // Shared components - import from sharedComponents/
-          const componentSubPath  = componentRegistryItem.subPath;
-          const componentImportId = `Component_${componentId}`;
-          imports.push(`import ${componentImportId} from '@morphBuild/${componentSubPath}';`);
-          componentIdentifiers[componentId] = componentImportId;
-          componentRegistryItem.component   = `__IDENTIFIER__${componentImportId}`;
-        } else {
-          // Inline components - will be imported from config file
-          if (namedExports.includes(componentId)) {
-            inlineComponents.push(componentId);
-            componentIdentifiers[componentId] = componentId;
-            componentRegistryItem.component   = `__IDENTIFIER__${componentId}`;
-          } else {
-            console.warn(chalk.yellow(`  ⚠️  Component '${componentId}' declared in config but not exported from '${configFilePath}'`));
-          }
-        }
-        
-        delete componentRegistryItem.inheritanceLevel;
-      }
-    }
-    
-    // Store configDirSubPath for ResourceProvider
-    this.nodeRegistry[nodeId].configDirSubPath = configDirSubPath;
-    delete nodeResources.configDirSubPath;
-    
-    // Build import line for inline modules/components from config file
-    const inlineExports = [...inlineModules, ...inlineComponents];
-    let configImportLine = '';
-    
-    if (inlineExports.length > 0) {
-      const configImportPath = configDirSubPath 
-        ? `@morphBuild/${configDirSubPath}/${nodeId}.config`
-        : `@morphBuild/${nodeId}.config`;
-      configImportLine = `import { ${inlineExports.join(', ')} } from '${configImportPath}';\n`;
-    }
-    
-    // Build final imports section (filter out original imports from config file)
-    const filteredImports     = imports.filter(imp => !imp.includes(`${nodeId}.config`));
-    const otherImports        = filteredImports.join('\n');
-    const resourceFileImports = configImportLine + (otherImports ? otherImports + '\n\n' : '\n');
-    
-    // Serialize node resources
-    const allIdentifiers      = { ...moduleIdentifiers, ...componentIdentifiers };
-    const serializedResources = this.serializeValue(nodeResources, 0, allIdentifiers);
-    
-    // Generate final source code
-    const resourceFileName       = `${nodeId}.resources.jsx`;
-    const resourceFileSourceCode = `${resourceFileImports}const nodeResources = ${serializedResources};\n\nexport default nodeResources;`;
-    
-    // Determine target path
-    const targetPath = configDirSubPath 
-      ? `morphBuild/${configDirSubPath}/${resourceFileName}` 
-      : `morphBuild/${resourceFileName}`;
-    
-    console.log(chalk.blue(`  Writing single file node to: ${targetPath}`));
-    fs.writeFileSync(targetPath, resourceFileSourceCode, 'utf8');
-  }
-
-  /**
-   * Extracts named export names from source code.
-   * Used to verify that declared modules/components are actually exported.
-   * 
-   * @param {string} sourceCode - The source code to parse
-   * @returns {string[]} - Array of export names
-   */
-  extractNamedExports(sourceCode) {
-    const exports = [];
-    
-    // Match: export function Name(...) { ... }
-    const exportFunctionRegex = /export\s+function\s+(\w+)/g;
-    let match;
-    while ((match = exportFunctionRegex.exec(sourceCode)) !== null) {
-      exports.push(match[1]);
-    }
-    
-    // Match: export const Name = ...
-    const exportConstRegex = /export\s+const\s+(\w+)/g;
-    while ((match = exportConstRegex.exec(sourceCode)) !== null) {
-      exports.push(match[1]);
-    }
-    
-    // Match: export { Name1, Name2 }
-    const exportBracesRegex = /export\s*\{([^}]+)\}/g;
-    while ((match = exportBracesRegex.exec(sourceCode)) !== null) {
-      const names = match[1].split(',').map(n => n.trim().split(/\s+as\s+/)[0].trim());
-      exports.push(...names);
-    }
-    
-    return exports;
-  }
-
-  /**
-   * Removes the default export and config object from a single file node config.
-   * This keeps the named exports (modules/components) but removes framework internals.
-   * 
-   * @param {string} filePath - Path to the config file in morphBuild
-   */
-  removeDefaultExportFromConfigFile(filePath) {
-    if (!fs.existsSync(filePath)) {
-      return;
-    }
-    
-    let sourceCode = fs.readFileSync(filePath, 'utf8');
-    
-    // Remove the config object definition: const config = { ... };
-    // This regex matches from 'const config = {' to the matching '};'
-    // Using a function to handle nested braces properly
-    sourceCode = this.removeConfigObject(sourceCode);
-    
-    // Remove "export default config;" or similar
-    sourceCode = sourceCode.replace(/export\s+default\s+\w+\s*;?\s*/g, '');
-    
-    // Remove "export default { ... };" (inline default export) - rare but possible
-    sourceCode = sourceCode.replace(/export\s+default\s*\{[\s\S]*?\n\};\s*/g, '');
-    
-    // Clean up excessive newlines
-    sourceCode = sourceCode.replace(/\n{3,}/g, '\n\n');
-    
-    // Trim leading/trailing whitespace
-    sourceCode = sourceCode.trim() + '\n';
-    
-    fs.writeFileSync(filePath, sourceCode, 'utf8');
-    
-    console.log(chalk.dim(`    Cleaned config file: ${filePath}`));
-  }
-
-  /**
-   * Removes the config object from source code using brace counting.
-   * Handles nested objects properly.
-   * 
-   * @param {string} sourceCode - The source code
-   * @returns {string} - Source code with config object removed
-   */
-  removeConfigObject(sourceCode) {
-    // Find "const config = {"
-    const configStartRegex = /const\s+config\s*=\s*\{/g;
-    const match = configStartRegex.exec(sourceCode);
-    
-    if (!match) {
-      return sourceCode;
-    }
-    
-    const startIndex = match.index;
-    const braceStart = match.index + match[0].length - 1; // Index of opening brace
-    
-    // Count braces to find the matching closing brace
-    let depth = 0;
-    let endIndex = -1;
-    let inString = false;
-    let stringChar = '';
-    let inTemplate = false;
-    
-    for (let i = braceStart; i < sourceCode.length; i++) {
-      const char     = sourceCode[i];
-      const prevChar = sourceCode[i - 1];
-      
-      // Handle template literals
-      if (!inString && char === '`') {
-        inTemplate = !inTemplate;
-        continue;
-      }
-      if (inTemplate) continue;
-      
-      // Handle strings
-      if (!inString && (char === '"' || char === "'")) {
-        inString = true;
-        stringChar = char;
-        continue;
-      }
-      if (inString && char === stringChar && prevChar !== '\\') {
-        inString = false;
-        continue;
-      }
-      if (inString) continue;
-      
-      // Count braces
-      if (char === '{') {
-        depth++;
-      } else if (char === '}') {
-        depth--;
-        if (depth === 0) {
-          endIndex = i;
-          break;
-        }
-      }
-    }
-    
-    if (endIndex === -1) {
-      return sourceCode;
-    }
-    
-    // Find the semicolon after the closing brace
-    let semicolonIndex = endIndex + 1;
-    while (semicolonIndex < sourceCode.length && /\s/.test(sourceCode[semicolonIndex])) {
-      semicolonIndex++;
-    }
-    if (sourceCode[semicolonIndex] === ';') {
-      semicolonIndex++;
-    }
-    
-    // Remove the config object
-    return sourceCode.slice(0, startIndex) + sourceCode.slice(semicolonIndex);
-  }
-  // ####################CHANGE - END####################
 
   /* Directory Handling
   /* *** *** *** *** *** *** *** *** *** *** *** *** *** *** */
@@ -625,13 +325,6 @@ class MorphSrcBuildDirectoryBuilder {
       'components.js',
       'components.jsx',
     ];
-
-    // ####################CHANGE - START##################
-    // Track single file node config files to preserve (but modify)
-    const singleFileConfigs = this.nodeIds
-      .filter(nodeId => this.nodeRegistry[nodeId]?.isFile)
-      .map(nodeId => `${nodeId}.config.jsx`);
-    // ####################CHANGE - END####################
     
     function deleteFilesRecursively(dir) {
       if (!fs.existsSync(dir)) {
@@ -648,15 +341,6 @@ class MorphSrcBuildDirectoryBuilder {
         if (stat.isDirectory()) {
           deleteFilesRecursively(fullPath);
         } else if (stat.isFile()) {
-          
-          // ####################CHANGE - START##################
-          // Preserve single file node config files but remove default export
-          if (singleFileConfigs.includes(item)) {
-            self.removeDefaultExportFromConfigFile(fullPath);
-            continue;
-          }
-          // ####################CHANGE - END####################
-          
           if (item.includes('.config.')) {
             fs.unlinkSync(fullPath);
             continue;
@@ -720,48 +404,44 @@ export default new NodeResourceProvider();
   }
 
   createEagerImportStatements() {
+
     const importStatementsArray = this.nodeIds.map(nodeId => {
-      const nodeItem         = this.nodeRegistry[nodeId];
-      const isSingleFile     = nodeItem?.isFile;
-      const configDirSubPath = this.nodeRegistry[nodeId].configDirSubPath;
-      
-      // ####################CHANGE - START##################
-      // Skip nodes that failed to compile
-      if (configDirSubPath === undefined) {
-        console.log(chalk.yellow(`  Skipping: Node '${nodeId}' failed to compile. It is excluded from NodeResourceProvider.`));
+
+      const nodeItem     = this.nodeRegistry[nodeId];
+      const isSingleFile = nodeItem?.isFile;
+
+      if (isSingleFile) {
+        console.log(chalk.dim(`  Skipping: Node '${nodeId}' is a single file (not yet supported). It is excluded from nodeResourceProvider.`));
         return null;
       }
       
-      // Handle single file nodes - they may have empty configDirSubPath
-      if (isSingleFile) {
-        const importPath = configDirSubPath 
-          ? `@morphBuild/${configDirSubPath}/${nodeId}.resources`
-          : `@morphBuild/${nodeId}.resources`;
-        return `import ${nodeId}Resources from '${importPath}';`;
+      const configDirSubPath = this.nodeRegistry[nodeId].configDirSubPath;
+      
+      if (!configDirSubPath) {
+        console.log(chalk.yellow(`  Skipping: Node '${nodeId}' failed to compile. It is excluded from nodeResourceProvider.`));
+        return null;
       }
       
-      // Handle directory nodes
       const importPath = `@morphBuild/${configDirSubPath}/${nodeId}.resources`;
+      
       return `import ${nodeId}Resources from '${importPath}';`;
-      // ####################CHANGE - END####################
     });
 
     const filteredStatements = importStatementsArray.filter(item => item !== null);
+
     return filteredStatements.join('\n');
   }
 
   createEagerRegistryItems() {
     const registryItemsArray = this.nodeIds.map(nodeId => {
-      // ####################CHANGE - START##################
+      const isFile           = this.nodeRegistry[nodeId]?.isFile;
       const configDirSubPath = this.nodeRegistry[nodeId].configDirSubPath;
 
-      // Skip nodes that failed to compile
-      if (configDirSubPath === undefined) {
+      if (isFile || !configDirSubPath) {
         return null;
       }
 
       return `'${nodeId}': ${nodeId}Resources`;
-      // ####################CHANGE - END####################
     });
 
     const filteredItems = registryItemsArray.filter(item => item !== null);
@@ -827,29 +507,22 @@ export default new NodeResourceProvider();
 
   createLazyLoaderItems() {
     const loaderItemsArray = this.nodeIds.map(nodeId => {
-      // ####################CHANGE - START##################
-      const nodeItem         = this.nodeRegistry[nodeId];
-      const isSingleFile     = nodeItem?.isFile;
+      const isFile           = this.nodeRegistry[nodeId]?.isFile;
       const configDirSubPath = this.nodeRegistry[nodeId].configDirSubPath;
 
-      // Skip nodes that failed to compile
-      if (configDirSubPath === undefined) {
-        console.log(chalk.yellow(`  Skipping: Node '${nodeId}' failed to compile. It is excluded from NodeResourceProvider.`));
+      if (isFile) {
+        console.log(chalk.dim(`  Skipping: Node '${nodeId}' is a single file (not yet supported). It is excluded from nodeResourceProvider.`));
         return null;
       }
 
-      // Handle single file nodes - they may have empty configDirSubPath
-      if (isSingleFile) {
-        const importPath = configDirSubPath 
-          ? `@morphBuild/${configDirSubPath}/${nodeId}.resources`
-          : `@morphBuild/${nodeId}.resources`;
-        return `'${nodeId}': () => import('${importPath}')`;
+      if (!configDirSubPath) {
+        console.log(chalk.yellow(`  Skipping: Node '${nodeId}' failed to compile. It is excluded from nodeResourceProvider.`));
+        return null;
       }
 
-      // Handle directory nodes
       const importPath = `@morphBuild/${configDirSubPath}/${nodeId}.resources`;
+      
       return `'${nodeId}': () => import('${importPath}')`;
-      // ####################CHANGE - END####################
     });
 
     const filteredItems = loaderItemsArray.filter(item => item !== null);
