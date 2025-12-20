@@ -8,7 +8,7 @@ const config = {
   },
 
   signals: {
-    someSignalB: {
+    someSignalFromDelta: {
       type: 'primitive', 
       default: 'bax',
     } 

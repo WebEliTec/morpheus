@@ -81,9 +81,17 @@ export default class ModuleManager {
 
 
       if (!moduleRegistryItem) {
-        const errorMessage = `Module "${moduleId}" of node "${kernel.nodeId}" not found.`;
+
+        let errorMessage; 
+
+        if( moduleId == 'Root' ) {
+          errorMessage = `Error: Root Module of node "${kernel.nodeId}" not found. Define a root node.`;
+        } else {
+          errorMessage = `Error: Module "${moduleId}" of node "${kernel.nodeId}" not found.`;
+        }
+
         console.warn(errorMessage);
-        return <h1>{errorMessage}</h1>;
+        return <div className="morpheus-error-box">{errorMessage}</div>;
       }
 
       const ModuleComponent = moduleRegistryItem?.component;

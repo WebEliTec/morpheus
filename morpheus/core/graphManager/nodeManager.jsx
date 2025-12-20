@@ -19,7 +19,7 @@ export default class NodeManager {
     this.notifyGraphOnNodeMount   = notifyGraphOnNodeMount;    
     this.notifyGraphOnNodeUnmount = notifyGraphOnNodeUnmount;
     this.mayCreateNode            = mayCreateNode;
-    this.nodeResourceProvider         = nodeResourceProvider || null;
+    this.nodeResourceProvider     = nodeResourceProvider || null;
 
   }
 
@@ -101,7 +101,7 @@ export default class NodeManager {
           executionContext:       this.executionContext, 
           executionContextConfig: this.executionContextConfig,
           libraryNodeConfig:      this.libraryNodeConfig,
-          runtimeEnvironment: 'client',
+          runtimeEnvironment:     'client',
         });
 
         nodeResources  = await compiler.exec();
@@ -113,6 +113,10 @@ export default class NodeManager {
 
       }
 
+    }
+
+    if( nodeId == 'NodeEcho' ) {
+      console.log( nodeResources );
     }
 
     const { traits }          = nodeResources;

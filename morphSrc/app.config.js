@@ -45,6 +45,11 @@ const appConfig = {
 		 	dir: '/',
 		},
 
+		NodeEcho: {
+		 	dir: '/',
+			isFile: true,
+		},
+
 
 	},  
 

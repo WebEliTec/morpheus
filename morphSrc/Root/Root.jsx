@@ -16,6 +16,7 @@ export default function Root({ Kernel, Node, Module, Router }) {
     <div className="fade-in">
       <Node id="MainMenu" />
       <Node id="SideBar" />
+      <Node id="NodeEcho" />
       <Node id="TestNode" />
       
       <button onClick = { () => toggleArticles() } onMouseEnter = { handleMouseEnter } >
