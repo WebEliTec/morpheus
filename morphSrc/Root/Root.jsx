@@ -1,16 +1,28 @@
 import '../globals.scss';
 
-export default function Root( { Kernel, Node, Module, Router } ) {
+export default function Root({ Kernel, Node, Module, Router }) {
+  const shouldShowArticles = Kernel.shouldShowArticles();
 
-  Kernel.helloWorld1();
-  Kernel.helloInline();
+  const toggleArticles = () => {
+    Kernel.toggleArticles();
+  };
+
+  const handleMouseEnter = () => {
+    console.log('Preload!');
+    Kernel.preloadNode('Articles');
+  };
 
   return (
-    <div className = "fade-in">
+    <div className="fade-in">
       <Node id="MainMenu" />
       <Node id="SideBar" />
       <Node id="TestNode" />
-      <Node id="Articles" />
+      
+      <button onClick = { () => toggleArticles() } onMouseEnter = { handleMouseEnter } >
+        Toggle Articles
+      </button>
+      
+      {shouldShowArticles && <Node id="Articles" />}
     </div>
-  )
+  );
 }

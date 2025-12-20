@@ -12,6 +12,13 @@ import Graph from './apis/graph';
 import Router from './apis/router';
 import Utility from './apis/utility';
 
+// ####################CHANGE - START##################
+let ResourceProvider = null;
+if (import.meta.env.PROD) {
+  ResourceProvider = await import('@morphBuild/ResourceProvider.js').then(m => m.default);
+}
+// ####################CHANGE - END####################
+
 
 export class Morpheus {
   
@@ -67,22 +74,11 @@ export class Morpheus {
 
     // ####################CHANGE - START##################
     // Connect ResourceProvider to Graph API for preloading support
-    // if (import.meta.env.PROD) {
-    //   import('../morphBuild/ResourceProvider.js').then(module => {
-    //     const resourceProvider = module.default;
-    //     const lazyLoadEnabled  = appConfig.lazyLoadNodes ?? false;
-    //     this.apis.graph._setResourceProvider(resourceProvider, lazyLoadEnabled);
-    //   });
-    // }
-    // ####################CHANGE - END####################
-
-    if (import.meta.env.PROD) {
-      import('@morphBuild/ResourceProvider.js').then(module => {
-        const resourceProvider = module.default;
-        const lazyLoadEnabled  = appConfig.lazyLoadNodes ?? false;
-        this.apis.graph._setResourceProvider(resourceProvider, lazyLoadEnabled);
-      });
+    if (import.meta.env.PROD && ResourceProvider) {
+      const lazyLoadEnabled = appConfig.lazyLoadNodes ?? false;
+      this.apis.graph._setResourceProvider(ResourceProvider, lazyLoadEnabled);
     }
+    // ####################CHANGE - END####################
 
     this.executeAppHook('apisDidInitialize', this.apis );
 

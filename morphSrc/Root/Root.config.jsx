@@ -63,6 +63,14 @@ const config = {
 
     doSomethingWithTheApp() {
       this.apis.media.playSound("click");
+    },
+
+    toggleArticles() {
+      this.toggleSignal( 'showArticles' );
+    },
+
+    shouldShowArticles() {
+      return this.getSignal( 'showArticles' );
     }
 
   },
@@ -75,7 +83,7 @@ const config = {
 
     Root: {
       routes:  [ '/home', '/content-system', '/users' ],
-      signals: [],
+      signals: [ 'showArticles' ],
       dir: '/',
     },
 
@@ -96,10 +104,10 @@ const config = {
   },
 
   signals: {
-    someSignal: {
+    showArticles: {
       type: 'primitive', 
-      default: 'a'
-    }
+      default: false,
+    },
   },
   
 }
