@@ -79,7 +79,7 @@ export default class NodeManager {
 
       try {
         // Check if lazy loading is enabled in app config
-        if (this.executionContextConfig.lazyLoadNodes) {
+        if (this.executionContextConfig.lazyLoadNodeResources) {
           // Lazy loading: getNodeResources is async
           nodeResources = await this.nodeResourceProvider.getNodeResources(nodeId);
         } else {

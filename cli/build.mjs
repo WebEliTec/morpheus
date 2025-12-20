@@ -12,7 +12,7 @@ class MorphSrcBuildDirectoryBuilder {
     this.appConfig     = appConfig;
     this.nodeRegistry  = this.appConfig.nodes;
     this.nodeIds       = Object.keys( this.nodeRegistry );
-    this.lazyLoadNodes = this.appConfig.lazyLoadNodes ?? false;
+    this.lazyLoadNodeResources = this.appConfig.lazyLoadNodeResources ?? false;
 
   }
 
@@ -363,7 +363,7 @@ class MorphSrcBuildDirectoryBuilder {
   /* Resource Provider Creation
   /* *** *** *** *** *** *** *** *** *** *** *** *** *** *** */
   createNodeResourceProvider() {
-    if (!this.lazyLoadNodes) {
+    if (!this.lazyLoadNodeResources) {
       this.createEagerNodeResourceProvider();
     } else {
       this.createLazyNodeResourceProvider();

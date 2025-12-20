@@ -2,7 +2,7 @@ import ServiceClass from './services/ServiceClass';
 
 const appConfig = {
 
-	//lazyLoadNodes: true,
+	lazyLoadNodeResources: true,
 
 	ServiceClass,
 

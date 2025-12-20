@@ -72,7 +72,7 @@ export class Morpheus {
 
     // Connect NodeResourceProvider to Graph API for preloading support
     if (import.meta.env.PROD && NodeResourceProvider) {
-      const lazyLoadEnabled = appConfig.lazyLoadNodes ?? false;
+      const lazyLoadEnabled = appConfig.lazyLoadNodeResources ?? false;
       this.apis.graph._setNodeResourceProvider(NodeResourceProvider, lazyLoadEnabled);
     }
 
