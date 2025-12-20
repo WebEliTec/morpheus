@@ -12,9 +12,9 @@ import Graph from './apis/graph';
 import Router from './apis/router';
 import Utility from './apis/utility';
 
-let ResourceProvider = null;
+let NodeResourceProvider = null;
 if (import.meta.env.PROD) {
-  ResourceProvider = await import('@morphBuild/ResourceProvider.js').then(m => m.default);
+  NodeResourceProvider = await import('@morphBuild/NodeResourceProvider.js').then(m => m.default);
 }
 
 
@@ -70,10 +70,10 @@ export class Morpheus {
     this.apis.router   = new Router();
     this.apis.utility  = new Utility();
 
-    // Connect ResourceProvider to Graph API for preloading support
-    if (import.meta.env.PROD && ResourceProvider) {
+    // Connect NodeResourceProvider to Graph API for preloading support
+    if (import.meta.env.PROD && NodeResourceProvider) {
       const lazyLoadEnabled = appConfig.lazyLoadNodes ?? false;
-      this.apis.graph._setResourceProvider(ResourceProvider, lazyLoadEnabled);
+      this.apis.graph._setNodeResourceProvider(NodeResourceProvider, lazyLoadEnabled);
     }
 
     this.executeAppHook('apisDidInitialize', this.apis );
@@ -91,7 +91,7 @@ export class Morpheus {
       executionContextConfig: appConfig,
       libraryNodeConfig,
       graphChangeListener: this.graphChangeListener.bind( this ),
-      resourceProvider:       ResourceProvider,
+      nodeResourceProvider:       NodeResourceProvider,
     }
     
     this.executeAppHook('graphWillInitialize', config );
@@ -119,7 +119,7 @@ export class Morpheus {
       apis:                    this.devToolApp, 
       executionContextConfig: devToolConfig, 
       libraryNodeConfig,
-      resourceProvider:       null, 
+      nodeResourceProvider:       null,  // DevTools doesn't need NodeResourceProvider
     }
 
     this.devToolGraphManager  = new GraphManager( config );

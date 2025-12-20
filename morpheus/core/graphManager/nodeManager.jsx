@@ -8,7 +8,7 @@ const ParentKernelContext = createContext(null);
 export default class NodeManager {
 
 
-  constructor( { executionContext, executionContextConfig, libraryNodeConfig, services, apis, notifyGraphOnNodeMount, notifyGraphOnNodeUnmount, mayCreateNode, resourceProvider } ) {
+  constructor( { executionContext, executionContextConfig, libraryNodeConfig, services, apis, notifyGraphOnNodeMount, notifyGraphOnNodeUnmount, mayCreateNode, nodeResourceProvider } ) {
 
     this.services                 = services || null; 
     this.executionContext         = executionContext;
@@ -19,7 +19,7 @@ export default class NodeManager {
     this.notifyGraphOnNodeMount   = notifyGraphOnNodeMount;    
     this.notifyGraphOnNodeUnmount = notifyGraphOnNodeUnmount;
     this.mayCreateNode            = mayCreateNode;
-    this.resourceProvider         = resourceProvider || null;
+    this.nodeResourceProvider         = nodeResourceProvider || null;
 
   }
 
@@ -81,10 +81,10 @@ export default class NodeManager {
         // Check if lazy loading is enabled in app config
         if (this.executionContextConfig.lazyLoadNodes) {
           // Lazy loading: getNodeResources is async
-          nodeResources = await this.resourceProvider.getNodeResources(nodeId);
+          nodeResources = await this.nodeResourceProvider.getNodeResources(nodeId);
         } else {
           // Eager loading: getNodeResources is sync
-          nodeResources = this.resourceProvider.getNodeResources(nodeId);
+          nodeResources = this.nodeResourceProvider.getNodeResources(nodeId);
         }
       } catch (error) {
         console.error(`Failed to load pre-built resources for ${nodeId}:`, error);

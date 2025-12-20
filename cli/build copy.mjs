@@ -20,7 +20,7 @@ class MorphSrcBuildDirectoryBuilder {
     this.resetmorphBuildDirectory();
     await this.createResourceFiles();
     this.cleanupmorphBuild();
-    this.createNodeResourceProvider();
+    this.createResourceProvider();
   }
 
   resetmorphBuildDirectory() {
@@ -362,22 +362,22 @@ class MorphSrcBuildDirectoryBuilder {
 
   /* Resource Provider Creation
   /* *** *** *** *** *** *** *** *** *** *** *** *** *** *** */
-  createNodeResourceProvider() {
+  createResourceProvider() {
     if (!this.lazyLoadNodes) {
-      this.createEagerNodeResourceProvider();
+      this.createEagerResourceProvider();
     } else {
-      this.createLazyNodeResourceProvider();
+      this.createLazyResourceProvider();
     }
   }
 
-  createEagerNodeResourceProvider() {
+  createEagerResourceProvider() {
     const importStatements = this.createEagerImportStatements();
     const registryItems    = this.createEagerRegistryItems();
     
-    const nodeResourceProviderSourceCode = 
+    const resourceProviderSourceCode = 
 `${importStatements}
 
-class NodeResourceProvider {
+class ResourceProvider {
   constructor() {
     this.registry = {
       ${registryItems}
@@ -395,12 +395,12 @@ class NodeResourceProvider {
   }
 }
 
-export default new NodeResourceProvider();
+export default new ResourceProvider();
 `;
 
-    const outputPath = 'morphBuild/NodeResourceProvider.js';
-    fs.writeFileSync(outputPath, nodeResourceProviderSourceCode, 'utf8');
-    console.log(chalk.green(`  ✓ Created NodeResourceProvider.js (eager loading)`));
+    const outputPath = 'morphBuild/ResourceProvider.js';
+    fs.writeFileSync(outputPath, resourceProviderSourceCode, 'utf8');
+    console.log(chalk.green(`  ✓ Created ResourceProvider.js (eager loading)`));
   }
 
   createEagerImportStatements() {
@@ -411,14 +411,14 @@ export default new NodeResourceProvider();
       const isSingleFile = nodeItem?.isFile;
 
       if (isSingleFile) {
-        console.log(chalk.dim(`  Skipping: Node '${nodeId}' is a single file (not yet supported). It is excluded from nodeResourceProvider.`));
+        console.log(chalk.dim(`  Skipping: Node '${nodeId}' is a single file (not yet supported). It is excluded from resourceProvider.`));
         return null;
       }
       
       const configDirSubPath = this.nodeRegistry[nodeId].configDirSubPath;
       
       if (!configDirSubPath) {
-        console.log(chalk.yellow(`  Skipping: Node '${nodeId}' failed to compile. It is excluded from nodeResourceProvider.`));
+        console.log(chalk.yellow(`  Skipping: Node '${nodeId}' failed to compile. It is excluded from resourceProvider.`));
         return null;
       }
       
@@ -448,11 +448,11 @@ export default new NodeResourceProvider();
     return filteredItems.join(',\n      ');
   }
 
-    createLazyNodeResourceProvider() {
+    createLazyResourceProvider() {
       const loaderItems = this.createLazyLoaderItems();
     
-      const nodeResourceProviderSourceCode = 
-`class NodeResourceProvider {
+      const resourceProviderSourceCode = 
+`class ResourceProvider {
   constructor() {
     this.loaders = {
       ${loaderItems}
@@ -497,12 +497,12 @@ export default new NodeResourceProvider();
   }
 }
 
-export default new NodeResourceProvider();
+export default new ResourceProvider();
 `;
 
-    const outputPath = 'morphBuild/NodeResourceProvider.js';
-    fs.writeFileSync(outputPath, nodeResourceProviderSourceCode, 'utf8');
-    console.log(chalk.green(`  ✓ Created NodeResourceProvider.js (lazy loading)`));
+    const outputPath = 'morphBuild/ResourceProvider.js';
+    fs.writeFileSync(outputPath, resourceProviderSourceCode, 'utf8');
+    console.log(chalk.green(`  ✓ Created ResourceProvider.js (lazy loading)`));
   }
 
   createLazyLoaderItems() {
@@ -511,12 +511,12 @@ export default new NodeResourceProvider();
       const configDirSubPath = this.nodeRegistry[nodeId].configDirSubPath;
 
       if (isFile) {
-        console.log(chalk.dim(`  Skipping: Node '${nodeId}' is a single file (not yet supported). It is excluded from nodeResourceProvider.`));
+        console.log(chalk.dim(`  Skipping: Node '${nodeId}' is a single file (not yet supported). It is excluded from resourceProvider.`));
         return null;
       }
 
       if (!configDirSubPath) {
-        console.log(chalk.yellow(`  Skipping: Node '${nodeId}' failed to compile. It is excluded from nodeResourceProvider.`));
+        console.log(chalk.yellow(`  Skipping: Node '${nodeId}' failed to compile. It is excluded from resourceProvider.`));
         return null;
       }
 
@@ -528,6 +528,95 @@ export default new NodeResourceProvider();
     const filteredItems = loaderItemsArray.filter(item => item !== null);
     return filteredItems.join(',\n      ');
   }
+
+
+
+  /*
+  createResourceProvider() {
+    const importStatements = this.createResourceProviderImportStatements();
+    this.createResourceProviderClassFile( importStatements );
+  }
+
+  createResourceProviderImportStatements() {
+
+    const importStatementsArray = this.nodeIds.map( nodeId => {
+
+      const nodeItem     = this.nodeRegistry[nodeId];
+      const isSingleFile = nodeItem?.isFile;
+
+      if ( isSingleFile ) {
+        console.log(chalk.dim(`  Skipping: Node '${nodeId}' is a single file (not yet supported). It is excluded from resourceProvider.`));
+        return;
+      }
+      
+      const configDirSubPath = this.nodeRegistry[nodeId].configDirSubPath;
+      const importPath       = `@morphBuild/${configDirSubPath}/${nodeId}.resources`;
+      
+      return `import ${nodeId}Resources from '${importPath}';`;
+    });
+
+    const importStatements = importStatementsArray.join('\n');
+
+    return importStatements;
+
+  }
+
+  createResourceProviderClassFile( importStatements ) {
+    
+    const registryItemsArray = this.nodeIds.map( nodeId => {
+
+      const isFile = this.nodeRegistry[ nodeId ]?.isFile;
+
+      //Sort out until singleFiles are not supported
+      if ( isFile ) {
+        console.log(chalk.dim(`  Skipping: Node '${nodeId}' is a single file (not yet supported). It is excluded from registry of class 'ResourceProvider'`));
+        return null;
+      }
+
+      return `'${nodeId}': ${nodeId}Resources`
+    } );
+
+    //Remove until singleFiles are not supported
+    registryItemsArray.filter(item => item !== null);
+
+    const registryItems              = registryItemsArray.join(',\n      ');
+
+    const resourceProviderSourceCode = 
+`
+${importStatements}
+class ResourceProvider {
+
+  constructor() {
+
+    this.registry = {
+      ${registryItems}
+    };
+
+  }
+  
+  getNodeResources(nodeId) {
+
+    const resources = this.registry[nodeId];
+    
+    if (!resources) {
+      throw new Error(\`Node resources not found for: \${nodeId}\`);
+    }
+    
+    return resources;
+
+  }
+
+}
+
+export default new ResourceProvider();
+`;
+
+  const outputPath = 'morphBuild/ResourceProvider.js';
+  fs.writeFileSync(outputPath, resourceProviderSourceCode, 'utf8');
+
+
+  }*/
+
 
 }
 

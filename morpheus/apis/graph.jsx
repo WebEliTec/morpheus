@@ -4,7 +4,7 @@ export default class Graph {
   constructor() {
     
     this.graphData        = null; 
-    this.resourceProvider = null;
+    this.nodeResourceProvider = null;
     this.lazyLoadEnabled  = false;
 
   }
@@ -25,8 +25,8 @@ export default class Graph {
     console.log(this.nodeHierarchy); 
   }
 
-  _setResourceProvider(resourceProvider, lazyLoadEnabled) {
-    this.resourceProvider = resourceProvider;
+  _setNodeResourceProvider(nodeResourceProvider, lazyLoadEnabled) {
+    this.nodeResourceProvider = nodeResourceProvider;
     this.lazyLoadEnabled  = lazyLoadEnabled;
   }
 
@@ -41,13 +41,13 @@ export default class Graph {
       return;
     }
 
-    if (!this.resourceProvider) {
-      console.warn('[Graph] ResourceProvider not available for preloading');
+    if (!this.nodeResourceProvider) {
+      console.warn('[Graph] NodeResourceProvider not available for preloading');
       return;
     }
 
     try {
-      await this.resourceProvider.preload(nodeId);
+      await this.nodeResourceProvider.preload(nodeId);
       console.log(`[Graph] Preloaded node '${nodeId}'`);
     } catch (error) {
       console.warn(`[Graph] Failed to preload node '${nodeId}':`, error);
@@ -59,11 +59,11 @@ export default class Graph {
       return true; 
     }
 
-    if (!this.resourceProvider) {
+    if (!this.nodeResourceProvider) {
       return false;
     }
 
-    return this.resourceProvider.isLoaded(nodeId);
+    return this.nodeResourceProvider.isLoaded(nodeId);
   }
 
   async preloadNodes(nodeIds) {
