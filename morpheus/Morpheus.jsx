@@ -65,6 +65,17 @@ export class Morpheus {
     this.apis.router   = new Router();
     this.apis.utility  = new Utility();
 
+    // ####################CHANGE - START##################
+    // Connect ResourceProvider to Graph API for preloading support
+    if (import.meta.env.PROD) {
+      import('../morphBuild/ResourceProvider.js').then(module => {
+        const resourceProvider = module.default;
+        const lazyLoadEnabled  = appConfig.lazyLoadNodes ?? false;
+        this.apis.graph._setResourceProvider(resourceProvider, lazyLoadEnabled);
+      });
+    }
+    // ####################CHANGE - END####################
+
     this.executeAppHook('apisDidInitialize', this.apis );
 
     if ( appConfig.ServiceClass ) {

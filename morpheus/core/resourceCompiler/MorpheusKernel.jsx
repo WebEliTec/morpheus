@@ -440,4 +440,43 @@ export default class MorpheusKernel {
     optimisticSignal.value = cloneDeep(newValue);
   }
 
+
+  // Add this at the end of the MorpheusKernel class, before the final closing brace
+
+  // ####################CHANGE - START##################
+  /**
+   * Preload a node's resources without rendering it.
+   * Useful for optimizing navigation - call this when user hovers over a link.
+   * Shorthand for this.graph.preloadNode()
+   * 
+   * @param {string} nodeId - The node ID to preload
+   * @returns {Promise<void>}
+   */
+  preloadNode(nodeId) {
+    return this.graph.preloadNode(nodeId);
+  }
+
+  /**
+   * Preload multiple nodes at once.
+   * Shorthand for this.graph.preloadNodes()
+   * 
+   * @param {string[]} nodeIds - Array of node IDs to preload
+   * @returns {Promise<void>}
+   */
+  preloadNodes(nodeIds) {
+    return this.graph.preloadNodes(nodeIds);
+  }
+
+  /**
+   * Check if a node's resources are already loaded.
+   * Shorthand for this.graph.isNodeLoaded()
+   * 
+   * @param {string} nodeId - The node ID to check
+   * @returns {boolean}
+   */
+  isNodeLoaded(nodeId) {
+    return this.graph.isNodeLoaded(nodeId);
+  }
+  // ####################CHANGE - END####################
+
 }
