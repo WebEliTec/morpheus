@@ -91,19 +91,37 @@ class MorphSrcBuildDirectoryBuilder {
     const componentExports    = this.extractComponentExports( sourceCode, isSingleFile );
     const moduleRegistry      = nodeResources?.modules; 
 
+    // ####################CHANGE - START##################
+    const componentRegistry   = nodeResources?.components;
+    // ####################CHANGE - END####################
+
     const imports             = [...importStatements]; 
 
     const moduleIdentifiers   = {};
 
+    // ####################CHANGE - START##################
+    const componentIdentifiers = {};
+    // ####################CHANGE - END####################
+
     this.processModuleRegistry( nodeId, moduleRegistry, imports, isSingleFile, configDirSubPath, moduleIdentifiers );
+
+    // ####################CHANGE - START##################
+    this.processComponentRegistry( nodeId, componentRegistry, imports, isSingleFile, configDirSubPath, componentIdentifiers );
+    // ####################CHANGE - END####################
 
     const resourceFileImports = imports.length > 0 ? imports.join('\n') + '\n\n' : '';
 
     //Purpose of these two lines is unclear
     this.nodeRegistry[nodeId].configDirSubPath = nodeResources.configDirSubPath;
     delete nodeResources.configDirSubPath;
+    
 
-    const serializedResources       = this.serializeValue( nodeResources, 0, moduleIdentifiers );
+    // ####################CHANGE - START##################
+    const allIdentifiers            = { ...moduleIdentifiers, ...componentIdentifiers };
+    const serializedResources       = this.serializeValue( nodeResources, 0, allIdentifiers );
+    // ####################CHANGE - END####################
+
+
     const componentExportStatements = componentExports.length > 0 ? '\n\n' + componentExports.join('\n\n'): '';
     
     const resourceFileName          = `${nodeId}.resources.jsx`;
@@ -175,6 +193,33 @@ class MorphSrcBuildDirectoryBuilder {
 
   }
 
+  // ####################CHANGE - START##################
+  processComponentRegistry( nodeId, componentRegistry, imports, isSingleFile, configDirSubPath, componentIdentifiers ) {
+    if( !componentRegistry ) {
+      return null;
+    }
+
+    Object.entries( componentRegistry ).forEach( ( [ componentId, componentRegistryItem ] ) => {
+      const isShared                  = componentRegistryItem?.isShared;
+      const componentSubPath          = componentRegistryItem.subPath;
+      
+      // Create a unique identifier to avoid naming conflicts with modules
+      const componentImportId               = `Component_${componentId}`;
+      componentIdentifiers[componentId]     = componentImportId;
+      componentRegistryItem.component       = `__IDENTIFIER__${componentImportId}`;
+      delete componentRegistryItem.inheritanceLevel;
+
+      if ( isSingleFile && !isShared ) {
+        return;
+      } 
+  
+      const importPath = `@morphBuild/${componentSubPath}`;
+      imports.push(`import ${componentImportId} from '${importPath}';`);
+    });
+  }
+  // ####################CHANGE - END####################
+
+
   serializeValue(value, indent = 2, moduleIdentifiers = {}) {
   
     const spaces = ' '.repeat(indent);
@@ -202,48 +247,7 @@ class MorphSrcBuildDirectoryBuilder {
       if (entries.length === 0) return '{}';
       
       const serialized = entries.map(([key, val]) => {
-      
-      // Handle functions with method shorthand syntax
-      /*
-      if (typeof val === 'function') {
-        
-        const funcStr = val.toString();
-        
-        if (funcStr.startsWith('function')) {
-          // Convert: function name() { ... } → name() { ... }
-          const methodStr = funcStr.replace(/^function\s+/, '');
-          
-          // Fix indentation of function body
-          const lines = methodStr.split('\n');
-          const indentedLines = lines.map((line, index) => {
-            if (index === 0) return line; // First line (function signature)
-            if (index === lines.length - 1) return `${spaces}  ${line.trim()}`; // Last line (closing brace)
-            return `${spaces}    ${line.trim()}`; // Body lines
-          });
-          
-          return `${spaces}  ${indentedLines.join('\n')}`;
-        } else if (funcStr.includes('=>')) {
-          // Arrow function: keep as property with proper indentation
-          const lines = funcStr.split('\n');
-          const indentedLines = lines.map((line, index) => {
-            if (index === 0) return line.trim();
-            if (index === lines.length - 1) return `${spaces}  ${line.trim()}`;
-            return `${spaces}    ${line.trim()}`;
-          });
-          
-          return `${spaces}  ${key}: ${indentedLines.join('\n')}`;
-        } else {
-          // Method shorthand with proper indentation
-          const lines = funcStr.split('\n');
-          const indentedLines = lines.map((line, index) => {
-            if (index === 0) return `${key}${line.substring(funcStr.indexOf('('))}`;
-            if (index === lines.length - 1) return `${spaces}  ${line.trim()}`;
-            return `${spaces}    ${line.trim()}`;
-          });
-          
-          return `${spaces}  ${indentedLines.join('\n')}`;
-        }
-      }*/
+    
         if (typeof val === 'function') {
           const funcStr = val.toString();
           
@@ -329,7 +333,11 @@ class MorphSrcBuildDirectoryBuilder {
       'instanceRegistry.js',
       'instanceRegistry.jsx',
       'kernel.js',
-      'kernel.jsx'
+      'kernel.jsx',
+      // ####################CHANGE - START##################
+      'components.js',
+      'components.jsx',
+      // ####################CHANGE - END####################
     ];
     
     function deleteFilesRecursively(dir) {

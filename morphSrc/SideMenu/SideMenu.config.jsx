@@ -61,10 +61,6 @@ const config = {
 
   },*/
 
-  components: {
-    SomeComponent: {},
-  }, 
-
   /* Kernel
   /* *** *** *** *** *** *** *** *** *** *** *** *** *** *** */
 
