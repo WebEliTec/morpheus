@@ -9,10 +9,10 @@ import chalk from 'chalk';
 class MorphSrcBuildDirectoryBuilder {
 
   constructor() {
-    this.appConfig     = appConfig;
-    this.nodeRegistry  = this.appConfig.nodes;
-    this.nodeIds       = Object.keys( this.nodeRegistry );
-    this.lazyLoadNodes = this.appConfig.lazyLoadNodes ?? false;
+    this.appConfig             = appConfig;
+    this.nodeRegistry          = this.appConfig.nodes;
+    this.nodeIds               = Object.keys( this.nodeRegistry );
+    this.lazyLoadNodeResources = this.appConfig.lazyLoadNodeResources ?? false;
 
   }
 
@@ -138,136 +138,147 @@ class MorphSrcBuildDirectoryBuilder {
   // ####################CHANGE - START##################
   /* Single File Node Compilation
   /* *** *** *** *** *** *** *** *** *** *** *** *** *** *** */
-  async createSingleFileResourceFile( nodeId ) {
-    const nodeItem = this.nodeRegistry[nodeId];
-    
-    // Compile node resources (handles inheritance from delta level)
-    const compiler = new NodeCompiler({
-      nodeRegistry:           this.nodeRegistry,
-      nodeId,
-      executionContext:       'app',
-      executionContextConfig: this.appConfig,
-      libraryNodeConfig,
-      runtimeEnvironment:     'server',
-    });
-    
-    const nodeResources = await compiler.exec();
-    
-    // Determine file path based on dir config
-    const customDir   = nodeItem?.dir;
-    const isRootLevel = customDir === '/' || !customDir;
-    
-    let configDirSubPath;
-    let configFilePath;
-    
-    if (isRootLevel) {
-      configDirSubPath = '';
-      configFilePath   = `morphSrc/${nodeId}.config.jsx`;
-    } else {
-      configDirSubPath = customDir.startsWith('/') ? customDir.slice(1) : customDir;
-      configFilePath   = `morphSrc/${configDirSubPath}/${nodeId}.config.jsx`;
-    }
-    
-    if (!fs.existsSync(configFilePath)) {
-      console.warn(chalk.yellow(`  ⚠️  Single file node '${nodeId}' not found at '${configFilePath}'`));
-      return null;
-    }
-    
-    // Extract source code and imports
-    const sourceCode       = this.extractSourceCode(configFilePath);
-    const importStatements = this.extractImportStatements(sourceCode);
-    
-    // Extract named export names (to verify they exist)
-    const namedExports = this.extractNamedExports(sourceCode);
-    
-    const imports              = [...importStatements];
-    const moduleIdentifiers    = {};
-    const componentIdentifiers = {};
-    const moduleRegistry       = nodeResources?.modules;
-    const componentRegistry    = nodeResources?.components;
-    
-    // Track which inline exports we need to import from config file
-    const inlineModules    = [];
-    const inlineComponents = [];
-    
-    // Process modules
-    if (moduleRegistry) {
-      for (const [moduleId, moduleRegistryItem] of Object.entries(moduleRegistry)) {
-        const isShared = moduleRegistryItem?.isShared;
-        
-        if (isShared) {
-          // Shared modules - import from sharedModules/
-          const moduleSubPath = moduleRegistryItem.subPath;
+  // ####################CHANGE - START##################
+async createSingleFileResourceFile( nodeId ) {
+  const nodeItem = this.nodeRegistry[nodeId];
+  
+  // Compile node resources (handles inheritance from delta level)
+  const compiler = new NodeCompiler({
+    nodeRegistry:           this.nodeRegistry,
+    nodeId,
+    executionContext:       'app',
+    executionContextConfig: this.appConfig,
+    libraryNodeConfig,
+    runtimeEnvironment:     'server',
+  });
+  
+  const nodeResources = await compiler.exec();
+  
+  // Determine file path based on dir config
+  const customDir   = nodeItem?.dir;
+  const isRootLevel = customDir === '/' || !customDir;
+  
+  let configDirSubPath;
+  let configFilePath;
+  
+  if (isRootLevel) {
+    configDirSubPath = '';
+    configFilePath   = `morphSrc/${nodeId}.config.jsx`;
+  } else {
+    configDirSubPath = customDir.startsWith('/') ? customDir.slice(1) : customDir;
+    configFilePath   = `morphSrc/${configDirSubPath}/${nodeId}.config.jsx`;
+  }
+  
+  if (!fs.existsSync(configFilePath)) {
+    console.warn(chalk.yellow(`  ⚠️  Single file node '${nodeId}' not found at '${configFilePath}'`));
+    return null;
+  }
+  
+  // Extract source code and imports
+  const sourceCode       = this.extractSourceCode(configFilePath);
+  const importStatements = this.extractImportStatements(sourceCode);
+  
+  // Extract named export names (to verify they exist)
+  const namedExports = this.extractNamedExports(sourceCode);
+  
+  const imports              = [...importStatements];
+  const moduleIdentifiers    = {};
+  const componentIdentifiers = {};
+  const moduleRegistry       = nodeResources?.modules;
+  const componentRegistry    = nodeResources?.components;
+  
+  // Track which inline exports we need to import from config file
+  const inlineModules    = [];
+  const inlineComponents = [];
+  
+  // Process modules
+  if (moduleRegistry) {
+    for (const [moduleId, moduleRegistryItem] of Object.entries(moduleRegistry)) {
+      const isShared    = moduleRegistryItem?.isShared;
+      const isInherited = moduleRegistryItem?.inheritanceLevel && moduleRegistryItem.inheritanceLevel !== 'echo';
+      
+      if (isShared || isInherited) {
+        // Shared modules or inherited modules - import from their subPath
+        const moduleSubPath = moduleRegistryItem.subPath;
+        if (moduleSubPath) {
           imports.push(`import ${moduleId} from '@morphBuild/${moduleSubPath}';`);
         } else {
-          // Inline modules - will be imported from config file
-          if (namedExports.includes(moduleId)) {
-            inlineModules.push(moduleId);
-          } else {
-            console.warn(chalk.yellow(`  ⚠️  Module '${moduleId}' declared in config but not exported from '${configFilePath}'`));
-          }
+          console.warn(chalk.yellow(`  ⚠️  Module '${moduleId}' has no subPath defined`));
         }
-        
-        moduleIdentifiers[moduleId]      = moduleId;
-        moduleRegistryItem.component     = `__IDENTIFIER__${moduleId}`;
-        delete moduleRegistryItem.inheritanceLevel;
-      }
-    }
-    
-    // Process components
-    if (componentRegistry) {
-      for (const [componentId, componentRegistryItem] of Object.entries(componentRegistry)) {
-        const isShared = componentRegistryItem?.isShared;
-        
-        if (isShared) {
-          // Shared components - import from sharedComponents/
-          const componentSubPath  = componentRegistryItem.subPath;
-          const componentImportId = `Component_${componentId}`;
-          imports.push(`import ${componentImportId} from '@morphBuild/${componentSubPath}';`);
-          componentIdentifiers[componentId] = componentImportId;
-          componentRegistryItem.component   = `__IDENTIFIER__${componentImportId}`;
+      } else {
+        // Inline modules (defined in this single file) - will be imported from config file
+        if (namedExports.includes(moduleId)) {
+          inlineModules.push(moduleId);
         } else {
-          // Inline components - will be imported from config file
-          if (namedExports.includes(componentId)) {
-            inlineComponents.push(componentId);
-            componentIdentifiers[componentId] = componentId;
-            componentRegistryItem.component   = `__IDENTIFIER__${componentId}`;
-          } else {
-            console.warn(chalk.yellow(`  ⚠️  Component '${componentId}' declared in config but not exported from '${configFilePath}'`));
-          }
+          console.warn(chalk.yellow(`  ⚠️  Module '${moduleId}' declared in config but not exported from '${configFilePath}'`));
         }
-        
-        delete componentRegistryItem.inheritanceLevel;
       }
+      
+      moduleIdentifiers[moduleId]      = moduleId;
+      moduleRegistryItem.component     = `__IDENTIFIER__${moduleId}`;
+      delete moduleRegistryItem.inheritanceLevel;
     }
-    
-    // Store configDirSubPath for ResourceProvider
-    this.nodeRegistry[nodeId].configDirSubPath = configDirSubPath;
-    delete nodeResources.configDirSubPath;
-    
-    // Build import line for inline modules/components from config file
-    const inlineExports = [...inlineModules, ...inlineComponents];
-    let configImportLine = '';
-    
-    if (inlineExports.length > 0) {
-      const configImportPath = configDirSubPath 
-        ? `@morphBuild/${configDirSubPath}/${nodeId}.config`
-        : `@morphBuild/${nodeId}.config`;
-      configImportLine = `import { ${inlineExports.join(', ')} } from '${configImportPath}';\n`;
+  }
+  
+  // Process components
+  if (componentRegistry) {
+    for (const [componentId, componentRegistryItem] of Object.entries(componentRegistry)) {
+      const isShared    = componentRegistryItem?.isShared;
+      const isInherited = componentRegistryItem?.inheritanceLevel && componentRegistryItem.inheritanceLevel !== 'echo';
+      
+      if (isShared || isInherited) {
+        // Shared components or inherited components - import from their subPath
+        const componentSubPath  = componentRegistryItem.subPath;
+        const componentImportId = `Component_${componentId}`;
+        if (componentSubPath) {
+          imports.push(`import ${componentImportId} from '@morphBuild/${componentSubPath}';`);
+        } else {
+          console.warn(chalk.yellow(`  ⚠️  Component '${componentId}' has no subPath defined`));
+        }
+        componentIdentifiers[componentId] = componentImportId;
+        componentRegistryItem.component   = `__IDENTIFIER__${componentImportId}`;
+      } else {
+        // Inline components (defined in this single file) - will be imported from config file
+        if (namedExports.includes(componentId)) {
+          inlineComponents.push(componentId);
+          componentIdentifiers[componentId] = componentId;
+          componentRegistryItem.component   = `__IDENTIFIER__${componentId}`;
+        } else {
+          console.warn(chalk.yellow(`  ⚠️  Component '${componentId}' declared in config but not exported from '${configFilePath}'`));
+        }
+      }
+      
+      delete componentRegistryItem.inheritanceLevel;
     }
-    
-    // Build final imports section (filter out original imports from config file)
-    const filteredImports     = imports.filter(imp => !imp.includes(`${nodeId}.config`));
-    const otherImports        = filteredImports.join('\n');
-    const resourceFileImports = configImportLine + (otherImports ? otherImports + '\n\n' : '\n');
-    
-    // Serialize node resources
-    const allIdentifiers      = { ...moduleIdentifiers, ...componentIdentifiers };
-    const serializedResources = this.serializeValue(nodeResources, 0, allIdentifiers);
-    
-    // Generate final source code
-    const resourceFileName       = `${nodeId}.resources.jsx`;
-    const resourceFileSourceCode = `${resourceFileImports}const nodeResources = ${serializedResources};\n\nexport default nodeResources;`;
+  }
+  
+  // Store configDirSubPath for ResourceProvider
+  this.nodeRegistry[nodeId].configDirSubPath = configDirSubPath;
+  delete nodeResources.configDirSubPath;
+  
+  // Build import line for inline modules/components from config file
+  const inlineExports = [...inlineModules, ...inlineComponents];
+  let configImportLine = '';
+  
+  if (inlineExports.length > 0) {
+    const configImportPath = configDirSubPath 
+      ? `@morphBuild/${configDirSubPath}/${nodeId}.config`
+      : `@morphBuild/${nodeId}.config`;
+    configImportLine = `import { ${inlineExports.join(', ')} } from '${configImportPath}';\n`;
+  }
+  
+  // Build final imports section (filter out original imports from config file)
+  const filteredImports     = imports.filter(imp => !imp.includes(`${nodeId}.config`));
+  const otherImports        = filteredImports.join('\n');
+  const resourceFileImports = configImportLine + (otherImports ? otherImports + '\n\n' : '\n');
+  
+  // Serialize node resources
+  const allIdentifiers      = { ...moduleIdentifiers, ...componentIdentifiers };
+  const serializedResources = this.serializeValue(nodeResources, 0, allIdentifiers);
+  
+  // Generate final source code
+  const resourceFileName       = `${nodeId}.resources.jsx`;
+  const resourceFileSourceCode = `${resourceFileImports}const nodeResources = ${serializedResources};\n\nexport default nodeResources;`;
     
     // Determine target path
     const targetPath = configDirSubPath 
@@ -277,6 +288,7 @@ class MorphSrcBuildDirectoryBuilder {
     console.log(chalk.blue(`  Writing single file node to: ${targetPath}`));
     fs.writeFileSync(targetPath, resourceFileSourceCode, 'utf8');
   }
+  // ####################CHANGE - END####################
 
   /**
    * Extracts named export names from source code.
@@ -631,6 +643,9 @@ class MorphSrcBuildDirectoryBuilder {
     const singleFileConfigs = this.nodeIds
       .filter(nodeId => this.nodeRegistry[nodeId]?.isFile)
       .map(nodeId => `${nodeId}.config.jsx`);
+    
+    // Capture 'this' for use in inner function
+    const self = this;
     // ####################CHANGE - END####################
     
     function deleteFilesRecursively(dir) {
@@ -679,7 +694,7 @@ class MorphSrcBuildDirectoryBuilder {
   /* Resource Provider Creation
   /* *** *** *** *** *** *** *** *** *** *** *** *** *** *** */
   createNodeResourceProvider() {
-    if (!this.lazyLoadNodes) {
+    if (!this.lazyLoadNodeResources) {
       this.createEagerNodeResourceProvider();
     } else {
       this.createLazyNodeResourceProvider();

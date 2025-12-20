@@ -2,7 +2,7 @@ import ServiceClass from './services/ServiceClass';
 
 const appConfig = {
 
-	lazyLoadNodeResources: true,
+	//lazyLoadNodeResources: true,
 
 	ServiceClass,
 
@@ -47,7 +47,7 @@ const appConfig = {
 
 		NodeEcho: {
 		 	dir: '/',
-			isFile: true,
+			//isFile: true,
 		},
 
 
