@@ -30,7 +30,7 @@ export function NodeEcho( { Module } ) {
 
 export function SomeModule() {
   return (
-    <div>SomeModule</div>
+    <div>SomeModule yup</div>
   )
 }
 
