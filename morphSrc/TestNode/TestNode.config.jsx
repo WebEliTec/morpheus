@@ -25,25 +25,7 @@ const config = {
 
   }, 
 
-  navigationHooks: {  
-    willNavigate: {
-      priority: 10, 
-      function: () => {
-        console.log('Will Navigate!');
-      }
-    },
-  }, 
-
   hooks: {
-
-    onRuntimeDataChange( kernel, changedRuntimeDataItems ) {
-
-      if( changedRuntimeDataItems.includes('inputValue') ) {
-        console.log('huhuh!');
-        kernel.displayInputValueSomeWhere();
-      }
-
-    },
 
     willNavigate ( kernel, url ) {
       console.log('[TestNode]: willNavigate default prio 10');
