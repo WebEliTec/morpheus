@@ -19,10 +19,7 @@ export default class NodeManager {
     this.notifyGraphOnNodeMount   = notifyGraphOnNodeMount;    
     this.notifyGraphOnNodeUnmount = notifyGraphOnNodeUnmount;
     this.mayCreateNode            = mayCreateNode;
-
-    // ####################CHANGE - START##################
     this.resourceProvider         = resourceProvider || null;
-    // ####################CHANGE - END####################
 
   }
 

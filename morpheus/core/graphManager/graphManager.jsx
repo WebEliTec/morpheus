@@ -9,10 +9,7 @@ export default class GraphManager {
     this.executionContext       = config.executionContext;
     this.executionContextConfig = config.executionContextConfig;
     this.libraryNodeConfig      = config.libraryNodeConfig;
-
-    // ####################CHANGE - START##################
     this.resourceProvider       = config.resourceProvider || null;
-    // ####################CHANGE - END####################
     
     this.nodeManager  = new NodeManager({
       services:                 this.services,
@@ -23,9 +20,7 @@ export default class GraphManager {
       executionContextConfig:   this.executionContextConfig,
       libraryNodeConfig:        this.libraryNodeConfig,
       executionContext:         this.executionContext,
-      // ####################CHANGE - START##################
       resourceProvider:         this.resourceProvider,
-      // ####################CHANGE - END####################
     });
 
     this.graphChangeListener = config?.graphChangeListener;

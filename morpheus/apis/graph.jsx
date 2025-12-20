@@ -3,12 +3,9 @@ export default class Graph {
   
   constructor() {
     
-    this.graphData = null; 
-
-    // ####################CHANGE - START##################
+    this.graphData        = null; 
     this.resourceProvider = null;
     this.lazyLoadEnabled  = false;
-    // ####################CHANGE - END####################
 
   }
 
@@ -28,8 +25,6 @@ export default class Graph {
     console.log(this.nodeHierarchy); 
   }
 
-
-  // ####################CHANGE - START##################
   _setResourceProvider(resourceProvider, lazyLoadEnabled) {
     this.resourceProvider = resourceProvider;
     this.lazyLoadEnabled  = lazyLoadEnabled;
@@ -74,6 +69,5 @@ export default class Graph {
   async preloadNodes(nodeIds) {
     await Promise.all(nodeIds.map(nodeId => this.preloadNode(nodeId)));
   }
-  // ####################CHANGE - END####################
 
 }

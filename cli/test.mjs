@@ -8,13 +8,10 @@ import chalk from 'chalk';
 
 class MorphSrcBuildDirectoryBuilder {
   constructor() {
-    this.appConfig    = appConfig;
-    this.nodeRegistry = this.appConfig.nodes;
-    this.nodeIds      = Object.keys( this.nodeRegistry );
-    
-    // ####################CHANGE - START##################
+    this.appConfig     = appConfig;
+    this.nodeRegistry  = this.appConfig.nodes;
+    this.nodeIds       = Object.keys( this.nodeRegistry );
     this.lazyLoadNodes = this.appConfig.lazyLoadNodes ?? false;
-    // ####################CHANGE - END####################
   }
 
   async build() {
@@ -317,16 +314,13 @@ class MorphSrcBuildDirectoryBuilder {
   /* Resource Provider Creation
   /* *** *** *** *** *** *** *** *** *** *** *** *** *** *** */
   createResourceProvider() {
-    // ####################CHANGE - START##################
     if (this.lazyLoadNodes) {
       this.createLazyResourceProvider();
     } else {
       this.createEagerResourceProvider();
     }
-    // ####################CHANGE - END####################
   }
 
-  // ####################CHANGE - START##################
   createEagerResourceProvider() {
     const importStatements = this.createEagerImportStatements();
     const registryItems    = this.createEagerRegistryItems();
@@ -482,12 +476,7 @@ export default new ResourceProvider();
     const filteredItems = loaderItemsArray.filter(item => item !== null);
     return filteredItems.join(',\n      ');
   }
-  // ####################CHANGE - END####################
 
-  // ####################CHANGE - START##################
-  // REMOVED: Old methods createResourceProviderImportStatements() and createResourceProviderClassFile()
-  // They have been replaced by the new eager/lazy methods above
-  // ####################CHANGE - END####################
 }
 
 const morphsSrcBuildDirectoryBuilder = new MorphSrcBuildDirectoryBuilder();

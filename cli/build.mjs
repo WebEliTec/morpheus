@@ -9,13 +9,10 @@ import chalk from 'chalk';
 class MorphSrcBuildDirectoryBuilder {
 
   constructor() {
-    this.appConfig    = appConfig;
-    this.nodeRegistry = this.appConfig.nodes;
-    this.nodeIds      = Object.keys( this.nodeRegistry );
-
-    // ####################CHANGE - START##################
+    this.appConfig     = appConfig;
+    this.nodeRegistry  = this.appConfig.nodes;
+    this.nodeIds       = Object.keys( this.nodeRegistry );
     this.lazyLoadNodes = this.appConfig.lazyLoadNodes ?? false;
-    // ####################CHANGE - END####################
 
   }
 
@@ -93,26 +90,17 @@ class MorphSrcBuildDirectoryBuilder {
   
     const sourceCode          = this.extractSourceCode( configFilePath );
     const importStatements    = this.extractImportStatements( sourceCode );
-    const componentExports    = this.extractComponentExports( sourceCode, isSingleFile );
-    const moduleRegistry      = nodeResources?.modules; 
+    const componentExports     = this.extractComponentExports( sourceCode, isSingleFile );
+    const moduleRegistry       = nodeResources?.modules; 
+    const componentRegistry    = nodeResources?.components;
 
-    // ####################CHANGE - START##################
-    const componentRegistry   = nodeResources?.components;
-    // ####################CHANGE - END####################
+    const imports              = [...importStatements]; 
 
-    const imports             = [...importStatements]; 
-
-    const moduleIdentifiers   = {};
-
-    // ####################CHANGE - START##################
+    const moduleIdentifiers    = {};
     const componentIdentifiers = {};
-    // ####################CHANGE - END####################
 
     this.processModuleRegistry( nodeId, moduleRegistry, imports, isSingleFile, configDirSubPath, moduleIdentifiers );
-
-    // ####################CHANGE - START##################
     this.processComponentRegistry( nodeId, componentRegistry, imports, isSingleFile, configDirSubPath, componentIdentifiers );
-    // ####################CHANGE - END####################
 
     const resourceFileImports = imports.length > 0 ? imports.join('\n') + '\n\n' : '';
 
@@ -120,11 +108,8 @@ class MorphSrcBuildDirectoryBuilder {
     this.nodeRegistry[nodeId].configDirSubPath = nodeResources.configDirSubPath;
     delete nodeResources.configDirSubPath;
     
-
-    // ####################CHANGE - START##################
     const allIdentifiers            = { ...moduleIdentifiers, ...componentIdentifiers };
     const serializedResources       = this.serializeValue( nodeResources, 0, allIdentifiers );
-    // ####################CHANGE - END####################
 
 
     const componentExportStatements = componentExports.length > 0 ? '\n\n' + componentExports.join('\n\n'): '';
@@ -198,7 +183,6 @@ class MorphSrcBuildDirectoryBuilder {
 
   }
 
-  // ####################CHANGE - START##################
   processComponentRegistry( nodeId, componentRegistry, imports, isSingleFile, configDirSubPath, componentIdentifiers ) {
     if( !componentRegistry ) {
       return null;
@@ -222,7 +206,6 @@ class MorphSrcBuildDirectoryBuilder {
       imports.push(`import ${componentImportId} from '${importPath}';`);
     });
   }
-  // ####################CHANGE - END####################
 
 
   serializeValue(value, indent = 2, moduleIdentifiers = {}) {
@@ -339,10 +322,8 @@ class MorphSrcBuildDirectoryBuilder {
       'instanceRegistry.jsx',
       'kernel.js',
       'kernel.jsx',
-      // ####################CHANGE - START##################
       'components.js',
       'components.jsx',
-      // ####################CHANGE - END####################
     ];
     
     function deleteFilesRecursively(dir) {
@@ -382,13 +363,11 @@ class MorphSrcBuildDirectoryBuilder {
   /* Resource Provider Creation
   /* *** *** *** *** *** *** *** *** *** *** *** *** *** *** */
   createResourceProvider() {
-    // ####################CHANGE - START##################
     if (!this.lazyLoadNodes) {
       this.createEagerResourceProvider();
     } else {
       this.createLazyResourceProvider();
     }
-    // ####################CHANGE - END####################
   }
 
   createEagerResourceProvider() {

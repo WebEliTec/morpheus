@@ -24,9 +24,7 @@ const resourceRegistry = {
 
       hooks:            'hooks.jsx',
 
-      // ####################CHANGE - START##################
       components:       'components.jsx',
-      // ####################CHANGE - END####################
       
     }, 
 
@@ -54,9 +52,7 @@ const resourceRegistry = {
 
       hooks:            'hooks.jsx',
 
-      // ####################CHANGE - START##################
       components:       'components.jsx',
-      // ####################CHANGE - END####################
       
     }, 
 

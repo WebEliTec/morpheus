@@ -16,7 +16,6 @@ export default class ModuleManager {
     this.componentRegistry     = nodeResources.components;
   }
 
-  // ####################CHANGE - START##################
   /* Component Loader Factory
   /* *** *** *** *** *** *** *** *** *** *** *** *** *** *** */
   getComponentLoader() {
@@ -50,7 +49,7 @@ export default class ModuleManager {
       return <Component {...props}>{children}</Component>;
     };
   }
-  // ####################CHANGE - END####################
+
 
   /* Module Component Factory
   /* *** *** *** *** *** *** *** *** *** *** *** *** *** *** */
@@ -63,10 +62,7 @@ export default class ModuleManager {
     const nodeContext    = this.nodeContext;
     const Apis           = this.apis;
     const Node           = this.nodeLoader;
-
-    // ####################CHANGE - START##################
     const Component      = this.getComponentLoader();
-    // ####################CHANGE - END####################
 
     return function Module({ id, proxyId, instanceKey: propsInstanceKey, children = null, ...props }) {
 
@@ -90,10 +86,7 @@ export default class ModuleManager {
         return <h1>{errorMessage}</h1>;
       }
 
-      // ####################CHANGE - START##################
-      // RENAMED: Was "Component" which shadowed the ComponentLoader
       const ModuleComponent = moduleRegistryItem?.component;
-      // ####################CHANGE - END####################
 
       /* Routing Reactivity
       /* *** *** *** *** *** *** *** *** *** *** *** *** *** *** */
@@ -168,11 +161,9 @@ export default class ModuleManager {
       /* *** *** *** *** *** *** *** *** *** *** *** *** *** *** */
 
       const memoizedComponent = useMemo(() => {
-      // ####################CHANGE - START##################
-      // RENAMED: Using ModuleComponent instead of Component
+
       return ModuleComponent ? (
         <ModuleComponent
-      // ####################CHANGE - END####################
 
             key         = { instanceKey }
 
@@ -202,10 +193,8 @@ export default class ModuleManager {
 
             instanceKey = { instanceKey }
 
-            // ####################CHANGE - START##################
             Component   = { Component }
             C           = { Component }
-            // ####################CHANGE - END####################
 
             {...props}
           >
@@ -315,10 +304,7 @@ export default class ModuleManager {
     this.nodeContext           = null;
     this.nodeLoader            = null;
     this.moduleInstanceCounter = 0;
-
-    // ####################CHANGE - START##################
     this.componentRegistry     = null;
-    // ####################CHANGE - END####################
 
   }
 

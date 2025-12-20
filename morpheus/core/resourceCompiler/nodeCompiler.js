@@ -92,10 +92,7 @@ export default class NodeCompiler {
 
     const hooks             = this.resolveResourceType( nodeInheritanceLineStack, 'hooks' );
     const instances         = this.resolveResourceType( nodeInheritanceLineStack, 'instances' );
-
-    // ####################CHANGE - START##################
     const components        = this.resolveResourceType( nodeInheritanceLineStack, 'components' );
-    // ####################CHANGE - END####################
 
     const nodeResources = {
       nodeId,
@@ -110,12 +107,8 @@ export default class NodeCompiler {
       modules, 
       hooks, 
       instances,
-      // ####################CHANGE - START##################
       components,
-      // ####################CHANGE - END####################
     }
-
-   //console.log( nodeResources );
 
     return nodeResources;
 

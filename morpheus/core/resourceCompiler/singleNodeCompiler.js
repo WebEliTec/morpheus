@@ -138,10 +138,7 @@ export default class SingleNodeCompiler {
     const selectedResources  = this.selectResources( availableResources, configObject );
     const traits             = await this.loadTraits( availableResources, configObject );
     const moduleRegistry     = await this.loadModules( selectedResources?.modules, configObject );
-
-    // ####################CHANGE - START##################
     const componentRegistry  = await this.loadComponents( selectedResources?.components, configObject );
-    // ####################CHANGE - END####################
     
     if( !moduleRegistry ) {
       console.warn( `moduleRegistry is empty for node '${this.nodeId}'` );
@@ -177,9 +174,7 @@ export default class SingleNodeCompiler {
      * - Specifying if a core data item is required or not
      */
 
-    // ####################CHANGE - START##################
     nodeResources.components       = componentRegistry ?? null;
-    // ####################CHANGE - END####################
 
     if( this.inheritanceLevel == 'echo' ) {
       nodeResources.metaData         = selectedResources?.metaData ?? null
@@ -501,7 +496,6 @@ export default class SingleNodeCompiler {
 
   }
 
-  // ####################CHANGE - START##################
   /* Component Loading
   /* *** *** *** *** *** *** *** *** *** *** *** *** *** *** */
   async loadComponents( componentRegistry, configObject ) {
@@ -608,7 +602,6 @@ export default class SingleNodeCompiler {
 
     return initializedComponentRegistry;
   }
-  // ####################CHANGE - END####################
 
   /* Single File Loading
   /* *** *** *** *** *** *** *** *** *** *** *** *** *** *** */
@@ -708,7 +701,6 @@ export default class SingleNodeCompiler {
       Object.assign(traits, config.traitImplementations);
     }
 
-    // ####################CHANGE - START##################
     // Handle components in single file mode
     const initializedComponentRegistry = {};
     
@@ -763,7 +755,6 @@ export default class SingleNodeCompiler {
         }
       }
     }
-    // ####################CHANGE - END####################
 
     const nodeResources = {
 
@@ -782,10 +773,7 @@ export default class SingleNodeCompiler {
       instances:        config.instances ?? null, 
       hooks:            config.hook ?? null,
       traits:           traits ?? null,
-
-      // ####################CHANGE - START##################
       components:       Object.keys(initializedComponentRegistry).length > 0 ? initializedComponentRegistry : null,
-      // ####################CHANGE - END####################
 
     };
 
