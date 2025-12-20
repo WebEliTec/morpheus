@@ -96,7 +96,7 @@ body {
 
 .fade-in {
     opacity: 0;
-    animation: fadeIn 2s ease-in-out forwards;
+    animation: fadeIn 1.75s ease forwards;
 }
 
 @keyframes fadeIn {
@@ -140,6 +140,7 @@ body {
     display: flex;
     justify-content: space-between;
     padding: 0 !important;
+    border: 1px solid #0e6e9e;
 }
 
 
@@ -158,6 +159,8 @@ body {
 .counter-wrapper {
 
     align-items: center;
+
+
     
     button {
         background-color: black;
@@ -243,14 +246,25 @@ body {
     border-radius: .25rem;
 }
 
+.morph-box-beta {
+    background-color: rgba(0, 12, 21, 0.6235294118);
+    padding: 1rem;
+    border: 1px solid #0e6e9e;
+}
+
 .test-component {
     padding: 1rem;
     border: 2px solid #991b1b;;
     border-radius: .5rem;
     color: #991b1b;
     box-shadow: inset 0 8px 37px -14px #991b1b;
-    margin: 1rem;
+    margin: .25rem;
     background-image: url( '/grid.png' );
     background-size: 35%;
     background-position: 50%;
+    font-size: .75rem;
+}
+
+.current-url-display {
+    font-family: monospace;
 }

@@ -7,11 +7,10 @@ export default function Root( { Kernel, Node, Module, Router } ) {
 
   return (
     <div className = "fade-in">
-      <Module id="Test" someProps="true" />
-      <Node id="SideMenu" />
+      <Node id="MainMenu" />
       <Node id="SideBar" />
-      <Node id="Main" />
       <Node id="TestNode" />
+      <Node id="Articles" />
     </div>
   )
 }

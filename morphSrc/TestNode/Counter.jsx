@@ -7,7 +7,7 @@ export default function Counter( { _, Graph } ) {
 
   return (
     <div className="counter-wrapper-outer">
-      <div className="counter-wrapper morph-box">
+      <div className="counter-wrapper">
         <button onClick={ () => _.decreaseCounter() }>-</button>
         <div>{ counter }</div>
         <button onClick={ () => _.increaseCounter() }>+</button>

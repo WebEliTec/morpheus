@@ -5,7 +5,7 @@ export default function Toggler( { _, Module } ) {
   const btnText = !shouldShowInnerElement ? 'Show Element' : 'Hide Element';
 
   return (
-    <div className="toggler">
+    <div className="toggler h-full">
       <button className="morph-button p-4 mx-auto" onClick={ () => _.toggleInnerElement() }>{btnText}</button>
       { shouldShowInnerElement && <Module id="InnerElement" /> }
     </div> 

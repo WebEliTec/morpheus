@@ -13,18 +13,8 @@ const config = {
 
 	defaultPaths: {
 		modules: '/modules',
-		//traits:  '/',
 	},
 
-
-  /* Core Data
-  /* *** *** *** *** *** *** *** *** *** *** *** *** *** *** */
-
-
-  /*
-  coreData: {
-    someData: true,
-  },*/
 
   /* Hooks
   /* *** *** *** *** *** *** *** *** *** *** *** *** *** *** */
@@ -38,10 +28,7 @@ const config = {
     didNavigate: {
       priority: 30, 
       callback: function( kernel, oldUrl, newUrl ) {
-        //console.log( kernel );
-        //console.log( oldUrl );
-        //console.log( newUrl );
-        console.log('[Root]: didNavigate prio 30');
+        //console.log('[Root]: didNavigate prio 30');
       },
     }, 
 
@@ -86,7 +73,7 @@ const config = {
 
   modules: {
 
-    Root:          {
+    Root: {
       routes:  [ '/home', '/content-system', '/users' ],
       signals: [],
       dir: '/',
@@ -118,8 +105,3 @@ const config = {
 }
 
 export default config;
-
-/**
- * 
- * 
-*/

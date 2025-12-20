@@ -42,7 +42,7 @@ const config = {
 
   modules: {
 
-    SideMenu: {
+    MainMenu: {
       isRoot:  true,
       routes:  true,  
       signals: ['selectedMenuItem'], 
@@ -55,7 +55,7 @@ const config = {
   /*
   modules: {
 
-    SideMenu: {
+    MainMenu: {
       isRoot:  true,
     }
 

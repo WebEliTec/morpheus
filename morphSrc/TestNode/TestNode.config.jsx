@@ -3,7 +3,7 @@ const config = {
   defaultPaths: {
     traits: '/',
     modules: '/',
-    //components: '/components'
+    components: '/components'
   },
 
   components: {
@@ -58,14 +58,6 @@ const config = {
 
     runtimeDataDidChange () {
       console.log('runTimedataDidChange')
-    },
-
-    async kernelDidInitialize(kernel) {
-      // Wait for services to be ready
-      await kernel.services.whenReady();
-      
-      // Now data is available
-      kernel.coreData.articles = kernel.services.getArticles();
     },
 
   }, 
@@ -145,7 +137,7 @@ const config = {
       signals: ['showInnerElement']
     },
 
-    AnotherModule: {
+    CurrentUrlDisplay: {
       routes:  true,
       signals: []
     },

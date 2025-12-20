@@ -1,5 +1,4 @@
 import ServiceClass from './services/ServiceClass';
-import TestComponentD from './TestComponentD';
 
 const appConfig = {
 
@@ -23,7 +22,7 @@ const appConfig = {
 		//nodes:   '/nodes',
 		//modules: '/modules',
 		//traits:  '/traits',
-		components: '/components'
+		//components: '/components'
 	},
 
 	nodes: {
@@ -32,13 +31,17 @@ const appConfig = {
 			dir: '/',
 		},
 
-		SideMenu: {},
+		MainMenu: {},
 
 		SideBar:  {
-			dir: '/lol',
+			dir: '/',
 		},
 
 		TestNode: {
+		 	dir: '/',
+		},
+
+		Articles: {
 		 	dir: '/',
 		},
 

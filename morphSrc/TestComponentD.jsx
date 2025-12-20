@@ -2,6 +2,6 @@ import React from 'react'
 
 export default function TestComponentD() {
   return (
-    <div className="test-component">TestComponent D</div>
+    <div className="test-component">TestComponentD</div>
   )
 }
