@@ -83,7 +83,24 @@ export default class NodeManager {
 
       try {
 
-        nodeResources = ResourceProvider.getNodeResources(nodeId);
+        //nodeResources = ResourceProvider.getNodeResources(nodeId);
+
+        try {
+          // ####################CHANGE - START##################
+          // Check if lazy loading is enabled in app config
+          if (this.executionContextConfig.lazyLoadNodes) {
+            // Lazy loading: getNodeResources is async
+            nodeResources = await ResourceProvider.getNodeResources(nodeId);
+          } else {
+            // Eager loading: getNodeResources is sync
+            nodeResources = ResourceProvider.getNodeResources(nodeId);
+          }
+          // ####################CHANGE - END####################
+        } catch (error) {
+          console.error(`Failed to load pre-built resources for ${nodeId}:`, error);
+          throw error;
+        }
+
 
       } catch (error) {
 

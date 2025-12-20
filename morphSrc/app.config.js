@@ -3,6 +3,8 @@ import TestComponentD from './TestComponentD';
 
 const appConfig = {
 
+	//lazyLoadNodes: true,
+
 	ServiceClass,
 
 	hooks: {
