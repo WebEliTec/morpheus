@@ -1,31 +1,8 @@
-import { values } from "lodash"
+import React from 'react'
 
-export default function Wrapper({ _, Module, Node }) {
-  function handleChange( value ) {
-    _.setRuntimeDataItem( 'inputValue', value );
-  }
-  
-  const articles = _.getCoreData( 'articles' );
-  
+export default function Articles() {
   return (
-    <div className="test-node fade-in p-6 bg-gray-900 min-h-screen">
-      
-      {/* Top Controls */}
-      <div className="grid grid-cols-4 gap-4 mb-8">
-        <input 
-          type="text" 
-          onChange={ e => handleChange( e.target.value ) }  
-          className="test-input px-4 py-2 bg-gray-800 border border-gray-700 rounded-lg focus:outline-none focus:ring-2 focus:ring-cyan-500 text-gray-100 placeholder-gray-500"
-          placeholder="Search or filter..."
-        />
-        <Module id="InputValueDisplay" />
-        <Module id="Counter" />
-        <Module id="Toggler" />
-        <Module id="AnotherModule" />
-      </div>
-      
-      {/* Articles Grid */}
-      <div className="max-w-7xl mx-auto">
+          <div className="max-w-7xl mx-auto">
         <h1 className="text-3xl font-bold text-cyan-400 mb-6">
           Hacker News Feed
         </h1>
@@ -99,6 +76,5 @@ export default function Wrapper({ _, Module, Node }) {
           </div>
         )}
       </div>
-    </div>
   )
 }
