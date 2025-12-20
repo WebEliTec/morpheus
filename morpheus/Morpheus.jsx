@@ -95,6 +95,9 @@ export class Morpheus {
       executionContextConfig: appConfig,
       libraryNodeConfig,
       graphChangeListener: this.graphChangeListener.bind( this ),
+      // ####################CHANGE - START##################
+      resourceProvider:       ResourceProvider,  // Pass ResourceProvider through config
+      // ####################CHANGE - END####################
     }
     
     this.executeAppHook('graphWillInitialize', config );
@@ -122,6 +125,9 @@ export class Morpheus {
       apis:                    this.devToolApp, 
       executionContextConfig: devToolConfig, 
       libraryNodeConfig,
+      // ####################CHANGE - START##################
+      resourceProvider:       null,  // DevTools doesn't need ResourceProvider
+      // ####################CHANGE - END####################
     }
 
     this.devToolGraphManager  = new GraphManager( config );

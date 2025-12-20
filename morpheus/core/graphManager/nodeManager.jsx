@@ -3,17 +3,12 @@ import NodeCompiler from '../resourceCompiler/nodeCompiler';
 import MorpheusKernel from '../resourceCompiler/MorpheusKernel';
 import ModuleManager from './moduleManager';
 
-let ResourceProvider = null;
-if (import.meta.env.PROD)  {
-  ResourceProvider = await import('../../../morphBuild/ResourceProvider.js').then(m => m.default);
-}
-
 const ParentKernelContext = createContext(null);
 
 export default class NodeManager {
 
 
-  constructor( { executionContext, executionContextConfig, libraryNodeConfig, services, apis, notifyGraphOnNodeMount, notifyGraphOnNodeUnmount, mayCreateNode } ) {
+  constructor( { executionContext, executionContextConfig, libraryNodeConfig, services, apis, notifyGraphOnNodeMount, notifyGraphOnNodeUnmount, mayCreateNode, resourceProvider } ) {
 
     this.services                 = services || null; 
     this.executionContext         = executionContext;
@@ -24,6 +19,10 @@ export default class NodeManager {
     this.notifyGraphOnNodeMount   = notifyGraphOnNodeMount;    
     this.notifyGraphOnNodeUnmount = notifyGraphOnNodeUnmount;
     this.mayCreateNode            = mayCreateNode;
+
+    // ####################CHANGE - START##################
+    this.resourceProvider         = resourceProvider || null;
+    // ####################CHANGE - END####################
 
   }
 
@@ -82,31 +81,17 @@ export default class NodeManager {
     if (import.meta.env.PROD) {
 
       try {
-
-        //nodeResources = ResourceProvider.getNodeResources(nodeId);
-
-        try {
-          // ####################CHANGE - START##################
-          // Check if lazy loading is enabled in app config
-          if (this.executionContextConfig.lazyLoadNodes) {
-            // Lazy loading: getNodeResources is async
-            nodeResources = await ResourceProvider.getNodeResources(nodeId);
-          } else {
-            // Eager loading: getNodeResources is sync
-            nodeResources = ResourceProvider.getNodeResources(nodeId);
-          }
-          // ####################CHANGE - END####################
-        } catch (error) {
-          console.error(`Failed to load pre-built resources for ${nodeId}:`, error);
-          throw error;
+        // Check if lazy loading is enabled in app config
+        if (this.executionContextConfig.lazyLoadNodes) {
+          // Lazy loading: getNodeResources is async
+          nodeResources = await this.resourceProvider.getNodeResources(nodeId);
+        } else {
+          // Eager loading: getNodeResources is sync
+          nodeResources = this.resourceProvider.getNodeResources(nodeId);
         }
-
-
       } catch (error) {
-
         console.error(`Failed to load pre-built resources for ${nodeId}:`, error);
         throw error;
-
       }
 
     } else {
