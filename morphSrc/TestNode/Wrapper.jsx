@@ -12,7 +12,15 @@ export default function Wrapper({ _, Module, Node, Component }) {
       
       {/* Top Controls */}
       <div className="grid grid-cols-4 gap-4 mb-8">
-        <Component id="TestComponent" />
+        <div className="component-wrapper">
+          <Component id="TestComponentA" />
+          <Component id="TestComponentB" />
+          <Component id="TestComponentC" />
+          <Component id="TestComponentD" />
+          <Component id="TestComponentE" />
+          <Component id="TestComponentF" />
+        </div>
+
         {/* <input 
           type="text" 
           onChange={ e => handleChange( e.target.value ) }  

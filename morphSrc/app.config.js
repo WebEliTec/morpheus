@@ -1,4 +1,5 @@
 import ServiceClass from './services/ServiceClass';
+import TestComponentD from './TestComponentD';
 
 const appConfig = {
 
@@ -20,6 +21,7 @@ const appConfig = {
 		//nodes:   '/nodes',
 		//modules: '/modules',
 		//traits:  '/traits',
+		components: '/components'
 	},
 
 	nodes: {
@@ -47,6 +49,15 @@ const appConfig = {
 			dir: '/test'
 		},
 
+	}, 
+
+	sharedComponents: {
+		TestComponentE: {
+			dir: '/',
+		},
+		TestComponentF: {
+			dir: '/sub',
+		},
 	}, 
 
 	mediaRegistry: {

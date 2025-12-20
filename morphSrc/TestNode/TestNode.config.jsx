@@ -3,11 +3,24 @@ const config = {
   defaultPaths: {
     traits: '/',
     modules: '/',
-    components: '/components'
+    //components: '/components'
   },
 
   components: {
-    TestComponent: {},
+    TestComponentA: {},
+    TestComponentB: {},
+    TestComponentC: {
+      dir: '/',
+    },
+    TestComponentD: {
+      rootDir: '/',
+    },
+    TestComponentE: {
+      isShared: true,
+    },
+    TestComponentF: {
+      isShared: true,
+    },
   }, 
 
   signals: {
