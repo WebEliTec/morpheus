@@ -60,6 +60,11 @@ const config = {
       console.log('runTimedataDidChange')
     },
 
+    signalsDidChange( kernel ) {
+      console.log( 'Signals Did Change' );
+      kernel.indexedDBManager.updateNodeData('someNode', 'coreData', {someKey: "someValue"} );
+    }, 
+
   }, 
 
   kernel: {
