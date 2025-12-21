@@ -115,10 +115,6 @@ export default class NodeManager {
 
     }
 
-    if( nodeId == 'NodeEcho' ) {
-      console.log( nodeResources );
-    }
-
     const { traits }          = nodeResources;
 
     nodeResources.KernelClass = this.createKernelClass(traits);
@@ -184,6 +180,7 @@ export default class NodeManager {
     kernel.media               = apis.media;
     kernel.utility             = apis.utility;
     kernel.graph               = apis.graph;
+    kernel.indexedDBManager    = apis.indexedDBManager;
 
     kernel.router              = apis.router;
 

@@ -20,7 +20,7 @@ export default class GraphManager {
       executionContextConfig:   this.executionContextConfig,
       libraryNodeConfig:        this.libraryNodeConfig,
       executionContext:         this.executionContext,
-      nodeResourceProvider:         this.nodeResourceProvider,
+      nodeResourceProvider:     this.nodeResourceProvider,
     });
 
     this.graphChangeListener = config?.graphChangeListener;

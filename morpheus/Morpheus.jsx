@@ -11,6 +11,7 @@ import MediaManager from './apis/mediaManager';
 import Graph from './apis/graph';
 import Router from './apis/router';
 import Utility from './apis/utility';
+import IndexedDBManager from './apis/indexedDBManager';
 
 let NodeResourceProvider = null;
 if (import.meta.env.PROD) {
@@ -64,11 +65,12 @@ export class Morpheus {
 
     this.executeAppHook('appWillInitialize');
 
-    this.apis          = {};
-    this.apis.media    = new MediaManager( appConfig );
-    this.apis.graph    = new Graph();
-    this.apis.router   = new Router();
-    this.apis.utility  = new Utility();
+    this.apis                  = {};
+    this.apis.media            = new MediaManager( appConfig );
+    this.apis.indexedDBManager = new IndexedDBManager( appConfig );
+    this.apis.graph            = new Graph();
+    this.apis.router           = new Router();
+    this.apis.utility          = new Utility();
 
     // Connect NodeResourceProvider to Graph API for preloading support
     if (import.meta.env.PROD && NodeResourceProvider) {
@@ -90,8 +92,8 @@ export class Morpheus {
       services:               this.services,
       executionContextConfig: appConfig,
       libraryNodeConfig,
-      graphChangeListener: this.graphChangeListener.bind( this ),
-      nodeResourceProvider:       NodeResourceProvider,
+      graphChangeListener:    this.graphChangeListener.bind( this ),
+      nodeResourceProvider:   NodeResourceProvider,
     }
     
     this.executeAppHook('graphWillInitialize', config );
@@ -116,10 +118,10 @@ export class Morpheus {
 
     const config = {
       executionContext:       'dev',
-      apis:                    this.devToolApp, 
+      apis:                   this.devToolApp, 
       executionContextConfig: devToolConfig, 
       libraryNodeConfig,
-      nodeResourceProvider:       null,  // DevTools doesn't need NodeResourceProvider
+      nodeResourceProvider:   null,
     }
 
     this.devToolGraphManager  = new GraphManager( config );

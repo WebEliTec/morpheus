@@ -2,19 +2,26 @@ import ServiceClass from './services/ServiceClass';
 
 const appConfig = {
 
-	//lazyLoadNodeResources: true,
+	appName: 'Morpheus Experimental',
+	
+	dataVersion: '1', 
+
+	lazyLoadNodeResources: true,
 
 	ServiceClass,
 
 	hooks: {
-		appWillInitialize() {
-			console.log('App will initialize');
+		 appWillInitialize() {
+			//console.log('App will initialize');
 		}, 
 		graphWillInitialize() {
-			console.log('Graph will initialize');
+			//console.log('Graph will initialize');
 		}, 
+		apisDidInitialize( apis ) {
+			apis.indexedDBManager.createOrUpdateAppMainDatabase();
+		},
 		appDidInitialize() {
-			console.log('App did initialize');
+			//console.log('App did initialize');
 		}, 
 	}, 
 
@@ -47,7 +54,7 @@ const appConfig = {
 
 		NodeEcho: {
 		 	dir: '/',
-			//isFile: true,
+			isFile: true,
 		},
 
 

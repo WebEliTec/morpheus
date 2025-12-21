@@ -92,26 +92,7 @@ export default class SingleNodeCompiler {
     }
 
     const isFile                   = this.inheritanceLevel == 'echo' ? this.nodeRegistryItem.isFile : configFileContent.default?.isFile;
-
-    if( this.nodeId  == 'NodeEcho' ) {
-      console.log( 'xxxxxxxxxxxxxxxx' );
-      console.log( this.nodeRegistryItem );
-      console.log( 'isFile', isFile );
-      console.log( this.configDirSubPath )
-      console.log( configFileContent  );
-      console.log( 'xxxxxxxxxxxxxxxx' );
-    }
-
-    if( isFile ) {
-      console.warn( `Node '${this.nodeId}' is a single file. Single file compilation is currently not supported at morpheus buildtime and will be ignored.` );
-      //return null;
-    }
-
     const nodeResources            = isFile ? await this.compileResourcesFromFile( configFileContent ) : await this.compileResourcesFromDirectory( configFileContent );
-
-    if( this.nodeId  == 'NodeEcho' ) {
-      console.log( nodeResources );
-    }
 
     nodeResources.configDirSubPath = this.configDirSubPath;
 

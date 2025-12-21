@@ -51,3 +51,16 @@ export function validateModuleExports( module ) {
   return { hasNamedExportsButNoDefaultExport, hasNoMeaningfulDefaultExport };
 
 }
+
+
+export function toCamelCase(str) {
+  return str.replace(/-([a-z])/g, (_, char) => char.toUpperCase());
+}
+
+export function toSnakeCase(str) {
+  return str.replace(/([a-z0-9])([A-Z])/g, '$1_$2').replace(/[-\s]+/g, '_').toLowerCase();
+}
+
+export function toSeparatedLowerCase(str, separator = '-') {
+  return str.replace(/([a-z0-9])([A-Z])/g, '$1$2').replace(/[\s_-]+/g, separator).toLowerCase();
+}
