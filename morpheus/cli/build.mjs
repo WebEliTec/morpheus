@@ -1,9 +1,8 @@
 import fs from 'fs';
 import fse from 'fs-extra';
-import SingleNodeCompiler from '../morpheus/core/resourceCompiler/singleNodeCompiler.js';
-import NodeCompiler from '../morpheus/core/resourceCompiler/nodeCompiler.js';
-import appConfig from '../morphSrc/app.config.js';
-import libraryNodeConfig from '../morpheus/core/configs/libraryNode.config';
+import NodeCompiler from '../core/resourceCompiler/nodeCompiler.js';
+import appConfig from '../../morphSrc/app.config.js';
+import libraryNodeConfig from '../core/configs/libraryNode.config';
 import chalk from 'chalk';
 
 class MorphSrcBuildDirectoryBuilder {

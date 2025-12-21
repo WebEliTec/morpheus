@@ -30,7 +30,11 @@ const config = {
       callback: function( kernel, oldUrl, newUrl ) {
         //console.log('[Root]: didNavigate prio 30');
       },
-    }, 
+    },
+    
+    signalsDidChange: () => {
+      console.log('Singals Did Change!');
+    }
 
   },
 

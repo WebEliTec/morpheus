@@ -8,8 +8,7 @@
     "build": "npm run morpheus:build && vite build",
     "lint": "eslint .",
     "preview": "vite preview",
-    "morpheus:build": "npx tsx cli/build.mjs",
-    "morpheus:exp": "npx tsx cli/build_obj.mjs"
+    "morpheus:build": "npx tsx morpheus/cli/build.mjs"
   },
   "dependencies": {
     "@tailwindcss/vite": "^4.1.17",
