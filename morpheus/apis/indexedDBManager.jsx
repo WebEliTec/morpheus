@@ -190,7 +190,7 @@ export default class IndexedDBManager {
           this.db = upgradeRequest.result;
           resolve(this.db);
         };
-        
+
       };
 
     });
@@ -257,12 +257,9 @@ export default class IndexedDBManager {
       const store       = transaction.objectStore(this.storeNames.nodes);
       const request     = store.put(newRecord);
       
-      request.onerror = () => { reject(request.error) };
+      request.onerror   = () => { reject(request.error) };
       
-      request.onsuccess = () => {
-        console.log(`[IndexedDBManager] Updated ${dataType} for node: ${nodeInstanceId}`);
-        resolve(newRecord);
-      };
+      request.onsuccess = () => { console.log(`[IndexedDBManager] Updated ${dataType} for node: ${nodeInstanceId}`); resolve(newRecord) };
 
     });
   }
