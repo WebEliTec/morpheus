@@ -22,7 +22,8 @@ const config = {
   hooks: {
     kernelDidInitialize: async ( kernel ) => {
       kernel.coreData.someValue = 'Test';
-      //console.log( 'Root Node did initialize' );
+      const coreData = kernel.coreData;
+      kernel.indexedDB.upsertNodeCoreData( kernel.id, coreData );
     },
 
     didNavigate: {
@@ -37,6 +38,10 @@ const config = {
     }
 
   },
+
+  coreData: {
+    coreDataItemA: 'Hello World YYYY!',
+  }, 
 
   /* Traits
   /* *** *** *** *** *** *** *** *** *** *** *** *** *** *** */
