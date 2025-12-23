@@ -6,14 +6,20 @@ export default class GraphManager {
     
     this.services               = config.services || null;
     this.apis                   = config.apis;
+    // ###################### Begin: Changes ####################
+    this.apiManager             = config.apiManager || null;
+    // ###################### End: Changes #####################
     this.executionContext       = config.executionContext;
     this.executionContextConfig = config.executionContextConfig;
     this.libraryNodeConfig      = config.libraryNodeConfig;
-    this.nodeResourceProvider       = config.nodeResourceProvider || null;
+    this.nodeResourceProvider   = config.nodeResourceProvider || null;
     
     this.nodeManager  = new NodeManager({
       services:                 this.services,
       apis:                     this.apis,
+      // ###################### Begin: Changes ####################
+      apiManager:               this.apiManager,
+      // ###################### End: Changes #####################
       notifyGraphOnNodeMount:   this.notifyGraphOnNodeMount.bind(this),  
       notifyGraphOnNodeUnmount: this.notifyGraphOnNodeUnmount.bind(this), 
       mayCreateNode:            this.mayCreateNode.bind(this), 

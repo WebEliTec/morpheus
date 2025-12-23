@@ -7,6 +7,11 @@ import appConfig from '../morphSrc/app.config';
 import devToolConfig from './dev/ui/devTool.config';
 import libraryNodeConfig from './core/configs/libraryNode.config';
 
+// ###################### Begin: Changes ####################
+import APIManager from './core/APIManager';
+// ###################### End: Changes #####################
+
+/*
 import Graph from './apis/graph';
 import Router from './apis/router';
 import Utility from './apis/utility';
@@ -14,7 +19,7 @@ import Utility from './apis/utility';
 import MediaManager from './apis/mediaManager';
 
 import IndexedDBManager from './apis/indexedDBManager';
-import LocalStorageManager from './apis/localStorageManager';
+import LocalStorageManager from './apis/localStorageManager';*/
 
 let NodeResourceProvider = null;
 if (import.meta.env.PROD) {
@@ -64,7 +69,11 @@ export class Morpheus {
   /* Initialize App
   /* *** *** *** *** *** *** *** *** *** *** *** *** *** *** */
 
-  initializeApp() {
+  async initializeApp() {
+
+    // Initialize APIManager before appWillInitialize hook
+    this.apiManager = new APIManager(appConfig);
+    this.apis       = await this.apiManager.initialize();
 
     this.executeAppHook('appWillInitialize');
 
@@ -100,6 +109,7 @@ export class Morpheus {
     const config = {
       executionContext:       'app',
       apis:                   this.apis, 
+      apiManager:             this.apiManager,
       services:               this.services,
       executionContextConfig: appConfig,
       libraryNodeConfig,
@@ -118,24 +128,29 @@ export class Morpheus {
   /* Initialize Dev Tools
   /* *** *** *** *** *** *** *** *** *** *** *** *** *** *** */
 
-  initializeDevTools() {
-    this.devToolApp            = {};
-    this.devToolApp.media      = new MediaManager( devToolConfig );
-    this.devToolApp.graph      = new Graph();
-    this.devToolApp.utility    = new Utility();
-    this.devToolApp.router     = new Router();
-    this.devToolApp.apis       = {}; 
-    this.devToolApp.apis.graph = this.apis.graph;
+  async initializeDevTools() {
+
+    // DevTools uses its own APIManager with all APIs enabled for inspection
+    const devToolAPIManager = new APIManager({
+      ...devToolConfig,
+      supportedAPIs: [] // DevTools only needs core APIs
+    });
+    
+    this.devToolApp = await devToolAPIManager.initialize();
+    this.devToolApp.apis = {};
+    this.devToolApp.apis.graph = this.apis.graph; // Share main app's graph for inspection
 
     const config = {
       executionContext:       'dev',
-      apis:                   this.devToolApp, 
-      executionContextConfig: devToolConfig, 
+      apis:                   this.devToolApp,
+      apiManager:             devToolAPIManager,
+      executionContextConfig: devToolConfig,
       libraryNodeConfig,
       nodeResourceProvider:   null,
     }
+    
+    this.devToolGraphManager = new GraphManager(config);
 
-    this.devToolGraphManager  = new GraphManager( config );
   }
 
   /* Get Root Node (combines app + devtools)
