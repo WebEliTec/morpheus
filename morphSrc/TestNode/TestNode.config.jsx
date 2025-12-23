@@ -141,6 +141,23 @@ const config = {
 
   }, 
 
+  coreData: {
+    paths: {
+      a: '/path-a', 
+      b: '/path-b', 
+      c: '/path-c', 
+      d: '/path-d', 
+    },
+    names: ['Alvib', 'Berta', 'Cesar'],
+  },
+  
+  metaData: {
+    title: 'Node Title', 
+    duration: 40,
+  }
+
+  
+
 }
 
 export default config;
