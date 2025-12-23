@@ -182,6 +182,7 @@ export default class NodeManager {
     kernel.utility             = apis.utility;
     kernel.media               = apis.media;
     kernel.indexedDBManager    = apis.indexedDBManager;
+    kernel.indexedDB           = kernel.indexedDBManager;
 
     this.registerNavigationHooks( kernel, nodeResources );
 
