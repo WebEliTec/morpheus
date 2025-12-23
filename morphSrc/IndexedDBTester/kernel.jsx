@@ -1,18 +1,18 @@
 const indexedDBTestKernel = {
   
   // Object Store Operations
-  testAddObjectStore: async function() {
+  async testAddObjectStore() {
     await this.indexedDB.addObjectStore('users', 'id', ['email', 'lastName']);
     console.log('Store added');
   },
   
-  testDeleteObjectStore: async function() {
+  async testDeleteObjectStore() {
     await this.indexedDB.deleteObjectStore('users');
     console.log('Store deleted');
   },
   
   // Generic Record Operations (Layer 1)
-  testAddRecord: async function() {
+  async testAddRecord() {
     await this.indexedDB.addRecord('users', {
       id: 'user-001',
       email: 'alice@example.com',
@@ -22,22 +22,22 @@ const indexedDBTestKernel = {
     console.log('Record added');
   },
   
-  testGetRecord: async function() {
+  async testGetRecord() {
     const user = await this.indexedDB.getRecord('users', 'user-001');
     console.log('Record:', user);
   },
   
-  testGetAllRecords: async function() {
+  async testGetAllRecords() {
     const users = await this.indexedDB.getAllRecords('users');
     console.log('All records:', users);
   },
   
-  testUpdateRecord: async function() {
+  async testUpdateRecord() {
     await this.indexedDB.updateRecord('users', 'user-001', { firstName: 'Alicia' });
     console.log('Record updated');
   },
   
-  testUpsertRecord: async function() {
+  async testUpsertRecord() {
     await this.indexedDB.upsertRecord('users', {
       id: 'user-002',
       email: 'bob@example.com',
@@ -47,13 +47,13 @@ const indexedDBTestKernel = {
     console.log('Record upserted');
   },
   
-  testDeleteRecord: async function() {
+  async testDeleteRecord() {
     await this.indexedDB.deleteRecord('users', 'user-001');
     console.log('Record deleted');
   },
   
   // Node Data Collection Operations (Layer 2)
-  testAddNodeDataCollection: async function() {
+  async testAddNodeDataCollection() {
     await this.indexedDB.addNodeDataCollection(this.id, {
       metaData: { title: 'My Node', duration: 40 },
       coreData: { paths: { a: '/path-a' } }
@@ -61,12 +61,12 @@ const indexedDBTestKernel = {
     console.log('Node collection added');
   },
   
-  testGetNodeDataCollection: async function() {
+  async testGetNodeDataCollection() {
     const node = await this.indexedDB.getNodeDataCollection(this.id);
     console.log('Node collection:', node);
   },
   
-  testUpsertNodeDataCollection: async function() {
+  async testUpsertNodeDataCollection() {
     await this.indexedDB.upsertNodeDataCollection(this.id, {
       metaData: { title: 'Updated Node', duration: 60 },
       coreData: { paths: { a: '/new-path' } }
@@ -74,61 +74,61 @@ const indexedDBTestKernel = {
     console.log('Node collection upserted');
   },
   
-  testDeleteNodeDataCollection: async function() {
+  async testDeleteNodeDataCollection() {
     await this.indexedDB.deleteNodeDataCollection(this.id);
     console.log('Node collection deleted');
   },
   
   // Node Data Type Operations (Layer 3)
-  testAddNodeDataOfType: async function() {
+  async testAddNodeDataOfType() {
     await this.indexedDB.addNodeDataOfType(this.id, 'metaData', { title: 'Test', duration: 30 });
     console.log('MetaData added');
   },
   
-  testGetNodeDataOfType: async function() {
+  async testGetNodeDataOfType() {
     const metaData = await this.indexedDB.getNodeDataOfType(this.id, 'metaData');
     console.log('MetaData:', metaData);
   },
   
-  testUpsertNodeDataOfType: async function() {
+  async testUpsertNodeDataOfType() {
     await this.indexedDB.upsertNodeDataOfType(this.id, 'coreData', { paths: { x: '/x' } });
     console.log('CoreData upserted');
   },
   
-  testDeleteNodeDataOfType: async function() {
+  async testDeleteNodeDataOfType() {
     await this.indexedDB.deleteNodeDataOfType(this.id, 'coreData');
     console.log('CoreData deleted');
   },
   
   // MetaData Convenience (Layer 4)
-  testUpsertNodeMetaData: async function() {
+  async testUpsertNodeMetaData() {
     await this.indexedDB.upsertNodeMetaData(this.id, { title: 'Hello', duration: 100 });
     console.log('MetaData upserted');
   },
   
-  testGetNodeMetaData: async function() {
+  async testGetNodeMetaData() {
     const metaData = await this.indexedDB.getNodeMetaData(this.id);
     console.log('MetaData:', metaData);
   },
   
   // MetaData Item (Layer 5)
-  testUpsertNodeMetaDataItem: async function() {
+  async testUpsertNodeMetaDataItem() {
     await this.indexedDB.upsertNodeMetaDataItem(this.id, 'duration', 200);
     console.log('MetaData item upserted');
   },
   
-  testGetNodeMetaDataItem: async function() {
+  async testGetNodeMetaDataItem() {
     const duration = await this.indexedDB.getNodeMetaDataItem(this.id, 'duration');
     console.log('Duration:', duration);
   },
   
-  testDeleteNodeMetaDataItem: async function() {
+  async testDeleteNodeMetaDataItem() {
     await this.indexedDB.deleteNodeMetaDataItem(this.id, 'duration');
     console.log('MetaData item deleted');
   },
   
   // CoreData Convenience (Layer 4)
-  testUpsertNodeCoreData: async function() {
+  async testUpsertNodeCoreData() {
     await this.indexedDB.upsertNodeCoreData(this.id, {
       paths: { a: '/a', b: '/b' },
       names: ['Alice', 'Bob']
@@ -136,24 +136,24 @@ const indexedDBTestKernel = {
     console.log('CoreData upserted');
   },
   
-  testGetNodeCoreData: async function() {
+  async testGetNodeCoreData() {
     const coreData = await this.indexedDB.getNodeCoreData(this.id);
     console.log('CoreData:', coreData);
   },
   
   // CoreData Item (Layer 5)
-  testGetNodeCoreDataItem: async function() {
+  async testGetNodeCoreDataItem() {
     const paths = await this.indexedDB.getNodeCoreDataItem(this.id, 'paths');
     console.log('Paths:', paths);
   },
   
-  testUpsertNodeCoreDataItem: async function() {
+  async testUpsertNodeCoreDataItem() {
     await this.indexedDB.upsertNodeCoreDataItem(this.id, 'names', ['Alice', 'Bob', 'Charlie']);
     console.log('CoreData item upserted');
   },
   
   // SignalGroup Collection (Layer 4)
-  testUpsertNodeSignalGroupCollection: async function() {
+  async testUpsertNodeSignalGroupCollection() {
     await this.indexedDB.upsertNodeSignalGroupCollection(this.id, {
       'group-a': { name: 'Group A', signals: [1, 2, 3] },
       'group-b': { name: 'Group B', signals: [4, 5, 6] }
@@ -161,49 +161,49 @@ const indexedDBTestKernel = {
     console.log('SignalGroup collection upserted');
   },
   
-  testGetNodeSignalGroupCollection: async function() {
+  async testGetNodeSignalGroupCollection() {
     const groups = await this.indexedDB.getNodeSignalGroupCollection(this.id);
     console.log('SignalGroups:', groups);
   },
   
   // SignalGroup (Layer 5)
-  testAddNodeSignalGroup: async function() {
+  async testAddNodeSignalGroup() {
     await this.indexedDB.addNodeSignalGroup(this.id, 'group-c', { name: 'Group C', signals: [7, 8] });
     console.log('SignalGroup added');
   },
   
-  testGetNodeSignalGroup: async function() {
+  async testGetNodeSignalGroup() {
     const group = await this.indexedDB.getNodeSignalGroup(this.id, 'group-a');
     console.log('SignalGroup:', group);
   },
   
-  testUpdateNodeSignalGroup: async function() {
+  async testUpdateNodeSignalGroup() {
     await this.indexedDB.updateNodeSignalGroup(this.id, 'group-a', { signals: [1, 2, 3, 4] });
     console.log('SignalGroup updated');
   },
   
-  testDeleteNodeSignalGroup: async function() {
+  async testDeleteNodeSignalGroup() {
     await this.indexedDB.deleteNodeSignalGroup(this.id, 'group-b');
     console.log('SignalGroup deleted');
   },
   
   // App Meta (Layer 4)
-  testUpsertAppMeta: async function() {
+  async testUpsertAppMeta() {
     await this.indexedDB.upsertAppMeta('theme', 'dark');
     console.log('App meta upserted');
   },
   
-  testGetAppMeta: async function() {
+  async testGetAppMeta() {
     const theme = await this.indexedDB.getAppMeta('theme');
     console.log('Theme:', theme);
   },
   
-  testGetAllAppMeta: async function() {
+  async testGetAllAppMeta() {
     const allMeta = await this.indexedDB.getAllAppMeta();
     console.log('All app meta:', allMeta);
   },
   
-  testDeleteAppMeta: async function() {
+  async testDeleteAppMeta() {
     await this.indexedDB.deleteAppMeta('theme');
     console.log('App meta deleted');
   }

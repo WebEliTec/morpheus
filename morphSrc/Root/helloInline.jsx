@@ -1,5 +1,5 @@
 const someTrait = {
- helloInline() {
+ async helloInline() {
     console.log('Hello World from some trait file!');
   }
 }
