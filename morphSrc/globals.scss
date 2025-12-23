@@ -84,7 +84,7 @@ body {
     text-transform: uppercase;
     border: 1px solid $primary-darker;
     padding: .5rem .25rem;
-    width: 100%;
+    //width: 100%;
     max-width: 600px;
 
 }
@@ -243,7 +243,6 @@ body {
 
 .morph-box {
     border: 1px solid #031b27;
-    border-radius: .25rem;
 }
 
 .morph-box-beta {
@@ -267,4 +266,16 @@ body {
 
 .current-url-display {
     font-family: monospace;
+}
+
+
+.heading-alpha {
+    text-align: left;
+    color: #a5f9fc;
+    text-transform: uppercase;
+    position: relative;
+    font-size: 1rem;
+    margin-left: 0.5rem;
+    font-weight: 200;
+    //mask-image: linear-gradient( 90deg, rgba(4, 4, 4, 0.537254902), #000 40%, rgba(105, 6, 6, 0.8) );
 }

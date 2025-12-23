@@ -62,7 +62,7 @@ const config = {
 
     signalsDidChange( kernel ) {
       console.log( 'Signals Did Change' );
-      kernel.indexedDBManager.updateNodeData('someNode', 'coreData', {someKey: "someValue"} );
+      kernel.indexedDBManager.updateNodeData('someNode', 'coreData', {someKeyY: "someValue"} );
     }, 
 
   }, 

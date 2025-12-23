@@ -65,6 +65,9 @@ export class Morpheus {
 
     this.executeAppHook('appWillInitialize');
 
+
+    //Take appConfig here and determine which APIs to include
+
     this.apis                  = {};
     this.apis.media            = new MediaManager( appConfig );
     this.apis.indexedDBManager = new IndexedDBManager( appConfig );

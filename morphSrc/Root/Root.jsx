@@ -18,12 +18,16 @@ export default function Root({ Kernel, Node, Module, Router }) {
       <Node id="SideBar" />
       <Node id="NodeEcho" />
       <Node id="TestNode" />
+      <Node id="IndexedDBTester"/>
       
-      <button onClick = { () => toggleArticles() } onMouseEnter = { handleMouseEnter } >
-        Toggle Articles
-      </button>
-      
-      {shouldShowArticles && <Node id="Articles" />}
+      <div className="p-4">
+        <h2 className="heading-alpha mb-6">kernelDIDChange Tester</h2>
+        <button class="morph-button mb-16" onClick = { () => toggleArticles() } onMouseEnter = { handleMouseEnter } >
+          Toggle Article
+        </button>
+        {shouldShowArticles && <Node id="Articles" />}
+      </div>
+
     </div>
   );
 }

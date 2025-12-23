@@ -169,20 +169,19 @@ export default class NodeManager {
     kernel.parentId            = nodeProps?.parentId; 
 
     kernel.constants           = constants;
-    
     kernel.metaData            = { ...metaData, ...(instanceRegistryItem?.metaData || {}) };
     kernel.coreData            = { ...coreData, ...(instanceRegistryItem?.coreData || {}) };
     kernel.signalGroups        = signalGroups;
     kernel.optimisticSignals   = {};
 
     kernel.services            = services;
-    kernel.apis                = apis;
-    kernel.media               = apis.media;
-    kernel.utility             = apis.utility;
-    kernel.graph               = apis.graph;
-    kernel.indexedDBManager    = apis.indexedDBManager;
 
+    kernel.apis                = apis;
+    kernel.graph               = apis.graph;
     kernel.router              = apis.router;
+    kernel.utility             = apis.utility;
+    kernel.media               = apis.media;
+    kernel.indexedDBManager    = apis.indexedDBManager;
 
     this.registerNavigationHooks( kernel, nodeResources );
 

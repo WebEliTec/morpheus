@@ -57,6 +57,10 @@ const appConfig = {
 			isFile: true,
 		},
 
+		IndexedDBTester: {
+		 	dir: '/',
+		},
+
 
 	},  
 

@@ -1,3 +1,4 @@
+import Dexie from 'dexie';
 import { toSnakeCase } from '../helpers';
 
 export default class IndexedDBManager {
@@ -12,7 +13,7 @@ export default class IndexedDBManager {
       throw new Error('[IndexedDBManager] appConfig.appName is required');
     }
     
-    if (appConfig.dataVersion === undefined || appConfig.dataVersion === null) {
+    if (appConfig.dataVersion === undefined) {
       throw new Error('[IndexedDBManager] appConfig.dataVersion is required');
     }
     
@@ -31,236 +32,270 @@ export default class IndexedDBManager {
     this.validNodeDataTypes = ['metaData', 'coreData', 'signalGroups'];
   }
   
+  /* Helpers
+  /* *** *** *** *** *** *** *** *** *** *** *** *** *** *** */
+  
   getFullDatabaseName() {
     return `${this.dbPrefix}${this.appNameInternal}_${this.dataVersion}`;
   }
   
+  ensureInitialized() {
+    if (!this.db || !this.db.isOpen()) {
+      throw new Error('[IndexedDBManager] Database not initialized. Call createOrUpdateAppMainDatabase() first.');
+    }
+  }
+  
+  /* Main Database Initialization
+  /* *** *** *** *** *** *** *** *** *** *** *** *** *** *** */
+  
   async createOrUpdateAppMainDatabase() {
 
-
     const targetDbName = this.getFullDatabaseName();
-    const databases    = await indexedDB.databases();
+    const databases    = await Dexie.getDatabaseNames();
     const appDbPrefix  = `${this.dbPrefix}${this.appNameInternal}_`;
-    const oldDatabases = databases.filter( db => db.name.startsWith(appDbPrefix) && db.name !== targetDbName );
+    const oldDatabases = databases.filter(db => db.startsWith(appDbPrefix) && db !== targetDbName);
     
-    for (const oldDb of oldDatabases) {
-      await this.deleteDatabase(oldDb.name);
-      console.log(`[IndexedDBManager] Deleted old database: ${oldDb.name}`);
+    for (const oldDbName of oldDatabases) {
+      await this.deleteDatabase(oldDbName);
     }
+
+    const storeDefinitions = [
+      { name: 'app_meta', keyPath: 'key' },
+      { name: 'nodes', keyPath: 'nodeInstanceId' }
+    ]
     
-    await this.createDatabaseWithStores(targetDbName);
-    console.log(`[IndexedDBManager] Database ready: ${targetDbName}`);
+    await this.createDatabaseWithStores(targetDbName, storeDefinitions);
     
     return this.db;
+
   }
-  
+
   /* Database Operations
   /* *** *** *** *** *** *** *** *** *** *** *** *** *** *** */
-  
-  createDatabase(databaseName) {
 
-    return new Promise((resolve, reject) => {
+  async createDatabaseWithStores(databaseName, storeDefinitions = []) {
+    
+    this.db = new Dexie(databaseName);
+    
+    const schema = {};
+    
+    for (const store of storeDefinitions) {
+
+      let schemaString = store.keyPath;
       
-      const request     = indexedDB.open(databaseName);
-      request.onerror   = () => { reject(request.error) };
-      request.onsuccess = () => { this.db = request.result; resolve(this.db) };
-
-    });
+      if (store.indexes && store.indexes.length > 0) {
+        schemaString += ', ' + store.indexes.join(', ');
+      }
+      
+      schema[store.name] = schemaString;
+    }
+    
+    this.db.version(1).stores(schema);
+    await this.db.open();
+    
+    console.log(`[IndexedDBManager] Database "${databaseName}" ready with stores: ${Object.keys(schema).join(', ')}`);
+    
+    return this.db;
 
   }
-  
-  createDatabaseWithStores(databaseName) {
-    return new Promise((resolve, reject) => {
-      const request = indexedDB.open(databaseName, 1);
-      
-      request.onerror = () => {
-        reject(request.error);
-      };
-      
-      request.onupgradeneeded = (event) => {
-        const db = event.target.result;
-        
-        if (!db.objectStoreNames.contains(this.storeNames.meta)) {
-          db.createObjectStore(this.storeNames.meta, { keyPath: 'key' });
-          console.log(`[IndexedDBManager] Created object store: ${this.storeNames.meta}`);
-        }
-        
-        if (!db.objectStoreNames.contains(this.storeNames.nodes)) {
-          db.createObjectStore(this.storeNames.nodes, { keyPath: 'nodeInstanceId' });
-          console.log(`[IndexedDBManager] Created object store: ${this.storeNames.nodes}`);
-        }
-      };
-      
-      request.onsuccess = () => {
-        this.db = request.result;
-        resolve(this.db);
-      };
-    });
+
+  async deleteDatabase(databaseName) {
+    await Dexie.delete(databaseName);
   }
-  
-  deleteDatabase(databaseName) {
 
-    return new Promise((resolve, reject) => {
-
-      const request     = indexedDB.deleteDatabase(databaseName);
-      request.onerror   = () => { reject(request.error) };
-      request.onsuccess = () => { resolve() };
-
-    });
-
-  }
-  
-  /* Object Store Operations (Low-Level)
+  /* Object Store Operations
   /* *** *** *** *** *** *** *** *** *** *** *** *** *** *** */
-  
-  addObjectStore(databaseName, storeName, options = {}) {
 
-    return new Promise((resolve, reject) => {
-      
-      const openRequest        = indexedDB.open(databaseName);
-      openRequest.onerror      = () => { reject(openRequest.error) };
-      
-      openRequest.onsuccess    = () => {
-
-        const db               = openRequest.result;
-        const currentVersion   = db.version;
-
-        db.close();
-        
-        const upgradeRequest   = indexedDB.open(databaseName, currentVersion + 1);
-        upgradeRequest.onerror = () => { reject(upgradeRequest.error) };
-        
-        upgradeRequest.onupgradeneeded = (event) => {
-          const db = event.target.result;
-          
-          if (db.objectStoreNames.contains(storeName)) {
-            console.warn(`[IndexedDBManager] Object store "${storeName}" already exists`);
-            return;
-          }
-          
-          const storeOptions = {
-            keyPath: options.keyPath || 'id',
-            autoIncrement: options.autoIncrement || false
-          };
-          
-          db.createObjectStore(storeName, storeOptions);
-          console.log(`[IndexedDBManager] Created object store: ${storeName}`);
-        };
-        
-        upgradeRequest.onsuccess = () => {
-          this.db = upgradeRequest.result;
-          resolve(this.db);
-        };
-      };
-    });
-
-  }
-  
-  deleteObjectStore(databaseName, storeName) {
+  async addObjectStore(storeName, keyPath, indexes = []) {
     
-    return new Promise((resolve, reject) => {
-      
-      const openRequest     = indexedDB.open(databaseName);
-
-      openRequest.onerror   = () => { reject(openRequest.error) };  
-      
-      openRequest.onsuccess = () => {
-
-        const db               = openRequest.result;
-        const currentVersion   = db.version;
-
-        db.close();
-        
-        const upgradeRequest   = indexedDB.open(databaseName, currentVersion + 1);
-        upgradeRequest.onerror = () => { reject(upgradeRequest.error) };
-        
-        upgradeRequest.onupgradeneeded = (event) => {
-          const db = event.target.result;
-          
-          if (!db.objectStoreNames.contains(storeName)) {
-            console.warn(`[IndexedDBManager] Object store "${storeName}" does not exist`);
-            return;
-          }
-          
-          db.deleteObjectStore(storeName);
-          console.log(`[IndexedDBManager] Deleted object store: ${storeName}`);
-        };
-        
-        upgradeRequest.onsuccess = () => {
-          this.db = upgradeRequest.result;
-          resolve(this.db);
-        };
-
-      };
-
+    this.ensureInitialized();
+    
+    const databaseName   = this.db.name;
+    const currentVersion = this.db.verno;
+    
+    // Capture existing store schemas
+    const existingSchema = {};
+    this.db.tables.forEach(table => {
+      existingSchema[table.name] = table.schema.primKey.src + ( table.schema.indexes.length > 0 ? ', ' + table.schema.indexes.map(idx => idx.src).join(', ') : '' );
     });
+    
+    // Check if store already exists
+    if (existingSchema[storeName]) {
+      console.warn(`[IndexedDBManager] Object store "${storeName}" already exists`);
+      return this.db;
+    }
+    
+    // Close current connection
+    this.db.close();
+    
+    // Build schema string for new store
+    let schemaString = keyPath;
+    if (indexes.length > 0) {
+      schemaString += ', ' + indexes.join(', ');
+    }
+    existingSchema[storeName] = schemaString;
+    
+    // Reopen with new version
+    this.db = new Dexie(databaseName);
+    this.db.version(currentVersion + 1).stores(existingSchema);
+    await this.db.open();
+    
+    console.log(`[IndexedDBManager] Added object store: ${storeName}`);
+    return this.db;
   }
-  
-  /* Object Store Operations (Main Database Convenience Methods)
+
+  async deleteObjectStore(storeName) {
+
+    this.ensureInitialized();
+    
+    const databaseName   = this.db.name;
+    const currentVersion = this.db.verno;
+    
+    // Capture existing store schemas
+    const existingSchema = {};
+
+    this.db.tables.forEach(table => {
+      existingSchema[table.name] = table.schema.primKey.src + ( table.schema.indexes.length > 0 ? ', ' + table.schema.indexes.map(idx => idx.src).join(', ') : '' );
+    });
+    
+    // Check if store exists
+    if (!existingSchema[storeName]) {
+      console.warn(`[IndexedDBManager] Object store "${storeName}" does not exist`);
+      return this.db;
+    }
+    
+    // Close current connection
+    this.db.close();
+    
+    // Mark store for deletion (Dexie uses null to delete)
+    existingSchema[storeName] = null;
+    
+    // Reopen with new version
+    this.db = new Dexie(databaseName);
+    this.db.version(currentVersion + 1).stores(existingSchema);
+    await this.db.open();
+    
+    console.log(`[IndexedDBManager] Deleted object store: ${storeName}`);
+    return this.db;
+  }
+
+  /* Record Operations ( Abstraction Level 0 )
   /* *** *** *** *** *** *** *** *** *** *** *** *** *** *** */
-  
-  async addObjectStoreToMainDb(storeName, options = {}) {
-    const dbName = this.getFullDatabaseName();
-    return this.addObjectStore(dbName, storeName, options);
+
+  async executeRecordAction( storeName, operation, payload ) {
+    //storename
+    //operationTypes: add, update, upsert, delete
+    //payloads: key or value
   }
-  
-  async deleteObjectStoreFromMainDb(storeName) {
-    const dbName = this.getFullDatabaseName();
-    return this.deleteObjectStore(dbName, storeName);
+
+  async getRecord( storeName, recordData ) {
+    //Do something
   }
-  
-  /* Node Data Operations
+
+  async addRecord( storeName, recordData ) {
+    //Do something
+  }
+
+  async updateRecord( storeName, recordData ) {
+    //Do something
+  }
+
+  async upsertRecord( storeName, recordData ) {
+    //Do something
+  }
+
+  async deleteRecord( storeName, recordId ) {
+    //Do something
+  }
+
+  /* General Node Record Operations
   /* *** *** *** *** *** *** *** *** *** *** *** *** *** *** */
-  
-  async getNodeData(nodeInstanceId) {
-    
-    if (!this.db) {
-      throw new Error('[IndexedDBManager] Database not initialized. Call createOrUpdateAppMainDatabase() first.');
-    }
-    
-    return new Promise((resolve, reject) => {
-      const transaction = this.db.transaction(this.storeNames.nodes, 'readonly');
-      const store       = transaction.objectStore(this.storeNames.nodes);
-      const request     = store.get(nodeInstanceId);
-      
-      request.onerror = () => {
-        reject(request.error);
-      };
-      
-      request.onsuccess = () => {
-        resolve(request.result || null);
-      };
-    });
-  }
-  
-  async updateNodeData(nodeInstanceId, dataType, valueObject) {
-    
-    if (!this.db) {
-      throw new Error('[IndexedDBManager] Database not initialized. Call createOrUpdateAppMainDatabase() first.');
-    }
-    
-    if (!this.validNodeDataTypes.includes(dataType)) {
-      throw new Error(`[IndexedDBManager] Invalid dataType "${dataType}". Must be one of: ${this.validNodeDataTypes.join(', ')}`);
-    }
-    
-    if (typeof valueObject !== 'object' || valueObject === null) {
-      throw new Error('[IndexedDBManager] valueObject must be a non-null object');
-    }
-    
-    const existingRecord = await this.getNodeData(nodeInstanceId);
-    const newRecord      = existingRecord ? { ...existingRecord, [dataType]: valueObject } : { nodeInstanceId, [dataType]: valueObject };
-    
-    // Save it
-    return new Promise((resolve, reject) => {
 
-      const transaction = this.db.transaction(this.storeNames.nodes, 'readwrite');
-      const store       = transaction.objectStore(this.storeNames.nodes);
-      const request     = store.put(newRecord);
-      
-      request.onerror   = () => { reject(request.error) };
-      
-      request.onsuccess = () => { console.log(`[IndexedDBManager] Updated ${dataType} for node: ${nodeInstanceId}`); resolve(newRecord) };
-
-    });
+  async getNodeDataCollection( nodeInstanceId ) {
+    //Do something
   }
+
+  async addNodeDataCollection( nodeInstanceId, nodeDataCollection ) {
+    //Do something
+  }
+
+  async updateNodeDataCollection( nodeInstanceId, nodeDataCollection ) {
+    //Do something
+  } 
+
+  async upsertNodeDataColllection( nodeInstanceId, nodeDataCollection ) {
+    //Do something
+  } 
+
+  async deleteNodeDataCollection( nodeInstanceId ) {
+    //Do something
+  }
+
+  /* Node Type Data based Node Record Operations
+  /* *** *** *** *** *** *** *** *** *** *** *** *** *** *** */
+
+  async getNodeDataRecordOfType( nodeInstanceId, dataType ) {
+    //Availabel Types: metaData, coreData, signalGroups
+  }
+
+  async addNodeDataRecordOfType( nodeInstanceId, nodeDataType, payloadOfNodeDataType ) {
+    //Do something
+  }
+
+  async updateNodeDataRecordOfType( nodeInstanceId, nodeDataType, payloadOfNodeDataType ) {
+    //Do something
+  }
+
+  async upsertNodeDataRecordOfType( nodeInstanceId, nodeDataType, payloadOfNodeDataType ) {
+    //Do something
+  }
+
+  async deleteNodeDataRecordOfType( nodeInstanceId, nodeDataType ) {
+    //Do something
+  }
+
+
+  /* Specialized Node Record Operations
+  /* *** *** *** *** *** *** *** *** *** *** *** *** *** *** */
+
+  //Meta Data
+
+  async getNodeMetaData( nodeInstanceId ) {
+    //Do something
+  }
+
+  async updateNodeRecordMetaData( nodeInstanceId, metaData ) {
+    //Do something
+  }
+
+  async upsertNodeRecordMetaData( nodeInstanceId, metaData ) {
+    //Do something
+  }
+
+  async deleteNodeRecordMetaData( nodeInstanceId ) {
+    //Do something
+  }
+
+
+  async getNodeMetaDataItem( nodeInstanceId, metaDataItemId ) {
+    //Do something
+  }
+
+  async upsertNodeRecordMetaDataItem( nodeInstanceId, metaDataItem ) {
+    //Do something
+  } 
+
+  //Core Data
+
+  async upsertNodeRecordCoreData( nodeInstanceId, coreData ) {
+
+  } 
+
+  async upsertNodeRecordCoreDataItem( nodeInstanceId, coreData ) {
+
+  } 
+
+
+
+  
 }
