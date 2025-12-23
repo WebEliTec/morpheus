@@ -7,11 +7,14 @@ import appConfig from '../morphSrc/app.config';
 import devToolConfig from './dev/ui/devTool.config';
 import libraryNodeConfig from './core/configs/libraryNode.config';
 
-import MediaManager from './apis/mediaManager';
 import Graph from './apis/graph';
 import Router from './apis/router';
 import Utility from './apis/utility';
+
+import MediaManager from './apis/mediaManager';
+
 import IndexedDBManager from './apis/indexedDBManager';
+import LocalStorageManager from './apis/localStorageManager';
 
 let NodeResourceProvider = null;
 if (import.meta.env.PROD) {
@@ -69,11 +72,16 @@ export class Morpheus {
     //Take appConfig here and determine which APIs to include
 
     this.apis                  = {};
-    this.apis.media            = new MediaManager( appConfig );
-    this.apis.indexedDBManager = new IndexedDBManager( appConfig );
-    this.apis.graph            = new Graph();
-    this.apis.router           = new Router();
-    this.apis.utility          = new Utility();
+
+    this.apis.graph               = new Graph();
+    this.apis.router              = new Router();
+    this.apis.utility             = new Utility();
+
+    this.apis.media               = new MediaManager( appConfig );
+    
+    this.apis.indexedDBManager    = new IndexedDBManager( appConfig );
+    this.apis.localStorageManager = new LocalStorageManager( appConfig );
+
 
     // Connect NodeResourceProvider to Graph API for preloading support
     if (import.meta.env.PROD && NodeResourceProvider) {
