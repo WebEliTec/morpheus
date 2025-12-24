@@ -15,9 +15,6 @@ export default class NodeManager {
     this.executionContextConfig   = executionContextConfig;
     this.libraryNodeConfig        = libraryNodeConfig;
     this.apis                     = apis;
-    // ###################### Begin: Changes ####################
-    this.apiManager               = apiManager || null;
-    // ###################### End: Changes #####################
     this.nodeRegistry             = this.executionContextConfig.nodes;
     this.notifyGraphOnNodeMount   = notifyGraphOnNodeMount;    
     this.notifyGraphOnNodeUnmount = notifyGraphOnNodeUnmount;
@@ -179,18 +176,15 @@ export default class NodeManager {
 
     kernel.services            = services;
 
-    // ###################### Begin: Changes ####################
-    // Use APIManager to assign APIs if available, otherwise fall back to direct assignment
-    if (this.apiManager) {
-      this.apiManager.assignAPIsToKernel(kernel);
-    } else {
-      // Fallback for contexts without APIManager (e.g., devtools)
-      kernel.apis    = apis;
-      kernel.graph   = apis.graph;
-      kernel.router  = apis.router;
-      kernel.utility = apis.utility;
-    }
-    // ###################### End: Changes #####################
+    kernel.apis                = apis;
+    kernel.graph               = apis.graph;
+    kernel.router              = apis.router;
+    kernel.utility             = apis.utility;
+    kernel.media               = apis.media;
+    kernel.indexedDBManager    = apis.indexedDBManager;
+    kernel.indexedDB           = kernel.indexedDBManager;
+    kernel.localStorageManager = apis.localStorageManager;
+    kernel.localStorage        = kernel.localStorageManager;
 
     this.registerNavigationHooks( kernel, nodeResources );
 

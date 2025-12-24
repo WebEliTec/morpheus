@@ -5,13 +5,17 @@ import apiRegistry from './configs/apiRegistry.js';
 
 export default class APIManager {
   
-  constructor(appConfig) {
-    this.appConfig = appConfig;
-    this.supportedAPIs = appConfig.supportedAPIs || [];
-    this.apis = {};
+  constructor( appConfig ) {
+
+    console.log( 'API Manager' );
+
+    this.appConfig           = appConfig;
+    this.supportedAPIs       = appConfig.supportedAPIs || [];
+    this.apis                = {};
     this.enabledAdvancedAPIs = [];
     
     this.validateSupportedAPIs();
+
   }
   
   /* Validation
@@ -32,35 +36,42 @@ export default class APIManager {
   /* Initialization
   /* *** *** *** *** *** *** *** *** *** *** *** *** *** *** */
   async initialize() {
+    
     this.initializeCoreAPIs();
+    
     await this.initializeAdvancedAPIs();
     
     return this.apis;
   }
   
   initializeCoreAPIs() {
-    this.apis.graph   = new Graph();
-    this.apis.router  = new Router();
-    this.apis.utility = new Utility();
+
+    this.apis.graph   = new Graph( this.appConfig );
+    this.apis.router  = new Router( this.appConfig );
+    this.apis.utility = new Utility( this.appConfig );
+
   }
   
   async initializeAdvancedAPIs() {
+
     for (const apiName of this.supportedAPIs) {
+
       const registryEntry = apiRegistry[apiName];
       
       try {
-        const module = await import(/* @vite-ignore */ registryEntry.path);
-        const APIClass = module.default;
+        const module       = await import(/* @vite-ignore */ registryEntry.path);
+        const APIClass     = module.default;
         
         this.apis[apiName] = new APIClass(this.appConfig);
+
         this.enabledAdvancedAPIs.push(apiName);
         
       } catch (error) {
-        throw new Error(
-          `[APIManager] Failed to load API "${apiName}": ${error.message}`
-        );
+        throw new Error( `[APIManager] Failed to load API "${apiName}": ${error.message}` );
       }
+
     }
+
   }
   
   /* API Access
@@ -76,6 +87,7 @@ export default class APIManager {
   /* Kernel Assignment
   /* *** *** *** *** *** *** *** *** *** *** *** *** *** *** */
   assignAPIsToKernel(kernel) {
+    
     // Assign Core APIs (always available)
     kernel.apis    = this.apis;
     kernel.graph   = this.apis.graph;
