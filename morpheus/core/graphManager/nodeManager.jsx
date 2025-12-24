@@ -55,7 +55,7 @@ export default class NodeManager {
 
   }
 
-  async createNode( nodeId, instanceId, ...props ) {
+  async createNode( nodeId, instanceId = 'Default', ...props ) {
 
     const isNodeRegistered = this.nodeRegistry.hasOwnProperty(nodeId);
     
@@ -191,6 +191,8 @@ export default class NodeManager {
     kernel.runtimeData          = {};
     const runtimeDataDidChange  = ( changedRuntimeDataItems ) => { this.callHook( 'runtimeDataDidChange', nodeResources, kernel, changedRuntimeDataItems ) };
     kernel.runtimeDataDidChange = runtimeDataDidChange;
+
+    console.log(kernel);
    
     return kernel;
 

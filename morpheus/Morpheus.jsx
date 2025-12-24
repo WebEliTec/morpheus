@@ -66,22 +66,6 @@ export class Morpheus {
   }
 
 
-  /* Graph Change Handler
-  /* *** *** *** *** *** *** *** *** *** *** *** *** *** *** */
-  /*graphChangeListener() {
-    // ✅ Simple: just notify devtools if kernel is available
-    if (this.devToolsKernel) {
-      this.devToolsKernel.notifyGraphChanged();
-    }
-  }
-
-  /* DevTools Kernel Registration
-  /* *** *** *** *** *** *** *** *** *** *** *** *** *** *** */
-  /*registerDevToolsRootNodeKernel(kernel) {
-    this.devToolsKernel = kernel;
-    //console.log('[Morpheus] DevTools kernel registered');
-  }*/
-
   /* Initialize App
   /* *** *** *** *** *** *** *** *** *** *** *** *** *** *** */
 
@@ -172,15 +156,11 @@ export class Morpheus {
       
       useEffect(() => {
         // Load app root node
-        morpheus.graphManager.nodeManager.createNode("Root").then(node => {
-          setAppRootNode(() => node);
-        });
+        morpheus.graphManager.nodeManager.createNode( "Root" ).then( node => { setAppRootNode( () => node ) });
         
         // Load devtools root node in development
         if (isDev) {
-          morpheus.devToolGraphManager.nodeManager.createNode("Root").then(node => {
-            setDevToolsRoot(() => node);
-          });
+          morpheus.devToolGraphManager.nodeManager.createNode( "Root" ).then( node => { setDevToolsRoot(() => node) });
         }
       }, []);
       

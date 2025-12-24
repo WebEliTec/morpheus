@@ -9,13 +9,9 @@ export default class GraphManager {
     this.executionContext       = config.executionContext;
     this.executionContextConfig = config.executionContextConfig;
     this.libraryNodeConfig      = config.libraryNodeConfig;
-    this.nodeResourceProvider   = config.nodeResourceProvider || null;
-
-    // Simplified: direct callback instead of "listener"
-    this.onGraphChanged = config?.onGraphChanged || null;
-    
-    // Simplified graph structure
-    this.graph = { root: null };
+    this.nodeResourceProvider   = config.nodeResourceProvider || null; 
+    this.onGraphChanged         = config?.onGraphChanged || null;
+    this.graph                  = { root: null };
     
     this.nodeManager  = new NodeManager({
       services:                 this.services,
@@ -28,17 +24,6 @@ export default class GraphManager {
       executionContext:         this.executionContext,
       nodeResourceProvider:     this.nodeResourceProvider,
     });
-
-    console.log(config);
-
-    this.graphChangeListener = config?.graphChangeListener;
-    
-    /*
-    this.graphData = {
-      nodeHierarchy:  null
-    };
-    
-    this.apis.graph._setGraphData( this.graphData );*/
 
     this.apis.graph._setGraph(this.graph);
 
@@ -68,12 +53,6 @@ export default class GraphManager {
         mountedAt: Date.now()
       }
     };
-    
-    /*
-    if (!this.graphData.nodeHierarchy) {
-      this.graphData.nodeHierarchy = nodeData;
-      return;
-    }*/
 
     // First node becomes root
     if (!this.graph.root) {

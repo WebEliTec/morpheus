@@ -33,16 +33,8 @@ export default class Graph {
     return this.root;
   }
 
-  showGraph() {
-    console.log(this.root); 
-  }
-
   /* Graph Access
   /* *** *** *** *** *** *** *** *** *** *** *** *** *** *** */
-
-  get nodeHierarchy() {
-    return this.graphData?.nodeHierarchy || null;
-  }
 
   get rootNode() {
     return this.graphData?.rootNode || null;
@@ -50,11 +42,6 @@ export default class Graph {
 
   showGraph() {
     console.log(this.nodeHierarchy); 
-  }
-
-  _setNodeResourceProvider(nodeResourceProvider, lazyLoadEnabled) {
-    this.nodeResourceProvider = nodeResourceProvider;
-    this.lazyLoadEnabled  = lazyLoadEnabled;
   }
 
 
