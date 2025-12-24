@@ -23,11 +23,14 @@ const config = {
   traitIds: [ 'flowGraphManager' ],
 
   hooks: {
-    kernelDidInitialize: ( kernel ) => {
+    kernelDidInitialize: (kernel) => {
       const morpheus = Morpheus.getMorpheusObject();
-      morpheus.registerDevToolsRootNodeKernel( kernel );
+      
+      // Subscribe to graph changes
+      morpheus.subscribeToGraphChanges(() => {
+        kernel.onAppGraphChanged();
+      });
     },
-
   },
 
 
@@ -60,15 +63,16 @@ const config = {
   },
 
   kernel: {
-
     toggleShowUI() {
-      this.toggleSignal( 'showUI' );
+      this.toggleSignal('showUI');
     },
-
     shouldShowUI() {
-      return this.getSignal( 'showUI' );
+      return this.getSignal('showUI');
     },
-
+    onAppGraphChanged() {
+      // Called by subscription when app graph updates
+      this.updateAppGraphVersion();
+    }
   }
   
 }

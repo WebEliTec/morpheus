@@ -3,15 +3,42 @@ export default class Graph {
   
   constructor() {
     
-    this.graphData            = null; 
+    this._graph               = null; 
     this.nodeResourceProvider = null;
     this.lazyLoadEnabled      = false;
 
   }
 
-  _setGraphData(graphData) {
-    this.graphData = graphData;  
+  /* Internal Setup
+  /* *** *** *** *** *** *** *** *** *** *** *** *** *** *** */
+  
+  _setGraph(graph) {
+    this._graph = graph;  
   }
+
+  _setNodeResourceProvider(nodeResourceProvider, lazyLoadEnabled) {
+    this.nodeResourceProvider = nodeResourceProvider;
+    this.lazyLoadEnabled      = lazyLoadEnabled;
+  }
+
+  /* Internal Setup
+  /* *** *** *** *** *** *** *** *** *** *** *** *** *** *** */
+  
+  get root() {
+    return this._graph?.root || null;
+  }
+
+  // Alias for backwards compatibility
+  get nodeHierarchy() {
+    return this.root;
+  }
+
+  showGraph() {
+    console.log(this.root); 
+  }
+
+  /* Graph Access
+  /* *** *** *** *** *** *** *** *** *** *** *** *** *** *** */
 
   get nodeHierarchy() {
     return this.graphData?.nodeHierarchy || null;

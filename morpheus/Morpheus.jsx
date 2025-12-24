@@ -31,6 +31,9 @@ export class Morpheus {
     }
 
     Morpheus.instance = this;
+    
+    // Graph change subscription system
+    this.graphChangeSubscribers = new Set();
 
     this.initializeApp();
     this.initializeDevTools();
@@ -43,11 +46,29 @@ export class Morpheus {
     return Morpheus.instance;
   }
 
+  /* Graph Change Subscription System
+  /* *** *** *** *** *** *** *** *** *** *** *** *** *** *** */
+  
+  subscribeToGraphChanges( callback ) {
+    this.graphChangeSubscribers.add( callback );
+    // Return unsubscribe function
+    return () => this.graphChangeSubscribers.delete( callback );
+  }
+
+  notifyGraphChanged() {
+    this.graphChangeSubscribers.forEach(callback => {
+      try {
+        callback();
+      } catch (error) {
+        console.error('[Morpheus] Error in graph change subscriber:', error);
+      }
+    });
+  }
 
 
   /* Graph Change Handler
   /* *** *** *** *** *** *** *** *** *** *** *** *** *** *** */
-  graphChangeListener() {
+  /*graphChangeListener() {
     // ✅ Simple: just notify devtools if kernel is available
     if (this.devToolsKernel) {
       this.devToolsKernel.notifyGraphChanged();
@@ -56,10 +77,10 @@ export class Morpheus {
 
   /* DevTools Kernel Registration
   /* *** *** *** *** *** *** *** *** *** *** *** *** *** *** */
-  registerDevToolsRootNodeKernel(kernel) {
+  /*registerDevToolsRootNodeKernel(kernel) {
     this.devToolsKernel = kernel;
     //console.log('[Morpheus] DevTools kernel registered');
-  }
+  }*/
 
   /* Initialize App
   /* *** *** *** *** *** *** *** *** *** *** *** *** *** *** */
@@ -103,7 +124,8 @@ export class Morpheus {
       services:               this.services,
       executionContextConfig: appConfig,
       libraryNodeConfig,
-      graphChangeListener:    this.graphChangeListener.bind( this ),
+      onGraphChanged:         this.notifyGraphChanged.bind(this),  // Renamed & simplified
+      //graphChangeListener:    this.graphChangeListener.bind( this ),
       nodeResourceProvider:   NodeResourceProvider,
     }
     

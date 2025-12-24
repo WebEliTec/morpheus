@@ -10,6 +10,12 @@ export default class GraphManager {
     this.executionContextConfig = config.executionContextConfig;
     this.libraryNodeConfig      = config.libraryNodeConfig;
     this.nodeResourceProvider   = config.nodeResourceProvider || null;
+
+    // Simplified: direct callback instead of "listener"
+    this.onGraphChanged = config?.onGraphChanged || null;
+    
+    // Simplified graph structure
+    this.graph = { root: null };
     
     this.nodeManager  = new NodeManager({
       services:                 this.services,
@@ -23,13 +29,19 @@ export default class GraphManager {
       nodeResourceProvider:     this.nodeResourceProvider,
     });
 
+    console.log(config);
+
     this.graphChangeListener = config?.graphChangeListener;
     
+    /*
     this.graphData = {
       nodeHierarchy:  null
     };
     
-    this.apis.graph._setGraphData(this.graphData);
+    this.apis.graph._setGraphData( this.graphData );*/
+
+    this.apis.graph._setGraph(this.graph);
+
   }
   
   mayCreateNode(nodeId, instanceId = null) {
@@ -37,8 +49,8 @@ export default class GraphManager {
   }
 
   graphUpdated() {
-    if (typeof this.graphChangeListener === 'function') {
-      this.graphChangeListener();
+    if (typeof this.onGraphChanged === 'function') {
+      this.onGraphChanged();
     }
   }
   
@@ -57,8 +69,16 @@ export default class GraphManager {
       }
     };
     
+    /*
     if (!this.graphData.nodeHierarchy) {
       this.graphData.nodeHierarchy = nodeData;
+      return;
+    }*/
+
+    // First node becomes root
+    if (!this.graph.root) {
+      this.graph.root = nodeData;
+      this.graphUpdated();
       return;
     }
     
@@ -94,9 +114,10 @@ export default class GraphManager {
       return;
     }
     
-    if (node.id === this.graphData.nodeHierarchy?.id) {
-      this.graphData.nodeHierarchy = null;
+    if (node.id === this.graph.root?.id) {
+      this.graph.root = null;
       console.log(`[GraphManager] Unmounted root node: ${fullyQualifiedId}`);
+      this.graphUpdated();
       return;
     }
     
@@ -120,27 +141,23 @@ export default class GraphManager {
   }
   
   findNodeById(id) {
-
-    if (!this.graphData.nodeHierarchy) return null;
-    
-    const search = (node) => {
-
-      if (node.id === id) {
-        return node;
-      } 
+      if (!this.graph.root) return null;
       
-      for (const child of node.children) {
-        const found = search(child);
-        if (found) {
-          return found;
+      const search = (node) => {
+        if (node.id === id) {
+          return node;
+        } 
+        
+        for (const child of node.children) {
+          const found = search(child);
+          if (found) {
+            return found;
+          }
         }
-      }
+        
+        return null;
+      };
       
-      return null;
-
-    };
-    
-    return search(this.graphData.nodeHierarchy);
-
-  }
+      return search(this.graph.root);
+    }
 }

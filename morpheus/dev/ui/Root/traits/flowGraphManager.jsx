@@ -3,7 +3,7 @@ import ELK from 'elkjs/lib/elk.bundled.js';
 const flowGraphManager = {
 
   getAppGraph() {
-    return this.apis.apis.graph.nodeHierarchy;
+    return this.apis.apis.graph.root;
   },
 
   getAppGraphVersion() {
