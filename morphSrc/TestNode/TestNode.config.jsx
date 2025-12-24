@@ -57,12 +57,12 @@ const config = {
     }, 
 
     runtimeDataDidChange () {
-      console.log('runTimedataDidChange')
+      //console.log('runTimedataDidChange')
     },
 
     signalsDidChange( kernel ) {
-      console.log( 'Signals Did Change' );
-      kernel.indexedDBManager.updateNodeData('someNode', 'coreData', {someKeyY: "someValue"} );
+      //console.log( 'Signals Did Change' );
+      kernel.indexedDBManager.updateNodeDataOfType('someNode', 'coreData', {someKeyY: "someValue"} );
     }, 
 
   }, 

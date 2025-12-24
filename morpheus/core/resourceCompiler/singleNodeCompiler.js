@@ -342,7 +342,7 @@ export default class SingleNodeCompiler {
       }
       
       traitImplementations[traitId] = traitImpl;
-      console.log(`Trait '${traitId}' of node '${this.nodeId}' loaded from inline 'traits' implementation.`);
+      //console.log(`Trait '${traitId}' of node '${this.nodeId}' loaded from inline 'traits' implementation.`);
     }
     
     // 7. Handle kernel (always added last as special trait)

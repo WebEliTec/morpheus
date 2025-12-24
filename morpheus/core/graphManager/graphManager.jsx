@@ -9,7 +9,7 @@ export default class GraphManager {
     this.executionContext       = config.executionContext;
     this.executionContextConfig = config.executionContextConfig;
     this.libraryNodeConfig      = config.libraryNodeConfig;
-    this.nodeResourceProvider       = config.nodeResourceProvider || null;
+    this.nodeResourceProvider   = config.nodeResourceProvider || null;
     
     this.nodeManager  = new NodeManager({
       services:                 this.services,
@@ -26,7 +26,7 @@ export default class GraphManager {
     this.graphChangeListener = config?.graphChangeListener;
     
     this.graphData = {
-      nodeHierarchy: null
+      nodeHierarchy:  null
     };
     
     this.apis.graph._setGraphData(this.graphData);

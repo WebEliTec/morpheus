@@ -3,9 +3,9 @@ export default class Graph {
   
   constructor() {
     
-    this.graphData        = null; 
+    this.graphData            = null; 
     this.nodeResourceProvider = null;
-    this.lazyLoadEnabled  = false;
+    this.lazyLoadEnabled      = false;
 
   }
 
