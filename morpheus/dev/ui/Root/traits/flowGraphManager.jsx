@@ -40,13 +40,12 @@ const flowGraphManager = {
     
     const nodes = [];
     const edges = [];
-
-    console.log( 'appGraph.kernel' );
     
     // Add current node
     nodes.push({
       id: appGraph.id,
       type: 'morphNode',
+      draggable: false,
       position: { x, y },
       data: { 
         nodeId: appGraph.kernel?.nodeId || 'Unknown',

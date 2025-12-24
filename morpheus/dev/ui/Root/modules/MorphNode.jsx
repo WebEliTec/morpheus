@@ -8,7 +8,7 @@ export default function MorphNode({ data }) {
       
       <Handle type="target" position={Position.Top}/>
       
-      <div className="node-id heading-alpha">{data.nodeId} </div>
+      <div className="node-id dev-heading-alpha">{data.nodeId} </div>
 
       <div className="separator"></div>
       

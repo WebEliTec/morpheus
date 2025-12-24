@@ -5,30 +5,14 @@ import 'reactflow/dist/style.css';
 
 export default function LiveAppView({_, React, Module }) {
   
-  const appGraph          = _.getAppGraph();
-  const appGraphVersion   = _.getAppGraphVersion();
-  const [nodes, setNodes] = React.useState([]);
-  const [edges, setEdges] = React.useState([]);
+  const appGraph              = _.getAppGraph();
+  const appGraphVersion       = _.getAppGraphVersion();
+  const [nodes, setNodes]     = React.useState([]);
+  const [edges, setEdges]     = React.useState([]);
   const [loading, setLoading] = React.useState(true); // ✅ Add loading state
-  
-  /*
-  useEffect(() => {
-
-    if (!appGraph || !appGraph.id) {
-      setNodes([]);
-      setEdges([]);
-      return;
-    }
-    
-    const { nodes: flowNodes, edges: flowEdges } = _.getNodeGraph();
-    
-    setNodes(flowNodes);
-    setEdges(flowEdges);
-
-  }, [appGraphVersion]); */
 
   useEffect(() => {
-    // ✅ Handle async layout calculation
+
     async function updateLayout() {
       if (!appGraph || !appGraph.id) {
         setNodes([]);
@@ -51,11 +35,11 @@ export default function LiveAppView({_, React, Module }) {
     }
     
     updateLayout();
-  }, [appGraphVersion]); 
+  }, [ appGraphVersion ] ); 
 
   
   const nodeTypes = useMemo(() => ({
-    morphNode: (props) => <Module proxyId="MorphNode" {...props} />
+    morphNode: ( props ) => <Module proxyId="MorphNode" { ...props } />
   }), [Module]);
   
   const onNodesChange = useCallback(
@@ -89,18 +73,15 @@ export default function LiveAppView({_, React, Module }) {
   }
   
   return (
-    <div style={{ width: '100%', height: '100%' }}>
-      <div>
-        Graph v{appGraphVersion}
-      </div>
-      
+    <div style={{ width: '100%', height: '100%' }}>      
       <ReactFlow 
-        nodes         = {nodes} 
-        edges         = {edges} 
-        onNodesChange = {onNodesChange} 
-        onEdgesChange = {onEdgesChange} 
-        onConnect     = {onConnect} 
-        nodeTypes     = {nodeTypes}
+        nodes          = {nodes} 
+        edges          = {edges} 
+        onNodesChange  = {onNodesChange} 
+        onEdgesChange  = {onEdgesChange} 
+        onConnect      = {onConnect} 
+        nodeTypes      = {nodeTypes}
+        nodesDraggable = {false}
         fitView
         fitViewOptions={{ padding: 0.2 }}
       >

@@ -199,6 +199,11 @@ $bg-transparent: #000c159f;
     .node-id {
         font-size: 1rem;
         text-transform: none;
+
+        .dev-heading-alpha {
+            margin-left: 0;
+        }
+
     }
 
     .fully-qualified-node-id {
@@ -220,7 +225,7 @@ $bg-transparent: #000c159f;
 }
 
 
-.heading-alpha {
+.dev-heading-alpha {
     text-transform: uppercase;
     color: #a5f9fc;
     font-size: 1.25rem;

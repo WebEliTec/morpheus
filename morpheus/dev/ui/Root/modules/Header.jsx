@@ -1,6 +1,7 @@
 export default function Header( {_, Module, Lucide} ) {
 
-  const { X } = Lucide;
+  const { X }            = Lucide;
+  const appGraphVersion  = _.getAppGraphVersion();
 
   return (
    <header id="morpheus-ui-header">
