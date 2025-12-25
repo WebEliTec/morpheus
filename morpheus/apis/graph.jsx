@@ -1,4 +1,5 @@
-// apis/graph.jsx
+import NodeSelection from './NodeSelection';
+
 export default class Graph {
   
   constructor() {
@@ -44,6 +45,38 @@ export default class Graph {
     console.log(this.nodeHierarchy); 
   }
 
+  /* Selection Starters
+  /* *** *** *** *** *** *** *** *** *** *** *** *** *** *** */
+
+  find(nodeId, instanceId = 'Default') {
+    const fullyQualifiedId = `${nodeId}:${instanceId}`;
+    const node              = this._findNodeByFullyQualifiedId(fullyQualifiedId);
+
+    console.log(node);
+
+    return new NodeSelection(this, node);
+  }
+
+  /* Internal Tree Traversal
+  /* *** *** *** *** *** *** *** *** *** *** *** *** *** *** */
+
+  _findNodeByFullyQualifiedId( fullyQualifiedId, node = this._graph?.root ) {
+    if (!node) return null;
+    
+    if (node.id === fullyQualifiedId) {
+      return node;
+    }
+    
+    for (const child of node.children || []) {
+      const found = this._findNodeByFullyQualifiedId(fullyQualifiedId, child);
+      if (found) return found;
+    }
+    
+    return null;
+  }
+
+  /* Node Resource Preloader
+  /* *** *** *** *** *** *** *** *** *** *** *** *** *** *** */
 
   async preloadNode(nodeId) {
     if (!import.meta.env.PROD) {

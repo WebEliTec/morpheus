@@ -191,8 +191,6 @@ export default class NodeManager {
     kernel.runtimeData          = {};
     const runtimeDataDidChange  = ( changedRuntimeDataItems ) => { this.callHook( 'runtimeDataDidChange', nodeResources, kernel, changedRuntimeDataItems ) };
     kernel.runtimeDataDidChange = runtimeDataDidChange;
-
-    console.log(kernel);
    
     return kernel;
 
@@ -314,6 +312,9 @@ export default class NodeManager {
     const { nodeId, nodeProps } = kernel
 
     const rootModuleId             = nodeResources.rootModuleId;
+
+    console.log( nodeId, rootModuleId );
+
     const notifyGraphOnNodeMount   = this.notifyGraphOnNodeMount;
     const notifyGraphOnNodeUnmount = this.notifyGraphOnNodeUnmount;
     const destroyKernel            = this.destroyKernel.bind(this);

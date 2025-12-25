@@ -8,7 +8,7 @@ const appConfig = {
 
 	lazyLoadNodeResources: true,
 
-	//ServiceClass,
+	ServiceClass,
 
 	hooks: {
 		 appWillInitialize() {
@@ -35,24 +35,32 @@ const appConfig = {
 	nodes: {
 
 		Root:     {
-			isFile: true,
 			dir: '/',
 		},
 
-		MainMenu: {
-			isFile: true,
-			dir: '/',
-		},
+		MainMenu: {},
 
 		SideBar:  {
-			isFile: true,
 			dir: '/',
 		},
 
-		Main: {
+		TestNode: {
+		 	dir: '/',
+		},
+
+		Articles: {
+		 	dir: '/',
+		},
+
+		NodeEcho: {
+		 	dir: '/',
 			isFile: true,
-			dir: '/',
-		}
+		},
+
+		IndexedDBTester: {
+		 	dir: '/',
+		},
+
 
 	},  
 

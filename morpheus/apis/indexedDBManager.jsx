@@ -71,7 +71,7 @@ export default class IndexedDBManager {
     ];
     
     await this.createDatabaseWithStores(targetDbName, storeDefinitions);
-    console.log(`[IndexedDBManager] Database ready: ${targetDbName}`);
+    //console.log(`[IndexedDBManager] Database ready: ${targetDbName}`);
     
     return this.db;
   }
@@ -95,7 +95,7 @@ export default class IndexedDBManager {
     this.db.version(1).stores(schema);
     await this.db.open();
     
-    console.log(`[IndexedDBManager] Database "${databaseName}" ready with stores: ${Object.keys(schema).join(', ')}`);
+    //console.log(`[IndexedDBManager] Database "${databaseName}" ready with stores: ${Object.keys(schema).join(', ')}`);
     
     return this.db;
   }

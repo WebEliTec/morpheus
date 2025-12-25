@@ -36,6 +36,7 @@ export default class GraphManager {
   graphUpdated() {
     if (typeof this.onGraphChanged === 'function') {
       this.onGraphChanged();
+      console.log(this.graph);
     }
   }
   
@@ -43,9 +44,13 @@ export default class GraphManager {
 
     const { id: fullyQualifiedId } = kernel;
     const parentId                 = kernel.props?.parentId;
+    const nodeId                   = kernel.nodeId;
+    const instanceId               = kernel.instanceId;
     
     const nodeData = {
       id:       fullyQualifiedId,
+      nodeId, 
+      instanceId,
       parentId,
       children: [],
       kernel,
