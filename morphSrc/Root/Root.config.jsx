@@ -1,5 +1,3 @@
-import './globals.scss';
-
 const config = {
 
   /* Root
@@ -90,6 +88,7 @@ const config = {
 
     Root: {
       routes:  [ '/home', '/content-system', '/users' ],
+      dir: '/',
     }, 
 
   },
@@ -104,15 +103,3 @@ const config = {
 }
 
 export default config;
-
-
-
-export function Root({ Kernel, Node, Module, Router }) {
-  return (
-    <div className="fade-in">
-      <Node id="MainMenu" />
-      <Node id="SideBar" />
-      <Node id="Main" />
-    </div>
-  );
-}

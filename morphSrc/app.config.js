@@ -35,7 +35,6 @@ const appConfig = {
 	nodes: {
 
 		Root:     {
-			isFile: true,
 			dir: '/',
 		},
 
