@@ -25,11 +25,7 @@ const config = {
   hooks: {
     kernelDidInitialize: (kernel) => {
       const morpheus = Morpheus.getMorpheusObject();
-      
-      // Subscribe to graph changes
-      morpheus.subscribeToGraphChanges(() => {
-        kernel.onAppGraphChanged();
-      });
+      morpheus.subscribeToGraphChanges(() => { kernel.onAppGraphChanged() });
     },
   },
 

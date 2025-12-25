@@ -101,58 +101,57 @@ $bg-transparent: #000c159f;
         width: 40px;
     }
 
-}
+    .logo {
 
-#morpheus-ui #morpheus-ui-header .logo {
+        padding-left: 2.25rem;
 
-
-    padding-left: 2.25rem;
-
-    position: relative;
-
-    .inner {
         position: relative;
-        right: 3rem;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-    }
 
-    .inner img {
-        width: 2.5rem;
-        height: auto;
-        position: absolute;
-        //top: -6px;
-        left: -.75rem;
-        mask-image: linear-gradient(to right, #04040489, #000 20%, #690606c8);
-        animation: explodeDropShadow 3s ease-in-out 1;
-        animation-delay: 0.2s;
-    }
+        .inner {
+            position: relative;
+            right: 3rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
 
-    .inner h2 {
-        text-align: left;
-        color: rgb(165, 249, 252);
-        text-transform: uppercase;
-        position: relative;
-        //left: 2.5rem;
-        font-size: 1rem;
-        mask-image: linear-gradient(to right, #04040489, #000000 20%, #690606c8);
-    }
+        .inner img {
+            width: 2.5rem;
+            height: auto;
+            position: absolute;
+            //top: -6px;
+            left: -.75rem;
+            mask-image: linear-gradient(to right, #04040489, #000 20%, #690606c8);
+            animation: explodeDropShadow 3s ease-in-out 1;
+            animation-delay: 0.2s;
+        }
 
-    @keyframes explodeDropShadow {
-        0% {
-            filter: brightness(0.9)
-            drop-shadow(0 0 0 rgba(0, 255, 255, 0.7));
+        .inner h2 {
+            text-align: left;
+            color: rgb(165, 249, 252);
+            text-transform: uppercase;
+            position: relative;
+            //left: 2.5rem;
+            font-size: 1rem;
+            mask-image: linear-gradient(to right, #04040489, #000000 20%, #690606c8);
         }
-        40% {
-            filter: brightness(1.7)
-            drop-shadow(0 0 2px rgba(0, 255, 255, 0.8))
-            drop-shadow(0 0 3px rgba(0, 255, 255, 0.6));
+
+        @keyframes explodeDropShadow {
+            0% {
+                filter: brightness(0.9)
+                drop-shadow(0 0 0 rgba(0, 255, 255, 0.7));
+            }
+            40% {
+                filter: brightness(1.7)
+                drop-shadow(0 0 2px rgba(0, 255, 255, 0.8))
+                drop-shadow(0 0 3px rgba(0, 255, 255, 0.6));
+            }
+            100% {
+                filter: brightness(0.9)
+                drop-shadow(0 0 0 rgba(0, 255, 255, 0));
+            }
         }
-        100% {
-            filter: brightness(0.9)
-            drop-shadow(0 0 0 rgba(0, 255, 255, 0));
-        }
+
     }
 
 }
@@ -164,7 +163,14 @@ $bg-transparent: #000c159f;
 
 }
 
-#morpheus-ui #morpheus-ui-view .react-flow {
+
+
+#morpheus-ui #morpheus-ui-view .canvas-wrapper {
+    height: 100%;
+    width: 100%;
+}
+
+#morpheus-ui #morpheus-ui-view .canvas-wrapper .react-flow {
 
     height: 100vh;
     width: 100vw;

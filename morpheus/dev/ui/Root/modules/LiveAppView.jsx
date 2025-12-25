@@ -3,7 +3,7 @@ import { useCallback, useMemo, useEffect } from 'react';
 import ReactFlow, { Background, Controls, MiniMap,applyNodeChanges, applyEdgeChanges, addEdge } from 'reactflow';
 import 'reactflow/dist/style.css';
 
-export default function LiveAppView({_, React, Module }) {
+export default function LiveAppView( {_, React, Module } ) {
   
   const appGraph              = _.getAppGraph();
   const appGraphVersion       = _.getAppGraphVersion();
@@ -73,7 +73,7 @@ export default function LiveAppView({_, React, Module }) {
   }
   
   return (
-    <div style={{ width: '100%', height: '100%' }}>      
+    <div className="canvas-wrapper">      
       <ReactFlow 
         nodes          = {nodes} 
         edges          = {edges} 
