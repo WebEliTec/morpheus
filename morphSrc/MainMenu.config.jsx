@@ -21,6 +21,10 @@ const config = {
 
   }, 
 
+  metaData: {
+    title: 'Test'
+  },
+
   /* Signals
   /* *** *** *** *** *** *** *** *** *** *** *** *** *** *** */
 
@@ -86,6 +90,10 @@ const config = {
 
     sayHi() {
       console.log('Hello from Foreign Node!');
+    },
+
+    getData( value ) {
+      return value;
     }
 
 

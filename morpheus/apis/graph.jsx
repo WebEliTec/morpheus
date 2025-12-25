@@ -49,12 +49,16 @@ export default class Graph {
   /* *** *** *** *** *** *** *** *** *** *** *** *** *** *** */
 
   find(nodeId, instanceId = 'Default') {
+
     const fullyQualifiedId = `${nodeId}:${instanceId}`;
-    const node              = this._findNodeByFullyQualifiedId(fullyQualifiedId);
-
-    console.log(node);
-
-    return new NodeSelection(this, node);
+    const node             = this._findNodeByFullyQualifiedId(fullyQualifiedId);
+    
+    if (!node) {
+      console.warn(`[Graph] Node '${fullyQualifiedId}' not found in graph`);
+    }
+    
+    return new NodeSelection(this, node, fullyQualifiedId);
+    
   }
 
   /* Internal Tree Traversal

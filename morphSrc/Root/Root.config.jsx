@@ -36,7 +36,7 @@ const config = {
   },
 
   coreData: {
-    coreDataItemA: 'Hello World YYYY!',
+    coreDataItemA: 'Hello World!',
   }, 
 
   /* Traits
