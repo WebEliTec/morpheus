@@ -25,6 +25,10 @@ const config = {
     getMetaDataOfMenu() {
       const value = this.graph.find('MainMenu').metaData('title');
       console.log(value);
+    },
+
+    getParent() {
+      this.graph.find( this.nodeId ).parent().call('holla');
     }
 
   }
@@ -55,6 +59,10 @@ export function Root( {_} ) {
 
       <div className="morph-button mt-4 w-50" onClick={() => { _.getMetaDataOfMenu() }}>
         Get Meta Data
+      </div>
+
+      <div className="morph-button mt-4 w-50" onClick={() => { _.getParent() }}>
+        Parent
       </div>
     
     </div>

@@ -7,6 +7,61 @@ export default class NodeSelection {
     this.query = query;
   }
 
+  /* Traversal (chainable)
+  /* *** *** *** *** *** *** *** *** *** *** *** *** *** *** */
+
+  parent() {
+    // Check if node exists
+    if (!this.node) {
+      console.warn(`[Graph] Cannot get parent - node '${this.query}' not found in graph`);
+      return new NodeSelection(this.graph, null, `parent of ${this.query}`);
+    }
+
+    // Check if node has a parent
+    const parentId = this.node.parentId;
+
+    if (!parentId) {
+      console.warn(`[Graph] Node '${this.node.id}' has no parent (it is the root)`);
+      return new NodeSelection(this.graph, null, `parent of ${this.node.id}`);
+    }
+
+    // Find parent node
+    const parentNode = this.graph._findNodeByFullyQualifiedId(parentId);
+
+    if (!parentNode) {
+      console.warn(`[Graph] Parent '${parentId}' not found for node '${this.node.id}'`);
+      return new NodeSelection(this.graph, null, parentId);
+    }
+
+    return new NodeSelection(this.graph, parentNode, parentId);
+  }
+
+  // Add this to NodeSelection.js in the Traversal section
+
+  child(nodeId, instanceId = 'Default') {
+    if (!this.node) {
+      console.warn(`[Graph] Cannot get child - node '${this.query}' not found in graph`);
+      return new NodeSelection(this.graph, null, `child ${nodeId}:${instanceId} of ${this.query}`);
+    }
+
+    const children = this.node.children || [];
+
+    if (children.length === 0) {
+      console.warn(`[Graph] Node '${this.node.id}' has no children`);
+      return new NodeSelection(this.graph, null, `child ${nodeId}:${instanceId} of ${this.node.id}`);
+    }
+
+    const fullyQualifiedId = `${nodeId}:${instanceId}`;
+    const childNode = children.find(child => child.id === fullyQualifiedId);
+
+    if (!childNode) {
+      console.warn(`[Graph] Child '${fullyQualifiedId}' not found in children of '${this.node.id}'`);
+      return new NodeSelection(this.graph, null, fullyQualifiedId);
+    }
+
+    return new NodeSelection(this.graph, childNode, fullyQualifiedId);
+  }
+
   /* Actions (chainable)
   /* *** *** *** *** *** *** *** *** *** *** *** *** *** *** */
 
@@ -74,7 +129,7 @@ export default class NodeSelection {
     }
   }
 
-    /* Data Accessors (return value, break chain)
+  /* Data Accessors (return value, break chain)
   /* *** *** *** *** *** *** *** *** *** *** *** *** *** *** */
 
   coreData(itemId = null) {

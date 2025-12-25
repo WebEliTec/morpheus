@@ -76,6 +76,10 @@ const config = {
 
     shouldShowArticles() {
       return this.getSignal( 'showArticles' );
+    },
+
+    holla() {
+      console.log('Holla Mundo!');
     }
 
   },
