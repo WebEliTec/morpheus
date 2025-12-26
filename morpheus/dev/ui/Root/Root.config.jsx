@@ -56,6 +56,8 @@ const config = {
 
     MorphNode: {},
 
+    CanvasSideBar: {},
+
   },
 
   kernel: {

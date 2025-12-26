@@ -5,13 +5,11 @@ export default function Header( {_, Module, Lucide} ) {
 
   return (
    <header id="morpheus-ui-header">
+      <div className="morpheus-logo-wrapper">
+        <Module id = "MorpheusLogo" className="mr-3"/> 
+        <h2>Morpheus Development Center</h2>
+      </div>
       <button onClick={() => _.toggleShowUI()} className="morpheus-ui-close-button"><X size="16" /></button>
-      <div className="logo">
-          <div className="inner">
-            <Module id = "MorpheusLogo" className="mr-3"/> 
-            <h2>Morpheus Development Center</h2>
-          </div>
-        </div>
    </header>
   )
 }

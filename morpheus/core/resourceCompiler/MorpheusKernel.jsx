@@ -5,14 +5,6 @@ import axios from "axios";
 
 export default class MorpheusKernel {
 
-  constructor() {
-
-    if (typeof this.init === 'function') {
-      this.init();
-    }
-
-  }
-
   /* Constants, Meta Data, Core Data & Props
   /* *** *** *** *** *** *** *** *** *** *** *** *** *** *** */
 
@@ -444,10 +436,6 @@ export default class MorpheusKernel {
 
   preloadNode(nodeId) {
     return this.graph.preloadNode(nodeId);
-  }
-
-  preloadNodes(nodeIds) {
-    return this.graph.preloadNodes(nodeIds);
   }
 
   isNodeLoaded(nodeId) {

@@ -8,6 +8,9 @@ $header-height: 2.375rem;
 $sidebar-width: 250px;
 $process-title-height: 2.5rem;
 
+$morpheus-ui-header-height: 41px;
+$morpheus-ui-sidebar-width: 300px;
+
 $bg-transparent: #000c159f;
 
 #morpheus-ui-trigger {
@@ -40,8 +43,6 @@ $bg-transparent: #000c159f;
 #morpheus-ui {
 
     z-index: 2147483647;
-    //pointer-events: none;
-    //opacity: .1;
     position: fixed;
     top: 0;
     left: 0;
@@ -52,12 +53,7 @@ $bg-transparent: #000c159f;
     background: linear-gradient(135deg, #000803e6 60%, #001a00e5 120%);
 
     .morpheus-ui-close-button {
-        position: absolute;
-        right: 0;
-        top: 0;
         cursor: pointer;
-        z-index: 100000;
-        padding: 1rem;
 
         &:hover svg {
             stroke: $secondary;
@@ -72,48 +68,78 @@ $bg-transparent: #000c159f;
 
 }
 
+/* Header
+/* *** *** *** *** *** *** *** *** *** *** *** *** *** *** */
+
 #morpheus-ui #morpheus-ui-header {
     background-color: #00000036;
-    position: fixed;
-    top: 0; 
-    left: 0;
     width: 100%;
     z-index: 10;
+    height: $morpheus-ui-header-height;
+    display: flex;
+    justify-content: space-between;
+    background-color: rgba(0, 0, 0, 0.3215686275);
+    border-bottom: 1px solid #06354c;
+    padding-right: 1rem;
+    //box-shadow: inset 0 -6px 16px -4px #0f469e;
 
-    .logo {
-        padding-top: 0.5rem;
-        padding-bottom: 0.5rem;
-        background-color: #00000052;
-        border-bottom: 1px solid #0e6e9e;
-        box-shadow: inset 0 -6px 16px -4px #0f469e;
-    }
 
-
+    /*
     .inner {
         height: 40px;
         h2 {
             margin-left: .5rem;
         }
-    }
+    }*/
 
     #MorpheusLogo {
         height: 40px;
         width: 40px;
     }
 
+    .morpheus-logo-wrapper {
+        display: flex;
+        align-items: center;
+        padding-left: 1rem;
+
+        h2 {
+            text-align: left;
+            color: rgb(165, 249, 252);
+            text-transform: uppercase;
+            position: relative;
+            //left: 2.5rem;
+            font-size: .875rem;
+            mask-image: linear-gradient(to right, #04040489, #000000 20%, #690606c8);
+        }
+
+        svg {
+            mask-image: linear-gradient(to right, #04040489, #000 20%, #690606c8);
+            animation: explodeDropShadow 3s ease-in-out 1;
+            animation-delay: 0.2s;
+            display: none;
+        }
+
+    }
+
     .logo {
+
+        /*
+        padding-top: 0.5rem;
+        padding-bottom: 0.5rem;
+        background-color: #00000052;
 
         padding-left: 2.25rem;
 
-        position: relative;
+        position: relative;*/
 
+        /*
         .inner {
             position: relative;
             right: 3rem;
             display: flex;
             align-items: center;
             justify-content: center;
-        }
+        }*/
 
         .inner img {
             width: 2.5rem;
@@ -156,21 +182,24 @@ $bg-transparent: #000c159f;
 
 }
 
+/* View
+/* *** *** *** *** *** *** *** *** *** *** *** *** *** *** */
+
 #morpheus-ui #morpheus-ui-view {
-
     height: 100%;
     width: 100%;
-
+    padding-left: $morpheus-ui-sidebar-width;
 }
 
+/* Node Canvas
+/* *** *** *** *** *** *** *** *** *** *** *** *** *** *** */
 
-
-#morpheus-ui #morpheus-ui-view .canvas-wrapper {
-    height: 100%;
+#morpheus-ui #morpheus-ui-view #react-flow-canvas-wrapper {
+    height: calc( 100% - $morpheus-ui-header-height) ;
     width: 100%;
 }
 
-#morpheus-ui #morpheus-ui-view .canvas-wrapper .react-flow {
+#morpheus-ui #morpheus-ui-view #react-flow-canvas-wrapper .react-flow {
 
     height: 100vh;
     width: 100vw;
@@ -230,6 +259,19 @@ $bg-transparent: #000c159f;
 
 }
 
+#morpheus-ui #canvas-sidebar {
+    position: fixed;
+    top: $morpheus-ui-header-height; 
+    left: 0;
+    z-index: 100;
+    width: $morpheus-ui-sidebar-width;
+    height: calc( 100vh - $morpheus-ui-header-height);
+    background-color: black;
+    border-right: 1px solid #06354c;
+}
+
+/* Typography & General
+/* *** *** *** *** *** *** *** *** *** *** *** *** *** *** */
 
 .dev-heading-alpha {
     text-transform: uppercase;

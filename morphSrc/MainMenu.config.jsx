@@ -44,7 +44,6 @@ const config = {
       isRoot:  true,
       routes:  true,  
       signals: ['selectedMenuItem'], 
-      //dir: '/modules',
     }
 
   },
@@ -81,10 +80,8 @@ const config = {
         return;
       }
       
-      // Update signal
       this.setSignal('selectedMenuItem', menuItemId);
       
-      // Navigate using Router
       this.router.navigate(menuItem.route);
     },
 
@@ -127,6 +124,7 @@ export function MainMenu( { _ } ) {
   const activeMenuItem = _.getActiveMenuItem();
   
   return (
+
     <div className={`morph-menu`}>
 
       <div className="morph-menu-overlay"></div>
@@ -146,7 +144,6 @@ export function MainMenu( { _ } ) {
         })}
       </div>
 
-      
     </div>
   )
 }

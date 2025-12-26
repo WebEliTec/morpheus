@@ -73,7 +73,7 @@ export default function LiveAppView( {_, React, Module } ) {
   }
   
   return (
-    <div className="canvas-wrapper">      
+    <div id="react-flow-canvas-wrapper">      
       <ReactFlow 
         nodes          = {nodes} 
         edges          = {edges} 

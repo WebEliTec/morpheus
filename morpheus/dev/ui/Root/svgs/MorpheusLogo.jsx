@@ -1,5 +1,5 @@
 // Static Morpheus Logo Component
-export default function MorpheusLogo({ width = '45px', height = '45px', className }) {
+export default function MorpheusLogo({ width = '45px', height = '40px', className }) {
   return (
     <div style={{ 
       width, 
