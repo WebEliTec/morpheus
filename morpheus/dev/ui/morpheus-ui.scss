@@ -131,9 +131,11 @@ $bg-transparent: #000c159f;
             padding: 0.75rem;
             cursor: pointer;
 
-            &:hover {
+            &:hover, &.is-active {
                 color: #a5f9fc;
             }
+
+
 
         }
 

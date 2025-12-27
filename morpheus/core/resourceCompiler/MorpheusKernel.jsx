@@ -23,8 +23,14 @@ export default class MorpheusKernel {
   /* Core Data Management
   /* *** *** *** *** *** *** *** *** *** *** *** *** *** *** */
 
-  getCoreData( coreDataItemId ) {
+  getCoreData( coreDataItemId = null ) {
+
+    if ( !coreDataItemId ) {
+      return this.coreData;
+    } 
+
     return this.getCoreDataItem( coreDataItemId );
+
   }
 
   getCoreDataItem(coreDataItemId) {

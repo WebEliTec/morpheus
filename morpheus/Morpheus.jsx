@@ -125,6 +125,7 @@ export class Morpheus {
   /* *** *** *** *** *** *** *** *** *** *** *** *** *** *** */
 
   initializeDevTools() {
+
     this.devToolApp            = {};
     this.devToolApp.media      = new MediaManager( devToolConfig );
     this.devToolApp.graph      = new Graph();

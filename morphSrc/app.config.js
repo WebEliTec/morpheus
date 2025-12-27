@@ -11,8 +11,8 @@ const appConfig = {
 	//ServiceClass,
 
 	hooks: {
-		 appWillInitialize() {
-			//console.log('App will initialize');
+		appWillInitialize() {
+			console.log('App will initialize');
 		}, 
 		graphWillInitialize() {
 			//console.log('Graph will initialize');
