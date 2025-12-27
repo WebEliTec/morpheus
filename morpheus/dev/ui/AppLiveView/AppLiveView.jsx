@@ -60,20 +60,12 @@ export default function LiveAppView( {_, React, Module } ) {
 
   if (loading) {
     return (
-      <div style={{ 
-        display: 'flex', 
-        alignItems: 'center', 
-        justifyContent: 'center', 
-        height: '100%',
-        color: '#888'
-      }}>
-        Calculating layout...
-      </div>
+      <div></div>
     );
   }
   
   return (
-    <div id="react-flow-canvas-wrapper">      
+    <div id="react-flow-canvas-wrapper" className="fade-in">      
       <ReactFlow 
         nodes          = {nodes} 
         edges          = {edges} 

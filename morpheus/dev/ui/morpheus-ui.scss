@@ -66,6 +66,21 @@ $bg-transparent: #000c159f;
 
     }
 
+    .fade-in {
+        opacity: 0;
+        animation: fadeIn-morphui 1.75s ease forwards;
+    }
+
+    @keyframes fadeIn-morphui {
+        from {
+            opacity: 0;
+        }
+
+        to {
+            opacity: 1;
+        }
+    }
+
 }
 
 /* Header
@@ -208,7 +223,7 @@ $bg-transparent: #000c159f;
 #morpheus-ui #morpheus-ui-view {
     height: 100%;
     width: 100%;
-    padding-left: $morpheus-ui-sidebar-width;
+    //padding-left: $morpheus-ui-sidebar-width;
 }
 
 /* Node Canvas
