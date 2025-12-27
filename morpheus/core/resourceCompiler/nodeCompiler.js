@@ -4,6 +4,8 @@ export default class NodeCompiler {
 
   constructor( { nodeRegistry, nodeId, executionContext, executionContextConfig, libraryNodeConfig, runtimeEnvironment } ) {
 
+    console.log( nodeId );
+
     this.nodeId                 = nodeId;
     this.nodeRegistryItem       = nodeRegistry[ nodeId ];
     this.executionContext       = executionContext;

@@ -36,7 +36,6 @@ export default class GraphManager {
   graphUpdated() {
     if (typeof this.onGraphChanged === 'function') {
       this.onGraphChanged();
-      console.log(this.graph);
     }
   }
   

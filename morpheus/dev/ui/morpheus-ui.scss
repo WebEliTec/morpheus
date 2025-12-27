@@ -97,7 +97,7 @@ $bg-transparent: #000c159f;
         width: 40px;
     }
 
-    .morpheus-logo-wrapper {
+    .morpheus-ui-header-inner{
         display: flex;
         align-items: center;
         padding-left: 1rem;
@@ -116,7 +116,25 @@ $bg-transparent: #000c159f;
             mask-image: linear-gradient(to right, #04040489, #000 20%, #690606c8);
             animation: explodeDropShadow 3s ease-in-out 1;
             animation-delay: 0.2s;
-            display: none;
+        }
+
+    }
+
+    nav {
+        display: flex;
+        align-items: center;
+        height: 100%;
+
+        > div {
+            color: #005c5f;
+            font-size: 0.875rem;
+            padding: 0.75rem;
+            cursor: pointer;
+
+            &:hover {
+                color: #a5f9fc;
+            }
+
         }
 
     }

@@ -57,6 +57,8 @@ export default class NodeManager {
 
   async createNode( nodeId, instanceId = 'Default', ...props ) {
 
+    console.log( this.executionContext, nodeId, instanceId );
+
     const isNodeRegistered = this.nodeRegistry.hasOwnProperty(nodeId);
     
     if (!isNodeRegistered) {
@@ -313,8 +315,6 @@ export default class NodeManager {
 
     const rootModuleId             = nodeResources.rootModuleId;
 
-    console.log( nodeId, rootModuleId );
-
     const notifyGraphOnNodeMount   = this.notifyGraphOnNodeMount;
     const notifyGraphOnNodeUnmount = this.notifyGraphOnNodeUnmount;
     const destroyKernel            = this.destroyKernel.bind(this);
@@ -352,35 +352,57 @@ export default class NodeManager {
   }
 
   async callHook(hookName, nodeResources, ...args) {
+  
+    const kernel     = args[0];
+    const instanceId = kernel?.instanceId;
     
-    const hooks = nodeResources?.hooks;
-
-    if ( !hooks ) {
+    // 1. Check for instance-specific hook first (if not Default)
+    let hook = null;
+    
+    if (instanceId && instanceId !== 'Default') {
+      const instanceHooks = nodeResources?.instances?.[instanceId]?.hooks;
+      hook = instanceHooks?.[hookName];
+    }
+    
+    // 2. Fall back to node-level hook
+    if (!hook) {
+      hook = nodeResources?.hooks?.[hookName];
+    }
+    
+    // 3. No hook found at either level
+    if (!hook) {
       return null;
     }
-
-    const hook  = hooks?.[hookName];
-
-    if( !hook ) {
+    
+    // 4. Normalize hook format (support both function and {priority, callback} format)
+    const callback = typeof hook === 'function' ? hook : hook.callback;
+    
+    if (typeof callback !== 'function') {
       return null;
     }
     
-    if (typeof hook === 'function') {
+    try {
+      await callback(...args);
+    } catch (error) {
+      console.error(`[NodeManager] Error in ${hookName} hook:`, error);
       
-      try {
-
-        await hook(...args);
-
-      } catch (error) {
-
-        console.error(`[NodeManager] Error in ${hookName} hook:`, error);
+      // Call nodeDidError hook if available (check instance-level first, then node-level)
+      if (hookName !== 'nodeDidError') {
+        let errorHook = null;
         
-        // Call nodeDidError hook if available
-        if ( hookName !== 'nodeDidError' && hooks.nodeDidError ) {
+        if (instanceId && instanceId !== 'Default') {
+          errorHook = nodeResources?.instances?.[instanceId]?.hooks?.nodeDidError;
+        }
+        if (!errorHook) {
+          errorHook = nodeResources?.hooks?.nodeDidError;
+        }
+        
+        if (errorHook) {
+          const errorCallback = typeof errorHook === 'function' ? errorHook : errorHook.callback;
           try {
-            await hooks.nodeDidError( args[0], error, { hookName } );
+            await errorCallback(args[0], error, { hookName });
           } catch (errorHookError) {
-            console.error( '[NodeManager] Error in nodeDidError hook:', errorHookError );
+            console.error('[NodeManager] Error in nodeDidError hook:', errorHookError);
           }
         }
       }
@@ -390,15 +412,26 @@ export default class NodeManager {
   /* Navigation Hook Registration
   /* *** *** *** *** *** *** *** *** *** *** *** *** *** *** */
   registerNavigationHooks(kernel, nodeResources) {
-    const hooks = nodeResources?.hooks;
-    if (!hooks) return;
-
+    const instanceId = kernel?.instanceId;
+    
     const navigationHookTypes = ['willNavigate', 'didNavigate'];
-
+    
     for (const hookType of navigationHookTypes) {
-      const hookDef = hooks[hookType];
+      let hookDef = null;
+      
+      // 1. Check instance-specific hooks first (if not Default)
+      if (instanceId && instanceId !== 'Default') {
+        hookDef = nodeResources?.instances?.[instanceId]?.hooks?.[hookType];
+      }
+      
+      // 2. Fall back to node-level hooks
+      if (!hookDef) {
+        hookDef = nodeResources?.hooks?.[hookType];
+      }
+      
+      // 3. No hook found at either level
       if (!hookDef) continue;
-
+      
       const normalizedHook = this.normalizeNavigationHook(hookDef, kernel);
       if (normalizedHook) {
         kernel.router.registerNavigationHook(hookType, kernel.id, normalizedHook);
@@ -491,5 +524,64 @@ export default class NodeManager {
     return `${ nodeId }${ separator }Default` 
 
   }  
+
+
+  /* Depracted
+  /* *** *** *** *** *** *** *** *** *** *** *** *** *** *** */
+
+  async callHook__depracted(hookName, nodeResources, ...args) {
+
+    console.log( nodeResources );
+    
+    const hooks = nodeResources?.hooks;
+
+    if ( !hooks ) {
+      return null;
+    }
+
+    const hook  = hooks?.[hookName];
+
+    if( !hook ) {
+      return null;
+    }
+    
+    if (typeof hook === 'function') {
+      
+      try {
+
+        await hook(...args);
+
+      } catch (error) {
+
+        console.error(`[NodeManager] Error in ${hookName} hook:`, error);
+        
+        // Call nodeDidError hook if available
+        if ( hookName !== 'nodeDidError' && hooks.nodeDidError ) {
+          try {
+            await hooks.nodeDidError( args[0], error, { hookName } );
+          } catch (errorHookError) {
+            console.error( '[NodeManager] Error in nodeDidError hook:', errorHookError );
+          }
+        }
+      }
+    }
+  }
+
+  registerNavigationHooks__depracted(kernel, nodeResources) {
+    const hooks = nodeResources?.hooks;
+    if (!hooks) return;
+
+    const navigationHookTypes = ['willNavigate', 'didNavigate'];
+
+    for (const hookType of navigationHookTypes) {
+      const hookDef = hooks[hookType];
+      if (!hookDef) continue;
+
+      const normalizedHook = this.normalizeNavigationHook(hookDef, kernel);
+      if (normalizedHook) {
+        kernel.router.registerNavigationHook(hookType, kernel.id, normalizedHook);
+      }
+    }
+  }
 
 }

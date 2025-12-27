@@ -71,8 +71,22 @@ const config = {
       // Called by subscription when app graph updates
       this.updateAppGraphVersion();
     }
-  }
-  
+  }, 
+
+  instances: {
+    instanceA: {
+      coreData: {
+        coreDataItem1: 'a', 
+      }, 
+      hooks: {
+        kernelDidInitialize ( kernel, url ) {
+          console.log('NodeInstance Specific kernelDidInitilazeHook executed');
+        },
+      },
+    }
+  }, 
+    
 }
+  
 
 export default config;

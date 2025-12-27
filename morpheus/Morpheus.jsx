@@ -147,8 +147,9 @@ export class Morpheus {
   /* Get Root Node (combines app + devtools)
   /* *** *** *** *** *** *** *** *** *** *** *** *** *** *** */
   getRootNode() {
+
     const morpheus = this;
-    const isDev = import.meta.env.DEV;;
+    const isDev    = import.meta.env.DEV;;
     
     return function MorpheusGraphLoader() {
       const [AppRootNode, setAppRootNode]   = useState(null);
@@ -173,6 +174,7 @@ export class Morpheus {
         </>
       );
     };
+    
   }
 
   /* Hook
