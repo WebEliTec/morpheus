@@ -766,7 +766,7 @@ export default class SingleNodeCompiler {
       signalGroups:     resolvedSignalGroups ?? null,
       modules:          initializedModuleRegistry ?? null,
       instances:        config.instances ?? null, 
-      hooks:            config.hook ?? null,
+      hooks:            config.hooks ?? null,
       traits:           traits ?? null,
       components:       Object.keys(initializedComponentRegistry).length > 0 ? initializedComponentRegistry : null,
 
