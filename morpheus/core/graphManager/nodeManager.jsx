@@ -176,7 +176,7 @@ export default class NodeManager {
     kernel.signalGroups        = signalGroups;
     kernel.optimisticSignals   = {};
 
-    kernel.services            = services;
+    kernel.services            = services ;
 
     kernel.apis                = apis;
     kernel.graph               = apis.graph;

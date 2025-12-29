@@ -1,4 +1,8 @@
+import ServiceClass from './services/ServiceClass';
+
 const devToolConfig = {
+
+  ServiceClass,
 
   defaultPaths: {
     nodes:   '/',
@@ -13,11 +17,6 @@ const devToolConfig = {
     Docs:            {},
   },
 
-  hooks: {
-    appDidInitialize () {
-      console.log('Dev Tools Did Initialize XXXXXXXXXXXXXXXXXXXXXX');
-    },
-  },
 
   hooks: {
 		appWillInitialize() {

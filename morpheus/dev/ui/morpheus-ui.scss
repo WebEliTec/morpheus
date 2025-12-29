@@ -308,18 +308,32 @@ $bg-transparent: #000c159f;
 /* Typography & General
 /* *** *** *** *** *** *** *** *** *** *** *** *** *** *** */
 
-.dev-heading-alpha {
-    text-transform: uppercase;
-    color: #a5f9fc;
-    font-size: 1.25rem;
+
+#morpheus-ui {
+    .dev-heading-alpha {
+        text-transform: uppercase;
+        color: #a5f9fc;
+        font-size: 1.25rem;
+    }
+
+    .dev-heading-beta {
+        color: #a5f9fc;
+        font-size: .875rem;
+    }
+
+    .running-text-beta {
+        font-size: .75rem;
+        line-height: 1.3;
+        margin-bottom: 1rem;
+        color: #a3a3a3;
+    }
+
+    .path {
+        font-family: monospace;
+        color: #00c923;
+    }
 }
 
-.running-text-beta {
-    font-size: .875rem;
-    line-height: 1.3;
-    margin-bottom: 1rem;
-    color: #a3a3a3;
-}
 
 .morpheus-error-box {
 
@@ -335,6 +349,8 @@ $bg-transparent: #000c159f;
     background-size: 30%;
     background-position: 50%;
 }
+
+
 
 
 /*

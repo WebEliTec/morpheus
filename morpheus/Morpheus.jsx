@@ -134,9 +134,19 @@ export class Morpheus {
     this.devToolApp.apis       = {}; 
     this.devToolApp.apis.graph = this.apis.graph;
 
+    const serviceClassConfig   = {
+      apis: this.devToolApp.apis, 
+      appConfig, 
+    }
+
+    if ( devToolConfig.ServiceClass ) {
+      this.devToolApp.services = new devToolConfig.ServiceClass( serviceClassConfig );
+    }
+
     const config = {
       executionContext:       'dev',
-      apis:                   this.devToolApp, 
+      apis:                   this.devToolApp,
+      services:               this.devToolApp.services,
       executionContextConfig: devToolConfig, 
       libraryNodeConfig,
       nodeResourceProvider:   null,
