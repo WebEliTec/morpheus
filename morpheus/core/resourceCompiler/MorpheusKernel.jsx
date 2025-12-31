@@ -49,8 +49,14 @@ export default class MorpheusKernel {
   /* Meta Data Management
   /* *** *** *** *** *** *** *** *** *** *** *** *** *** *** */
 
-  getMetaData( metaDataItemId ) {
-    return this.getMetaDataItem( metaDataItemId );
+  getMetaData( metaDataItemId = null ) {
+
+    if( metaDataItemId ) {
+      return this.getMetaDataItem( metaDataItemId );
+    }
+
+    return this.metaData;
+
   }
 
   getMetaDataItem( metaDataItemId ) {
