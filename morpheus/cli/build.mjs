@@ -572,7 +572,8 @@ async createSingleFileResourceFile( nodeId ) {
             // Prepend async if needed
             return `${spaces}  ${asyncPrefix}${indentedLines.join('\n')}`;
             
-          } else if (normalizedFuncStr.includes('=>')) {
+          //} else if (normalizedFuncStr.includes('=>')) {
+          } else if (/^\s*\(.*\)\s*=>|^\s*\w+\s*=>/.test(normalizedFuncStr)) {
             // Arrow function
             const lines = funcStr.split('\n'); // Use original funcStr to preserve async
             const indentedLines = lines.map((line, index) => {

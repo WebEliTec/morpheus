@@ -46,6 +46,15 @@ export default class MorpheusKernel {
 
   }
 
+  callCoreFunction(functionId, ...args) {
+    const fn = this.coreData.functions?.[functionId];
+    if (typeof fn === 'function') {
+      return fn(this, ...args);
+    }
+    console.warn(`[Kernel] Function '${functionId}' not defined in coreData.functions`);
+    return null;
+  }
+
   /* Meta Data Management
   /* *** *** *** *** *** *** *** *** *** *** *** *** *** *** */
 
