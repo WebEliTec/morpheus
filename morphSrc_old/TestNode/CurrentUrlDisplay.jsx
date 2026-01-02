@@ -1,6 +1,6 @@
 export default function CurrentUrlDisplay({ _ }) {
 
-  const currentURL = _.router.getUrl().url;
+  const currentURL = _.router.getUrl();
 
   return (
     <div className="current-url-display-outer">

@@ -75,7 +75,7 @@ export default class Router {
 
   getSegment(index = 1, defaultValue = null) {
     const adjustedIndex = index - 1;
-    const { segments }  = this.getUrl();
+    const { segments }  = this.getUrlInfo();
     return segments[adjustedIndex] || defaultValue;
   }
   
@@ -98,12 +98,12 @@ export default class Router {
   }
   
   hasSegments(count) {
-    const { segments } = this.getUrl();
+    const { segments } =  this.getUrlInfo();
     return segments.length >= count;
   }
   
   getSegmentCount() {
-    const { segments } = this.getUrl();
+    const { segments } = this.getUrlInfo();
     return segments.length;
   }
   
@@ -112,7 +112,7 @@ export default class Router {
 
   navigate(path) {
 
-    const previousUrl  = this.getUrl().url;
+    const previousUrl  = this.getUrlInfo().url;
     const absolutePath = path.startsWith('/') ? path : `/${path}`;
     
     // Execute willNavigate hooks - can cancel navigation
@@ -142,7 +142,7 @@ export default class Router {
   }
   
   notifyListeningNodes() {
-    const currentRoute = this.getUrl().url;
+    const currentRoute = this.getUrl();
     this.listeners.forEach(cb => cb(currentRoute));
   }
   
@@ -153,7 +153,7 @@ export default class Router {
   /* Route Checks
   /* *** *** *** *** *** *** *** *** *** *** *** *** *** *** */
   isHome() {
-    const { segments } = this.getUrl();
+    const { segments } = this.getUrlInfo();
     return segments.length === 0;
   }
   
