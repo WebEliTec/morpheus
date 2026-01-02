@@ -10,13 +10,17 @@ export default class Router {
   /* Get URL 
   /* *** *** *** *** *** *** *** *** *** *** *** *** *** *** */
 
-  getUrl() {
+  getUrlInfo() {
     const url = window.location.pathname;
     
     return {
       url: url,
       segments: this.parseSegments(url)
     };
+  }
+
+  getUrl() {
+    return window.location.pathname;
   }
   
   /* Hook Registration
