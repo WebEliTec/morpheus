@@ -1,17 +1,34 @@
 // Router.js
 export default class Router {
-  
+
   constructor() {
     this.listeners         = new Set();
     this.willNavigateHooks = new Map();
     this.didNavigateHooks  = new Map();
+
+    // Listen for browser back/forward button
+    this.setupPopStateListener();
+  }
+
+  setupPopStateListener() {
+    window.addEventListener('popstate', () => {
+      const currentUrl = this.getUrl();
+      // Notify all listeners that the route changed
+      this.notifyListeningNodes();
+      // Execute didNavigate hooks (no previousUrl available for popstate)
+      this.executeDidNavigateHooks(null, currentUrl);
+    });
   }
   
   /* Get URL 
   /* *** *** *** *** *** *** *** *** *** *** *** *** *** *** */
 
+  getUrl() {
+    return window.location.pathname;
+  }
+
   getUrlInfo() {
-    const url = window.location.pathname;
+    const url = this.getUrl();
     
     return {
       url: url,
@@ -19,9 +36,7 @@ export default class Router {
     };
   }
 
-  getUrl() {
-    return window.location.pathname;
-  }
+
   
   /* Hook Registration
   /* *** *** *** *** *** *** *** *** *** *** *** *** *** *** */
