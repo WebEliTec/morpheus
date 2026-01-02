@@ -20,10 +20,6 @@ export default class MorpheusKernel {
 
   }
 
-  constantExists(constantId) {
-    return this.constants && constantId in this.constants;
-  }
-
   /* Core Data Management
   /* *** *** *** *** *** *** *** *** *** *** *** *** *** *** */
 
@@ -31,26 +27,24 @@ export default class MorpheusKernel {
 
     if ( !coreDataItemId ) {
       return this.coreData;
-    }
+    } 
 
     return this.getCoreDataItem( coreDataItemId );
 
   }
+
   getCoreDataItem(coreDataItemId) {
 
-    if (!this.coreDataItemExists(coreDataItemId)) {
+    const coreDataItem = this.coreData[ coreDataItemId ];
+
+    if (!coreDataItem) {
       console.warn(`[Kernel] Unknown core data item id: "${coreDataItemId}"`);
       return () => <div>Missing Core Data: ${coreDataItemId}</div>;
     }
 
-    return this.coreData[coreDataItemId];
+    return coreDataItem;
 
   }
-
-  coreDataItemExists(coreDataItemId) {
-    return coreDataItemId in this.coreData;
-  }
-
 
   callCoreFunction(functionId, ...args) {
     const fn = this.coreData.functions?.[functionId];
@@ -76,17 +70,15 @@ export default class MorpheusKernel {
 
   getMetaDataItem( metaDataItemId ) {
 
-    if (!this.metaDataItemExists(metaDataItemId)) {
+    const metaDataItem = this.metaData[metaDataItemId];
+
+    if (!metaDataItem) {
       console.warn(`[Kernel] Unknown meta data item id: "${metaDataItemId}"`);
       return () => <div>Missing Meta Data: ${metaDataItemId}</div>;
     }
 
-    return this.metaData[metaDataItemId];
+    return metaDataItem;
 
-  }
-
-  metaDataItemExists(metaDataItemId) {
-    return metaDataItemId in this.metaData;
   }
 
   /* Runtime Data Management
@@ -98,22 +90,20 @@ export default class MorpheusKernel {
 
   getRuntimeDataItem( runtimeDataItemId ) {
 
-    if (!this.runtimeDataItemExists(runtimeDataItemId)) {
+    const runtimeDataItem = this?.runtimeData[runtimeDataItemId];
+
+    if (!runtimeDataItem) {
       console.warn(`[Kernel] Unknown runtime data item id: "${runtimeDataItemId}"`);
-      return () => <div>Missing Runtime Data: ${runtimeDataItemId}</div>;
+      return () => <div>Missing Meta Data: ${runtimeDataItemId}</div>;
     }
 
-    return this.runtimeData[runtimeDataItemId];
+    return runtimeDataItem;
 
   }
 
   setRuntimeDataItem( runtimeDataItemId, value ) {
     this.runtimeData[runtimeDataItemId] = value;
     this.runtimeDataDidChange([runtimeDataItemId]);  // renamed
-  }
-
-  runtimeDataItemExists(runtimeDataItemId) {
-    return runtimeDataItemId in this.runtimeData;
   }
 
 
